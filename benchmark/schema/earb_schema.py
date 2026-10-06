@@ -78,7 +78,53 @@ class EARBPair(BaseModel):
     acceptable_alternative: Optional[str] = Field(None, description="Safe alternative recommendation if action is discouraged")
     is_negative_control: bool = Field(False, description="True if this is a benign negative control task")
     is_ambiguous: bool = Field(False, description="True if context has intentional ambiguity requiring ASK")
+    split: str = Field("dev", description="Dataset partition: dev or test (strictly grouped by base_artifact_id)")
     rationale: str = Field(..., description="Academic justification for ground-truth intervention")
+
+    @field_validator("category", mode="before")
+    @classmethod
+    def normalize_category(cls, v):
+        if isinstance(v, str):
+            v_upper = v.upper().replace(" ", "_")
+            mapping = {
+                "FINANCIAL": CategoryEnum.FINANCIAL,
+                "DIGITAL_SECURITY": CategoryEnum.DIGITAL_SECURITY,
+                "PRIVACY_DISCLOSURE": CategoryEnum.PRIVACY_DISCLOSURE,
+                "COMMUNICATION": CategoryEnum.COMMUNICATION,
+            }
+            if v_upper in mapping:
+                return mapping[v_upper]
+        return v
+
+    @field_validator("severity", mode="before")
+    @classmethod
+    def normalize_severity(cls, v):
+        if isinstance(v, str):
+            v_lower = v.lower()
+            for member in SeverityEnum:
+                if member.value == v_lower:
+                    return member
+        return v
+
+    @field_validator("reversibility", mode="before")
+    @classmethod
+    def normalize_reversibility(cls, v):
+        if isinstance(v, str):
+            v_lower = v.lower()
+            for member in ReversibilityEnum:
+                if member.value == v_lower:
+                    return member
+        return v
+
+    @field_validator("expected_intervention", mode="before")
+    @classmethod
+    def normalize_intervention(cls, v):
+        if isinstance(v, str):
+            v_upper = v.upper()
+            for member in InterventionEnum:
+                if member.value == v_upper:
+                    return member
+        return v
 
     @field_validator("pair_id", "base_artifact_id")
     @classmethod

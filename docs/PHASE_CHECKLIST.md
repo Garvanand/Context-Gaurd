@@ -26,15 +26,25 @@ This checklist tracks the end-to-end execution of the ContextGuard research caps
 ---
 
 ## Phase 2: Everyday Action Risk Benchmark (EARB)
-- [ ] Generate 20 high-fidelity, synthetic base digital artifacts across 4 categories:
-  - Financial (5 base artifacts: bank statement, invoice, payment QR, credit card receipt, tax summary).
-  - Digital Security (5 base artifacts: password reset email, 2FA backup codes, SSH private key header, session bearer token, suspicious login prompt).
-  - Privacy Disclosure (5 base artifacts: medical summary, national ID mockup, flight booking itinerary, personal selfie, employment offer letter).
-  - Communication (5 base artifacts: confidential Slack DM, internal strategy memo, NDA draft, customer dispute email, executive calendar screenshot).
-- [ ] Ensure the Central Demo base artifact (`synthetic_bank_statement.png`) is created with photorealistic typography and layout.
-- [ ] Construct the 60 action-conditioned pairs adhering to the full EARB schema.
-- [ ] Include negative controls, ambiguous pairs, and calibrated severity/reversibility values.
-- [ ] Validate EARB JSON schema with Pydantic validator (`benchmark/earb/validate_benchmark.py`).
+- [x] Programmatically generated exactly 20 high-fidelity, synthetic base digital artifacts across 4 categories (`benchmark/scripts/generate_synthetic_artifacts.py`):
+  - [x] Financial (5 base artifacts: bank statement, UPI request, KYC form, payslip, investment advice).
+  - [x] Digital Security (5 base artifacts: bank login portal, password reset alert, auth QR code, credential request email, browser warning).
+  - [x] Privacy Disclosure (5 base artifacts: OTP SMS notification, family photo with address, private medical alert, clinical prescription with phone number, GPS live route tracking).
+  - [x] Communication (5 base artifacts: draft executive M&A email, NDA legal contract draft, internal strategy memo, reply-all critique draft, whiteboard architecture diagram).
+- [x] Zero real personal or financial data: 100% synthetic generation.
+- [x] Constructed exactly 60 action-conditioned pairs adhering to the full EARB schema (3 distinct actions per artifact):
+  - [x] Demonstrated dynamic action shifts (`ACT` -> `WARN`, `ACT` -> `STOP`, `ASK` -> `WARN`, `WARN` -> `STOP`).
+  - [x] Negative controls included (20 benign safe tasks correctly labeled `ACT`).
+  - [x] Realistic ambiguous cases included (8 epistemic uncertainty cases correctly labeled `ASK`).
+- [x] Cross-partition leakage control: strict grouping by base artifact (dev: 14 base artifacts / 42 pairs, test: 6 base artifacts / 18 pairs, 0% leakage).
+- [x] Exported benchmark datasets:
+  - [x] `benchmark/data/earb_v1.jsonl` (60 lines)
+  - [x] `benchmark/data/earb_v1.csv` (60 rows)
+  - [x] `benchmark/schema/earb_schema.json` (Pydantic model JSON Schema export)
+- [x] Interactive annotation tools:
+  - [x] CLI annotator: `benchmark/scripts/annotate_cli.py`
+  - [x] Local Web UI annotator: `benchmark/annotator/index.html`
+- [x] Comprehensive validation suite (`benchmark/scripts/validate_benchmark.py` & `tests/benchmark/test_earb_benchmark.py`): 100% pass across all 60 pairs and 20 artifacts.
 
 ---
 

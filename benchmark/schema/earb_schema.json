@@ -1,0 +1,217 @@
+{
+  "$defs": {
+    "CategoryEnum": {
+      "enum": [
+        "Financial",
+        "Digital Security",
+        "Privacy Disclosure",
+        "Communication"
+      ],
+      "title": "CategoryEnum",
+      "type": "string"
+    },
+    "EARBPair": {
+      "description": "Represents a single evaluated artifact-action pair in the EARB benchmark.",
+      "properties": {
+        "pair_id": {
+          "description": "Unique identifier for the artifact-action pair (e.g. EARB-FIN-001-A)",
+          "title": "Pair Id",
+          "type": "string"
+        },
+        "base_artifact_id": {
+          "description": "Identifier for the base artifact (e.g. ART-FIN-001)",
+          "title": "Base Artifact Id",
+          "type": "string"
+        },
+        "artifact_type": {
+          "description": "Type of artifact: image, document, url, text_snippet",
+          "title": "Artifact Type",
+          "type": "string"
+        },
+        "artifact_path": {
+          "description": "Relative path or URI to the synthetic artifact file",
+          "title": "Artifact Path",
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/$defs/CategoryEnum",
+          "description": "Risk category: Financial, Digital Security, Privacy Disclosure, Communication"
+        },
+        "context": {
+          "description": "Surrounding context (e.g. user location, network state, urgency claim)",
+          "title": "Context",
+          "type": "string"
+        },
+        "source_app": {
+          "description": "Source application producing or sharing the artifact",
+          "title": "Source App",
+          "type": "string"
+        },
+        "recipient": {
+          "description": "Designated recipient or target persona",
+          "title": "Recipient",
+          "type": "string"
+        },
+        "destination": {
+          "description": "Destination channel or target platform",
+          "title": "Destination",
+          "type": "string"
+        },
+        "intended_action": {
+          "description": "Explicit user action: save_private, direct_message, post_public, etc.",
+          "title": "Intended Action",
+          "type": "string"
+        },
+        "risk_type": {
+          "description": "High-level risk taxonomy label",
+          "title": "Risk Type",
+          "type": "string"
+        },
+        "risk_subtype": {
+          "description": "Fine-grained hazard classification",
+          "title": "Risk Subtype",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/SeverityEnum",
+          "description": "Magnitude of potential harm if executed unsafely"
+        },
+        "reversibility": {
+          "$ref": "#/$defs/ReversibilityEnum",
+          "description": "Degree to which consequences can be undone"
+        },
+        "evidence": {
+          "description": "List of perceptual/factual evidence snippets",
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "uncertainty": {
+          "default": 0.0,
+          "description": "Epistemic/aleatoric uncertainty score between 0.0 and 1.0",
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Uncertainty",
+          "type": "number"
+        },
+        "expected_intervention": {
+          "$ref": "#/$defs/InterventionEnum",
+          "description": "Ground-truth safety intervention: ACT, ASK, WARN, STOP"
+        },
+        "acceptable_alternative": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Safe alternative recommendation if action is discouraged",
+          "title": "Acceptable Alternative"
+        },
+        "is_negative_control": {
+          "default": false,
+          "description": "True if this is a benign negative control task",
+          "title": "Is Negative Control",
+          "type": "boolean"
+        },
+        "is_ambiguous": {
+          "default": false,
+          "description": "True if context has intentional ambiguity requiring ASK",
+          "title": "Is Ambiguous",
+          "type": "boolean"
+        },
+        "split": {
+          "default": "dev",
+          "description": "Dataset partition: dev or test (strictly grouped by base_artifact_id)",
+          "title": "Split",
+          "type": "string"
+        },
+        "rationale": {
+          "description": "Academic justification for ground-truth intervention",
+          "title": "Rationale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pair_id",
+        "base_artifact_id",
+        "artifact_type",
+        "artifact_path",
+        "category",
+        "context",
+        "source_app",
+        "recipient",
+        "destination",
+        "intended_action",
+        "risk_type",
+        "risk_subtype",
+        "severity",
+        "reversibility",
+        "expected_intervention",
+        "rationale"
+      ],
+      "title": "EARBPair",
+      "type": "object"
+    },
+    "InterventionEnum": {
+      "enum": [
+        "ACT",
+        "ASK",
+        "WARN",
+        "STOP"
+      ],
+      "title": "InterventionEnum",
+      "type": "string"
+    },
+    "ReversibilityEnum": {
+      "enum": [
+        "fully",
+        "partially",
+        "irreversible"
+      ],
+      "title": "ReversibilityEnum",
+      "type": "string"
+    },
+    "SeverityEnum": {
+      "enum": [
+        "negligible",
+        "minor",
+        "moderate",
+        "severe",
+        "critical"
+      ],
+      "title": "SeverityEnum",
+      "type": "string"
+    }
+  },
+  "description": "Collection of EARB pairs constituting the benchmark evaluation suite.",
+  "properties": {
+    "version": {
+      "default": "1.0.0",
+      "description": "EARB benchmark version",
+      "title": "Version",
+      "type": "string"
+    },
+    "description": {
+      "default": "Everyday Action Risk Benchmark suite",
+      "description": "Dataset description",
+      "title": "Description",
+      "type": "string"
+    },
+    "pairs": {
+      "description": "List of artifact-action pairs",
+      "items": {
+        "$ref": "#/$defs/EARBPair"
+      },
+      "title": "Pairs",
+      "type": "array"
+    }
+  },
+  "title": "EARBDataset",
+  "type": "object"
+}

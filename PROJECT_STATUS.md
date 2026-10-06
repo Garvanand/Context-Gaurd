@@ -2,9 +2,9 @@
 
 **Capstone Title:** CONTEXTGUARD: A Multimodal AI System for Pre-Action Risk Detection in Everyday Digital Tasks  
 **Institution:** Final-Year B.Tech Capstone Project  
-**Status Date:** Android Privacy Architecture (Pipeline, Redaction Engine, Network Modes, Audit Logger, Threat Model & Privacy Center) Completed  
-**Current Milestone:** Privacy Architecture & Invariants **COMPLETED**  
-**Next Milestone:** Phase 2 (Everyday Action Risk Benchmark - EARB Dataset & 60 Action-Conditioned Pairs)
+**Status Date:** Phase 2 (Everyday Action Risk Benchmark - 20 Base Artifacts, 60 Action Pairs) Completed  
+**Current Milestone:** Everyday Action Risk Benchmark (EARB) **COMPLETED**  
+**Next Milestone:** Phase 5 (Empirical Benchmark & Baseline Ablation Study across EARB)
 
 ---
 
@@ -48,6 +48,7 @@
 | **Android Perception Layer** | - Google ML Kit Text Recognition<br>- Google ML Kit Face Detection<br>- Native `PdfRenderer` (first 3 pages)<br>- Local PII Detector (9 types, Luhn check, OTP context)<br>- Strongly typed `LocalPerceptionResult` | - `MlKitPerceptionEngine.kt`<br>- `PiiDetector.kt`<br>- `PdfPerceptionRenderer.kt`<br>- `ImagePreprocessor.kt`<br>- Coroutines off-UI dispatchers (`Dispatchers.Default`, `Dispatchers.IO`) | **PASS**<br>15 dedicated unit tests passed.<br>APK packaged with real native ML Kit runtime (`libface_detector_v2_jni.so`, `libmlkit_google_ocr_pipeline.so`). |
 | **Privacy Architecture** | - 9-stage Serial Privacy Pipeline<br>- In-memory Redaction Engine (`BLACKOUT` & `BLUR`)<br>- 3 Network Modes (`OFFLINE`, `LOCAL_BACKEND`, `RESTRICTED_EVALUATION`)<br>- Metadata-only Network Audit Logger<br>- SHA-256 Correlation Fingerprinting<br>- Interactive Privacy Center UI<br>- Before vs After Redaction Preview<br>- User Intentional Override on STOP | - `PrivacyPipeline.kt`<br>- `RedactionEngine.kt`<br>- `NetworkAuditLogger.kt`<br>- `ContextGuardApiClient.kt`<br>- `PrivacyScreen.kt`<br>- `AnalyzeScreen.kt`<br>- `ResultScreen.kt`<br>- `docs/THREAT_MODEL.md` | **PASS**<br>6/6 privacy invariant unit tests passed.<br>43 total Android unit tests passed.<br>Debug APK assembled successfully. |
 | **Android Sharesheet Integration** | - System-level Share Target (`ACTION_SEND` & `ACTION_SEND_MULTIPLE`)<br>- Supported MIME types: `image/*`, `text/plain`, `application/pdf`, `*/*`<br>- ContentResolver extraction (zero persistent disk writes)<br>- Safe in-memory decoding with bounded 1600px downsampling<br>- Multi-page PDF rasterization via `PdfRenderer`<br>- URL pattern extraction from shared browser text<br>- Non-crashing error handling across 8 edge cases<br>- 3-Iteration identical artifact triad verification | - `AndroidManifest.xml`<br>- `SharesheetPayloadResolver.kt`<br>- `SharePayload.kt`<br>- `PdfPerceptionRenderer.kt`<br>- `MainViewModel.kt`<br>- `MainActivity.kt`<br>- `SharesheetIntegrationTest.kt`<br>- `DEMO_RUNBOOK.md` (Section 5) | **PASS**<br>6/6 sharesheet integration unit tests pass.<br>28/28 debug unit tests pass.<br>Debug APK assembled (94.9 MB). |
+| **Everyday Action Risk Benchmark (EARB)** | - Exactly 20 programmatically generated synthetic base artifacts<br>- Exactly 60 action-conditioned pairs across 4 categories<br>- 3 candidate actions per base artifact with dynamic shifts<br>- 20 negative controls (ACT) & 8 ambiguous cases (ASK)<br>- Zero-leakage grouping by base artifact (dev: 42, test: 18)<br>- Interactive CLI annotator & local Web UI annotator<br>- Automated Pydantic validation & pytest test suite | - `benchmark/data/earb_v1.jsonl`<br>- `benchmark/data/earb_v1.csv`<br>- `benchmark/schema/earb_schema.json`<br>- `benchmark/scripts/generate_synthetic_artifacts.py`<br>- `benchmark/scripts/build_earb_dataset.py`<br>- `benchmark/scripts/annotate_cli.py`<br>- `benchmark/scripts/validate_benchmark.py`<br>- `benchmark/annotator/index.html`<br>- `tests/benchmark/test_earb_benchmark.py` | **PASS**<br>60/60 pairs valid.<br>7/7 benchmark pytest tests pass.<br>68 total Python tests pass. |
 
 ---
 
