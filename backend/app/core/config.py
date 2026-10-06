@@ -35,8 +35,8 @@ class Settings(BaseSettings):
     vlm_timeout_seconds: int = Field(15, ge=1, le=60, description="Timeout for VLM queries")
 
     # Models & Artifacts
-    phishing_model_path: str = Field("artifacts/models/xgboost_phishing_v1.json", description="Path to XGBoost model")
-    phishing_feature_extractor_path: str = Field("artifacts/models/url_features_v1.json", description="Path to feature extractor metadata")
+    phishing_model_path: str = Field("ml/artifacts/url_risk_model.joblib", description="Path to trained URL risk model artifact")
+    phishing_feature_extractor_path: str = Field("ml/artifacts/url_model_metadata.json", description="Path to model metadata")
 
     # Privacy & Safety
     storage_mode: str = Field("memory_only", description="Must be memory_only for zero raw persistence")

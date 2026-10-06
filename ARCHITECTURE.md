@@ -73,7 +73,8 @@ graph TD
 - **Model:** Gradient boosted decision trees trained on the genuine public **PhiUSIIL Phishing URL Dataset** (UCI ML Repository).
 - **Feature Pipeline:** 35+ strictly derived lexical and structural features (e.g., URL length, Shannon entropy, domain hyphens, subdomain count, TLD risk, presence of IP address, suspicious token ratios).
 - **Parity Guarantee:** The feature extractor module (`ml.features.url_features`) is identical between offline dataset training and runtime inference.
-- **Artifact:** Exported as portable JSON (`artifacts/models/xgboost_phishing_v1.json`).
+- **Artifact:** Exported model weights at [`ml/artifacts/url_risk_model.joblib`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/ml/artifacts/url_risk_model.joblib) and parameters at [`ml/artifacts/url_model_metadata.json`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/ml/artifacts/url_model_metadata.json).
+- **Service Layer:** [`backend/services/url_risk.py`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/backend/services/url_risk.py).
 
 ### Layer 3: Multimodal Vision-Language Reasoning (Qwen2.5-VL-3B)
 - **Model:** `Qwen2.5-VL-3B-Instruct` served locally via Ollama or local inference wrapper.
