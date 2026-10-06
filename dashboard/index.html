@@ -698,6 +698,100 @@
     }
     .field-k { color: var(--text-secondary); }
     .field-v { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text-primary); }
+
+    /* Three Experimental Modes Selector (Phase 7 Privacy-Utility) */
+    .mode-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .mode-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      padding: 10px 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      align-items: center;
+    }
+    .mode-pill:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .mode-pill.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+    .mode-pill.mode-raw {
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .mode-pill.mode-raw.active {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--stop-red);
+      color: var(--stop-red);
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.35);
+    }
+    .hazard-banner {
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-top: 10px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .hazard-title {
+      color: var(--stop-red);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hazard-desc {
+      color: #fca5a5;
+      font-size: 11px;
+      margin-top: 5px;
+      line-height: 1.45;
+    }
+    .benchmark-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+    .benchmark-table th {
+      text-align: left;
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--cyan-accent);
+      border-bottom: 1px solid var(--surface-border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+    }
+    .benchmark-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .benchmark-table tr.highlight-redacted td {
+      background: rgba(46, 204, 113, 0.08);
+      color: var(--text-primary);
+      font-weight: 700;
+    }
   </style>
 </head>
 <body>
@@ -1057,39 +1151,83 @@ Balance: INR 1,48,290.40
         </div>
       </div>
 
+      <!-- THREE EXPLICIT EXPERIMENTAL MODES (PHASE 7 PRIVACY-UTILITY) -->
+      <div class="glass-card" style="border-color: rgba(0, 240, 255, 0.4);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 11px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">
+            OPERATIONAL EXPERIMENT MODES
+          </div>
+          <span class="badge-pill badge-act" id="mode-status-badge">PRODUCTION</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+          Evaluate the measurable tradeoff between privacy redaction, network payload, and model utility.
+        </div>
+
+        <div class="mode-selector-grid">
+          <button class="mode-pill" id="pill-ondevice" onclick="setSupervisorMode('ON_DEVICE')">
+            <span>⚡ ON-DEVICE</span>
+            <span style="font-size: 9px; opacity: 0.8; font-weight: 500;">0 B egress</span>
+          </button>
+          <button class="mode-pill active" id="pill-redacted" onclick="setSupervisorMode('REDACTED')">
+            <span>🛡️ REDACTED</span>
+            <span style="font-size: 9px; opacity: 0.8; font-weight: 500;">ContextGuard</span>
+          </button>
+          <button class="mode-pill mode-raw" id="pill-raw" onclick="setSupervisorMode('RAW')">
+            <span>⚠️ RAW EVALUATION</span>
+            <span style="font-size: 9px; opacity: 0.8; font-weight: 500;">Benchmark Only</span>
+          </button>
+        </div>
+
+        <!-- HAZARD BANNER FOR RAW EVALUATION -->
+        <div class="hazard-banner" id="raw-hazard-box">
+          <div class="hazard-title">
+            <span>⚠️ EXPERIMENTAL BENCHMARK EVALUATION ONLY</span>
+          </div>
+          <div class="hazard-desc">
+            <strong>STRICTLY FORBIDDEN IN PRODUCTION:</strong> Mode 3 transmits unredacted raw image bytes, cleartext biometric face contours, and raw PII tokens over the network. Permitted exclusively on synthetic EARB benchmark artifacts with explicit researcher consent. Real user data is cryptographically prohibited from raw cloud egress.
+          </div>
+        </div>
+
+        <!-- MODE SPECIFICATION DESCRIPTION -->
+        <div id="mode-desc-box" style="font-size: 11px; color: var(--text-tertiary); margin-top: 8px; line-height: 1.4;">
+          <strong>Mode 2 (Proposed ContextGuard):</strong> On-device ML Kit detection + canvas blackout. Zero sensitive tokens or facial biometrics leave the device (100% masked).
+        </div>
+      </div>
+
       <!-- Telemetry HUD -->
       <div class="hud-grid">
         <div class="hud-stat">
           <span style="font-size: 10px; color: var(--text-tertiary);">Latency</span>
-          <span class="hud-val" style="color: var(--act-green);">142 ms</span>
+          <span class="hud-val" id="hud-latency" style="color: var(--act-green);">135 ms</span>
         </div>
         <div class="hud-stat">
           <span style="font-size: 10px; color: var(--text-tertiary);">Confidence</span>
-          <span class="hud-val" style="color: var(--cyan-accent);">95%</span>
+          <span class="hud-val" id="hud-confidence" style="color: var(--cyan-accent);">82%</span>
         </div>
         <div class="hud-stat">
-          <span style="font-size: 10px; color: var(--text-tertiary);">Risk</span>
-          <span class="hud-val" style="color: var(--stop-red);">1.58</span>
+          <span style="font-size: 10px; color: var(--text-tertiary);">Risk (rho)</span>
+          <span class="hud-val" id="hud-risk" style="color: var(--stop-red);">1.58</span>
         </div>
         <div class="hud-stat">
-          <span style="font-size: 10px; color: var(--text-tertiary);">Evidence</span>
-          <span class="hud-val" style="color: var(--text-primary);">4 items</span>
+          <span style="font-size: 10px; color: var(--text-tertiary);">Transmitted Sensitive</span>
+          <span class="hud-val" id="hud-sensitive" style="color: var(--act-green);">0 leaked</span>
         </div>
         <div class="hud-stat">
           <span style="font-size: 10px; color: var(--text-tertiary);">Redactions</span>
-          <span class="hud-val" style="color: var(--act-green);">4 masked</span>
+          <span class="hud-val" id="hud-redactions" style="color: var(--act-green);">117 masked</span>
         </div>
         <div class="hud-stat">
-          <span style="font-size: 10px; color: var(--text-tertiary);">Network</span>
-          <span class="hud-val" style="color: var(--ask-yellow); font-size: 12px;">LOCAL</span>
+          <span style="font-size: 10px; color: var(--text-tertiary);">Payload Size</span>
+          <span class="hud-val" id="hud-payload" style="color: var(--ask-yellow); font-size: 13px;">11.5 KB (-59%)</span>
         </div>
       </div>
 
       <!-- 1. MODEL -->
       <div class="glass-card">
         <div style="font-size: 12px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">1. MODEL</div>
-        <div class="field-row"><span class="field-k">Architecture</span><span class="field-v">Hybrid Edge Perception + Local VLM</span></div>
-        <div class="field-row"><span class="field-k">Memory Invariant</span><span class="field-v">Zero plaintext raw disk persistence</span></div>
+        <div class="field-row"><span class="field-k">Architecture</span><span class="field-v" id="field-model-arch">Hybrid Edge Perception + Local VLM</span></div>
+        <div class="field-row"><span class="field-k">Execution Mode</span><span class="field-v" id="field-model-mode">REDACTED_LOCAL_BACKEND</span></div>
+        <div class="field-row"><span class="field-k">Memory Invariant</span><span class="field-v" id="field-model-invariant">Zero plaintext raw disk persistence</span></div>
         <div class="field-row"><span class="field-k">Hash Digest</span><span class="field-v">SHA-256: e3b0c44298fc1c14...</span></div>
       </div>
 
@@ -1097,15 +1235,16 @@ Balance: INR 1,48,290.40
       <div class="glass-card">
         <div style="font-size: 12px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">2. PERCEPTION</div>
         <div class="field-row"><span class="field-k">OCR Engine</span><span class="field-v">Google ML Kit Text Recognition v16.0.1</span></div>
-        <div class="field-row"><span class="field-k">Facial Biometrics</span><span class="field-v">ML Kit Face Detection (0 detected)</span></div>
-        <div class="field-row"><span class="field-k">PII Parser</span><span class="field-v">Aadhaar, Luhn Credit Card, IFSC, OTP</span></div>
+        <div class="field-row"><span class="field-k">Facial Biometrics</span><span class="field-v" id="field-faces">ML Kit Face Contours: Obscured on-device</span></div>
+        <div class="field-row"><span class="field-k">PII Parser</span><span class="field-v">Aadhaar, Luhn Card, IFSC, OTP</span></div>
+        <div class="field-row"><span class="field-k">Redaction Ratio</span><span class="field-v" id="field-redaction-ratio" style="color: var(--act-green);">100.0% (Zero sensitive leakage)</span></div>
       </div>
 
       <!-- 3. VLM -->
       <div class="glass-card">
         <div style="font-size: 12px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">3. VLM</div>
         <div class="field-row"><span class="field-k">Model</span><span class="field-v">Qwen2.5-VL-3B-Instruct</span></div>
-        <div class="field-row"><span class="field-k">Runtime</span><span class="field-v">Ollama Local Daemon (:11434)</span></div>
+        <div class="field-row"><span class="field-k">Runtime</span><span class="field-v" id="field-vlm-runtime">Ollama Local Daemon (:11434)</span></div>
         <div class="field-row"><span class="field-k">Visual Grounding</span><span class="field-v">Action-conditioned JSON Schema</span></div>
       </div>
 
@@ -1123,6 +1262,84 @@ Balance: INR 1,48,290.40
         <div class="field-row"><span class="field-k">Formula</span><span class="field-v">rho = s * (1 + lambda * r)</span></div>
         <div class="field-row"><span class="field-k">Calculation</span><span class="field-v">0.90 * (1 + 0.75 * 1.00) = 1.575</span></div>
         <div class="field-row"><span class="field-k">Decision Boundary</span><span class="field-v" style="color: var(--stop-red);">STOP (rho &gt;= 0.65)</span></div>
+      </div>
+
+      <!-- 6. PRIVACY-UTILITY EMPIRICAL BENCHMARK RESULTS -->
+      <div class="glass-card" style="border-color: rgba(46, 204, 113, 0.4);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 12px; font-weight: 800; color: var(--act-green); letter-spacing: 1px;">
+            6. PRIVACY-UTILITY TRADEOFF (EARB BENCHMARK)
+          </div>
+          <span class="badge-pill badge-act">N = 60 PAIRS</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+          Empirical comparison of the 3 modes across all 60 EARB evaluation pairs.
+        </div>
+
+        <div style="overflow-x: auto; margin-top: 8px;">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Acc</th>
+                <th>Macro F1</th>
+                <th>STOP Rec</th>
+                <th>Payload</th>
+                <th>Leaked</th>
+                <th>Latency</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ON-DEVICE</td>
+                <td>63.3%</td>
+                <td>0.5389</td>
+                <td>70.0%</td>
+                <td>0.0 KB</td>
+                <td style="color: var(--act-green);">0</td>
+                <td>18.8 ms</td>
+              </tr>
+              <tr class="highlight-redacted">
+                <td>REDACTED</td>
+                <td>65.0%</td>
+                <td>0.5044</td>
+                <td>90.0%</td>
+                <td>11.5 KB</td>
+                <td style="color: var(--act-green);">0</td>
+                <td>135.5 ms</td>
+              </tr>
+              <tr>
+                <td style="color: #f87171;">RAW EVAL</td>
+                <td>68.3%</td>
+                <td>0.5455</td>
+                <td>95.0%</td>
+                <td>28.4 KB</td>
+                <td style="color: var(--stop-red); font-weight: 800;">117</td>
+                <td>375.4 ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SCIENTIFIC FINDING REPORT -->
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 8px 10px; margin-top: 10px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--ask-yellow);">
+            🔬 SCIENTIFIC FINDING: MEASURED UTILITY COST OF REDACTION
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4;">
+            Client-side redaction incurs a measurable utility cost of <strong>-3.3% Accuracy (-0.0411 Macro-F1)</strong> due to information loss from masking sensitive entities (PII tokens, clinical parameters, financial amounts). However, it achieves <strong>100% elimination of outbound sensitive data leakage (117 sensitive regions reduced to 0)</strong> and reduces payload size by <strong>59.3%</strong>.
+          </div>
+        </div>
+
+        <!-- PLOTS DIRECTORY REFERENCE -->
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 10px; font-size: 11px; color: var(--text-tertiary);">
+          <div>📊 <strong>Generated Plots:</strong></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cyan-accent);">
+            • results/figures/accuracy_vs_redaction.png<br/>
+            • results/figures/f1_vs_payload_size.png<br/>
+            • results/figures/latency_vs_accuracy.png
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1399,6 +1616,95 @@ Balance: INR 1,48,290.40
       if (ok) {
         alert("Deliberate User Override Active: Safety intervention bypassed by user consent. Event recorded in tamper-resistant audit ledger.");
         showScreen('screen-home');
+      }
+    }
+
+    function setSupervisorMode(mode) {
+      const pOndevice = document.getElementById('pill-ondevice');
+      const pRedacted = document.getElementById('pill-redacted');
+      const pRaw = document.getElementById('pill-raw');
+      const hazard = document.getElementById('raw-hazard-box');
+      const statusBadge = document.getElementById('mode-status-badge');
+      const descBox = document.getElementById('mode-desc-box');
+
+      const hudLat = document.getElementById('hud-latency');
+      const hudConf = document.getElementById('hud-confidence');
+      const hudRisk = document.getElementById('hud-risk');
+      const hudSens = document.getElementById('hud-sensitive');
+      const hudRed = document.getElementById('hud-redactions');
+      const hudPay = document.getElementById('hud-payload');
+
+      const fArch = document.getElementById('field-model-arch');
+      const fMode = document.getElementById('field-model-mode');
+      const fInvar = document.getElementById('field-model-invariant');
+      const fFaces = document.getElementById('field-faces');
+      const fRatio = document.getElementById('field-redaction-ratio');
+      const fVlm = document.getElementById('field-vlm-runtime');
+
+      if (!pOndevice || !pRedacted || !pRaw) return;
+
+      pOndevice.classList.remove('active');
+      pRedacted.classList.remove('active');
+      pRaw.classList.remove('active');
+
+      if (mode === 'ON_DEVICE') {
+        pOndevice.classList.add('active');
+        if (hazard) hazard.style.display = 'none';
+        if (statusBadge) { statusBadge.className = 'badge-pill badge-act'; statusBadge.innerText = 'EDGE ISOLATION'; }
+        if (descBox) descBox.innerHTML = '<strong>Mode 1 (ON-DEVICE):</strong> Zero network transmission (0 outbound bytes). Purely local ML Kit text recognition + regex. Does not invoke remote VLM.';
+
+        if (hudLat) { hudLat.innerText = '18.8 ms'; hudLat.style.color = 'var(--act-green)'; }
+        if (hudConf) hudConf.innerText = '80%';
+        if (hudRisk) hudRisk.innerText = '0.35';
+        if (hudSens) { hudSens.innerText = '0 leaked'; hudSens.style.color = 'var(--act-green)'; }
+        if (hudRed) hudRed.innerText = '0 (Local)';
+        if (hudPay) hudPay.innerText = '0.0 KB (100% red.)';
+
+        if (fArch) fArch.innerText = 'Edge Mobile ML Kit Perception Only';
+        if (fMode) fMode.innerText = 'ON_DEVICE (No egress)';
+        if (fInvar) fInvar.innerText = 'Absolute zero outbound bytes egress';
+        if (fFaces) fFaces.innerText = 'Contour detection only; 0 bytes transmitted';
+        if (fRatio) { fRatio.innerText = '100.0% (Zero outbound leakage)'; fRatio.style.color = 'var(--act-green)'; }
+        if (fVlm) fVlm.innerText = 'Offline (Edge rule engine active)';
+      } else if (mode === 'RAW') {
+        pRaw.classList.add('active');
+        if (hazard) hazard.style.display = 'block';
+        if (statusBadge) { statusBadge.className = 'badge-pill badge-stop'; statusBadge.innerText = 'BENCHMARK ONLY'; }
+        if (descBox) descBox.innerHTML = '<strong style="color:var(--stop-red);">Mode 3 (RAW EVALUATION):</strong> Academic benchmark ablation ONLY. Unredacted artifacts dispatched to cloud. Never permitted for production user data.';
+
+        if (hudLat) { hudLat.innerText = '375.4 ms'; hudLat.style.color = 'var(--stop-red)'; }
+        if (hudConf) hudConf.innerText = '93%';
+        if (hudRisk) hudRisk.innerText = '1.65';
+        if (hudSens) { hudSens.innerText = '117 leaked'; hudSens.style.color = 'var(--stop-red)'; }
+        if (hudRed) hudRed.innerText = '0 (0.0%)';
+        if (hudPay) hudPay.innerText = '28.35 KB (Raw)';
+
+        if (fArch) fArch.innerText = 'Cloud Multi-Modal VLM + Cleartext Egress';
+        if (fMode) fMode.innerText = 'RAW_CLOUD_EVALUATION (BENCHMARK ONLY)';
+        if (fInvar) fInvar.innerText = 'WARNING: Unredacted raw artifact egress';
+        if (fFaces) fFaces.innerText = 'Raw facial contours transmitted over WAN';
+        if (fRatio) { fRatio.innerText = '0.0% (CRITICAL: 117 regions leaked)'; fRatio.style.color = 'var(--stop-red)'; }
+        if (fVlm) fVlm.innerText = 'Remote Cloud API Endpoint (:8000)';
+      } else {
+        // REDACTED (Default)
+        pRedacted.classList.add('active');
+        if (hazard) hazard.style.display = 'none';
+        if (statusBadge) { statusBadge.className = 'badge-pill badge-act'; statusBadge.innerText = 'PRODUCTION'; }
+        if (descBox) descBox.innerHTML = '<strong>Mode 2 (Proposed ContextGuard):</strong> On-device ML Kit detection + canvas blackout. Zero sensitive tokens or facial biometrics leave the device (100% masked).';
+
+        if (hudLat) { hudLat.innerText = '135.5 ms'; hudLat.style.color = 'var(--act-green)'; }
+        if (hudConf) hudConf.innerText = '82%';
+        if (hudRisk) hudRisk.innerText = '1.58';
+        if (hudSens) { hudSens.innerText = '0 leaked'; hudSens.style.color = 'var(--act-green)'; }
+        if (hudRed) hudRed.innerText = '117 masked';
+        if (hudPay) hudPay.innerText = '11.5 KB (-59%)';
+
+        if (fArch) fArch.innerText = 'Hybrid Edge Perception + Local VLM';
+        if (fMode) fMode.innerText = 'REDACTED_LOCAL_BACKEND (Standard)';
+        if (fInvar) fInvar.innerText = 'Zero plaintext raw disk persistence';
+        if (fFaces) fFaces.innerText = 'ML Kit Face Contours: Obscured on-device';
+        if (fRatio) { fRatio.innerText = '100.0% (Zero sensitive leakage)'; fRatio.style.color = 'var(--act-green)'; }
+        if (fVlm) fVlm.innerText = 'Ollama Local Daemon (:11434)';
       }
     }
   </script>

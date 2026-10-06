@@ -103,35 +103,35 @@ class ContextGuardPipeline:
         """
         selected = request.selected_action.upper().strip() if request.selected_action else None
 
-        # Gather context for VLM inference
-        image_bytes = None
-        if request.artifact and request.artifact.startswith("data:image"):
-            import base64
-            try:
-                base64_data = request.artifact.split(",")[1]
-                image_bytes = base64.b64decode(base64_data)
-            except Exception:
-                pass
-
-        vlm_context = {
-            "source_app": context.source_app,
-            "destination": context.destination,
-            "recipient": context.recipient,
-            "candidate_actions": ["SEND", "UPLOAD", "POST", "SIGN", "LOGIN", "APPROVE", "SAVE", "OPEN"]
-        }
-
-        inferred_result = await self.vlm.infer_intent(
-            image_bytes=image_bytes,
-            ocr_text=context.ocr_text,
-            context=vlm_context
-        )
-        inferred = inferred_result.predicted_action
-
         # Explicit user selection takes strict precedence
         if selected:
             resolved = selected
+            inferred = selected
             source = "EXPLICIT_USER"
         else:
+            # Gather context for VLM inference when action is inferred
+            image_bytes = None
+            if request.artifact and request.artifact.startswith("data:image"):
+                import base64
+                try:
+                    base64_data = request.artifact.split(",")[1]
+                    image_bytes = base64.b64decode(base64_data)
+                except Exception:
+                    pass
+
+            vlm_context = {
+                "source_app": context.source_app,
+                "destination": context.destination,
+                "recipient": context.recipient,
+                "candidate_actions": ["SEND", "UPLOAD", "POST", "SIGN", "LOGIN", "APPROVE", "SAVE", "OPEN"]
+            }
+
+            inferred_result = await self.vlm.infer_intent(
+                image_bytes=image_bytes,
+                ocr_text=context.ocr_text,
+                context=vlm_context
+            )
+            inferred = inferred_result.predicted_action
             resolved = inferred
             source = "INFERRED_RESEARCH"
 
@@ -192,6 +192,29 @@ class ContextGuardPipeline:
                     )
                 )
             categories.add("Privacy")
+        elif request.redaction_metadata and request.redaction_metadata.get("is_redacted"):
+            masked_count = request.redaction_metadata.get("masked_tokens_count", 0)
+            masked_faces = request.redaction_metadata.get("masked_faces", 0)
+            if masked_count > 0:
+                evidence_items.append(
+                    EvidenceItem(
+                        type="redacted_pii_tokens",
+                        description=f"Client redaction engine masked {masked_count} sensitive PII entity token(s) prior to transmission",
+                        importance=0.80,
+                        evidence_source=EvidenceSource.ML_KIT,
+                    )
+                )
+                categories.add("Privacy")
+            if masked_faces > 0:
+                evidence_items.append(
+                    EvidenceItem(
+                        type="redacted_faces",
+                        description=f"Client redaction engine obscured {masked_faces} facial contour(s) on canvas",
+                        importance=0.70,
+                        evidence_source=EvidenceSource.ML_KIT,
+                    )
+                )
+                categories.add("Privacy")
 
         # 2. OCR lexical evidence
         if context.ocr_available and text:
@@ -473,6 +496,7 @@ class ContextGuardPipeline:
         intent: Stage2IntentOutput,
         evidence_out: Stage3EvidenceOutput,
         consequence_out: Stage4ConsequenceOutput,
+        request: Optional[AnalysisRequest] = None,
     ) -> Stage5UncertaintyOutput:
         """
         Calculates confidence c in [0.0, 1.0].
@@ -498,6 +522,10 @@ class ContextGuardPipeline:
         if intent.intent_source == "INFERRED_RESEARCH":
             conf -= 0.15
             uncertainty_reasons.append("Action was inferred rather than explicitly confirmed by user.")
+
+        if request and request.redaction_metadata and request.redaction_metadata.get("is_redacted"):
+            conf -= 0.05
+            uncertainty_reasons.append("Fine-grained entity details were masked by client-side redaction engine.")
 
         if not evidence_out.evidence:
             conf -= 0.25
@@ -573,10 +601,11 @@ class ContextGuardPipeline:
             consequence = self.stage_4_consequence(ctx, intent, evidence)
 
             # 5. Uncertainty
-            uncertainty = self.stage_5_uncertainty(ctx, intent, evidence, consequence)
+            uncertainty = self.stage_5_uncertainty(ctx, intent, evidence, consequence, request)
 
             # 6. Intervention
             response = self.stage_6_intervention(consequence, uncertainty, evidence, ctx, intent)
+            return response
             return response
 
         except Exception as e:

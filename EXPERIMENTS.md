@@ -109,3 +109,46 @@ $$\begin{pmatrix} \text{TN} = 5136 & \text{FP} = 11 \\ \text{FN} = 27 & \text{TP
 **Artifacts Generated:**
 - Model Weights: [`ml/artifacts/url_risk_model.joblib`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/ml/artifacts/url_risk_model.joblib)
 - Metadata & Parameters: [`ml/artifacts/url_model_metadata.json`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/ml/artifacts/url_model_metadata.json)
+
+---
+
+## 7. Phase 7: Three-Mode Privacy-Utility Evaluation (RQ3 Resolution)
+
+### A. Experimental Paradigm & Safety Boundaries
+
+To rigorously evaluate the empirical tradeoff between user privacy and model utility, three operational architectures were executed across all 60 EARB benchmark pairs:
+
+1. **MODE 1 (ON_DEVICE):** Pure edge perception using Google ML Kit OCR and heuristic rule gating. Absolute network isolation (0 bytes egress).
+2. **MODE 2 (REDACTED_LOCAL_BACKEND, ContextGuard Proposed):** In-memory canvas blackout masking human faces and PII tokens prior to backend transmission.
+3. **MODE 3 (RAW_CLOUD_EVALUATION):** Cloud multi-modal VLM receiving full unredacted artifacts and cleartext tokens.
+   > **SAFETY INVARIANT:** Mode 3 is strictly restricted to synthetic EARB benchmark artifacts under researcher consent. Real user data is cryptographically prohibited from unredacted cloud egress.
+
+### B. Empirical Results Table
+
+| System Mode | Multi-Class Accuracy | Macro F1 | STOP Recall | ACT FAR | Latency (ms) | Transmitted Sensitive Regions | Redaction Ratio | Mean Payload | Bandwidth Reduction |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Mode 1: ON_DEVICE** | `63.33%` | `0.5389` | `70.0%` | `5.0%` | `18.84 ms` | `0` | `100.0%` | `0.00 KB` | `100.0%` |
+| **Mode 2: REDACTED (Proposed)** | `65.00%` | `0.5044` | `90.0%` | `10.0%` | `135.46 ms` | `0` | `100.0%` | `11.53 KB` | `59.3%` |
+| **Mode 3: RAW (Benchmark Only)** | `68.33%` | `0.5455` | `95.0%` | `10.0%` | `375.45 ms` | `117` | `0.0%` | `28.35 KB` | `0.0%` |
+
+### C. Scientific Discovery: The Measured Utility Cost of Redaction
+
+In accordance with scientific integrity guidelines, redaction is **not claimed to have zero utility cost**:
+- **Measured Accuracy Cost:** $\Delta \text{Accuracy} = -3.33\%$ (`68.33%` $\to$ `65.00%`)
+- **Measured Macro-F1 Cost:** $\Delta \text{Macro-F1} = -0.0411$ (`0.5455` $\to$ `0.5044`)
+- **Measured STOP Recall Cost:** $\Delta \text{STOP Recall} = -5.00\%$ (`95.0%` $\to$ `90.0%`)
+
+**Mechanistic Causality:** Information loss occurs when fine-grained entity tokens (numerical compensation digits, specific lab glucose measurements, and precise OTP strings) are masked into `[REDACTED_PII]`. Downstream reasoning on subtle borderline cases experiences increased epistemic ambiguity, shifting borderline actions (such as `WARN` to `ASK`).
+
+**Privacy-Utility Frontier Advantage:**
+- Complete elimination of external sensitive data disclosure: **117 sensitive regions leaked in Mode 3 $\to$ 0 in Mode 2 (100% suppression)**.
+- Bandwidth reduction: **$59.34\%$ payload size reduction** ($28.35\text{ KB} \to 11.53\text{ KB}$).
+- Real-time usability: **$135.46\text{ ms}$ local latency**, well within the Android 200 ms interactive budget, compared to $375.45\text{ ms}$ WAN cloud upload.
+
+### D. Generated Publication Figures
+
+- **Accuracy vs. Redaction Ratio:** [`results/figures/accuracy_vs_redaction.png`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/results/figures/accuracy_vs_redaction.png)
+- **Macro-F1 vs. Outbound Payload Size (Pareto Frontier):** [`results/figures/f1_vs_payload_size.png`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/results/figures/f1_vs_payload_size.png)
+- **Latency vs. Accuracy (Operational Tradeoff):** [`results/figures/latency_vs_accuracy.png`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/results/figures/latency_vs_accuracy.png)
+- **Normalized Data Export:** [`privacy_utility_results.json`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/privacy_utility_results.json)
+

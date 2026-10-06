@@ -135,18 +135,18 @@ fun SettingsScreen(
                     )
                     Column(modifier = Modifier.padding(start = 8.dp)) {
                         Text(
-                            text = mode.name,
-                            color = if (selectedMode == mode) CyanAccent else TextPrimary,
+                            text = "${mode.displayName} (${mode.name})",
+                            color = if (mode.isBenchmarkOnly) StopRed else if (selectedMode == mode) CyanAccent else TextPrimary,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = when (mode) {
-                                InferenceMode.OFFLINE -> "Zero outbound bytes. All analysis runs on-device."
-                                InferenceMode.REDACTED_LOCAL_BACKEND -> "Standard demo mode. Masked PII sent to local host."
-                                InferenceMode.RAW_EVALUATION_ONLY -> "Academic ablation benchmark mode only."
+                                InferenceMode.ON_DEVICE -> "Zero outbound bytes. Pure on-device ML Kit perception."
+                                InferenceMode.REDACTED_LOCAL_BACKEND -> "ContextGuard standard mode. Masked PII & obscured faces sent to local backend."
+                                InferenceMode.RAW_CLOUD_EVALUATION -> "⚠️ Academic benchmark evaluation only. Never permitted in production."
                             },
-                            color = TextSecondary,
+                            color = if (mode.isBenchmarkOnly) StopRed.copy(alpha = 0.8f) else TextSecondary,
                             fontSize = 11.sp
                         )
                     }

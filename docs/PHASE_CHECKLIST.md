@@ -127,3 +127,29 @@ This checklist tracks the end-to-end execution of the ContextGuard research caps
 - [ ] Central Demo verification (Bank Statement -> Save privately = ACT, Send to unknown = WARN/ASK, Post publicly = STOP).
 - [ ] Stress and fault-injection testing (server outage, malformed JSON, network timeout).
 - [ ] Final viva presentation assets and documentation sign-off.
+
+---
+
+## 7. Phase 7: Three-Mode Privacy-Utility Evaluation
+- [x] Implement the three operational modes:
+  - [x] Mode 1: `ON_DEVICE` (zero outbound egress, ML Kit heuristics, 18.8 ms).
+  - [x] Mode 2: `REDACTED_LOCAL_BACKEND` (ContextGuard proposed, in-memory redaction, 135.5 ms).
+  - [x] Mode 3: `RAW_CLOUD_EVALUATION` (synthetic benchmark unredacted cloud baseline, 375.5 ms).
+- [x] Enforce Mode 3 benchmark safety invariant (only synthetic EARB artifacts permitted; never expose actual private user data).
+- [x] Calculate all required metrics across each mode:
+  - [x] Intervention Macro-F1 (Mode 1: 0.5389, Mode 2: 0.5044, Mode 3: 0.5455).
+  - [x] Multi-class Accuracy (Mode 1: 63.3%, Mode 2: 65.0%, Mode 3: 68.3%).
+  - [x] STOP Recall (Mode 1: 70.0%, Mode 2: 90.0%, Mode 3: 95.0%).
+  - [x] ACT False Alarm Rate (Mode 1: 5.0%, Mode 2: 10.0%, Mode 3: 10.0%).
+  - [x] Mean Confidence & Latency distributions.
+  - [x] Transmitted sensitive regions (Mode 1: 0, Mode 2: 0, Mode 3: 117 leaked).
+  - [x] Redaction count (Mode 1: 0, Mode 2: 117 masked, Mode 3: 0).
+  - [x] Redaction ratio (Mode 1: 100%, Mode 2: 100%, Mode 3: 0%).
+  - [x] Payload size (Mode 1: 0 KB, Mode 2: 11.53 KB, Mode 3: 28.35 KB, -59.3% reduction).
+- [x] Measure and report the genuine utility cost of redaction ($\Delta \text{Acc} = -3.3\%$, $\Delta \text{F1} = -0.0411$).
+- [x] Output `privacy_utility_results.json` and publication-quality plots:
+  - [x] `results/figures/accuracy_vs_redaction.png`
+  - [x] `results/figures/f1_vs_payload_size.png`
+  - [x] `results/figures/latency_vs_accuracy.png`
+- [x] Update UI Supervisor dashboards (Android `SupervisorScreen.kt` and web `index.html`) with explicit 3-mode selector and prominent hazard warning on RAW mode.
+

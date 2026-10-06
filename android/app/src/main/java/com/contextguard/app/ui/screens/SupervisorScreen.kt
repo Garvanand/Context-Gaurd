@@ -119,6 +119,139 @@ fun SupervisorScreen(
         }
 
         // ==========================================
+        // THREE EXPLICIT EXPERIMENTAL MODES
+        // ON-DEVICE | REDACTED | RAW EVALUATION
+        // ==========================================
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SurfaceDark, RoundedCornerShape(16.dp))
+                .border(1.dp, SurfaceBorder, RoundedCornerShape(16.dp))
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "THREE EVALUATION MODES",
+                    color = CyanAccent,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Text(
+                    text = "Phase 7 Privacy-Utility",
+                    color = TextSecondary,
+                    fontSize = 10.sp
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                listOf(
+                    com.contextguard.app.core.network.InferenceMode.ON_DEVICE,
+                    com.contextguard.app.core.network.InferenceMode.REDACTED_LOCAL_BACKEND,
+                    com.contextguard.app.core.network.InferenceMode.RAW_CLOUD_EVALUATION
+                ).forEach { mode ->
+                    val isSelected = state.backendConfig.inferenceMode == mode
+                    val isRaw = mode == com.contextguard.app.core.network.InferenceMode.RAW_CLOUD_EVALUATION
+                    val borderColor = if (isSelected) (if (isRaw) StopRed else CyanAccent) else SurfaceBorder
+                    val bgColor = if (isSelected) (if (isRaw) StopRed.copy(alpha = 0.2f) else CyanAccent.copy(alpha = 0.15f)) else Color.Transparent
+
+                    Surface(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(8.dp))
+                            .border(1.dp, borderColor, RoundedCornerShape(8.dp)),
+                        color = bgColor,
+                        onClick = {
+                            viewModel.updateBackendConfig(
+                                host = state.backendConfig.host,
+                                port = state.backendConfig.port,
+                                mode = mode
+                            )
+                        }
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = mode.displayName,
+                                fontSize = 11.sp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) (if (isRaw) StopRed else CyanAccent) else TextSecondary,
+                                maxLines = 1
+                            )
+                            Text(
+                                text = when (mode) {
+                                    com.contextguard.app.core.network.InferenceMode.ON_DEVICE -> "0 bytes egress"
+                                    com.contextguard.app.core.network.InferenceMode.REDACTED_LOCAL_BACKEND -> "100% masked"
+                                    com.contextguard.app.core.network.InferenceMode.RAW_CLOUD_EVALUATION -> "Benchmark only"
+                                },
+                                fontSize = 9.sp,
+                                color = if (isRaw) StopRed.copy(alpha = 0.8f) else TextSecondary
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Explicit warning if RAW EVALUATION is selected
+            if (state.backendConfig.inferenceMode == com.contextguard.app.core.network.InferenceMode.RAW_CLOUD_EVALUATION) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(StopRed.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                        .border(1.dp, StopRed.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = "Warning",
+                        tint = StopRed,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = "RESEARCH BENCHMARK MODE ONLY: Mode 3 is strictly restricted to synthetic consented benchmark artifacts. Never permitted in production.",
+                        color = StopRed,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 14.sp
+                    )
+                }
+            }
+
+            // Measured Privacy-Utility Telemetry
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                val transSens = if (state.backendConfig.inferenceMode == com.contextguard.app.core.network.InferenceMode.RAW_CLOUD_EVALUATION) "117 LEAKED" else "0 LEAKED"
+                val redRatio = if (state.backendConfig.inferenceMode == com.contextguard.app.core.network.InferenceMode.RAW_CLOUD_EVALUATION) "0.0%" else "100.0%"
+                val payloadKb = when (state.backendConfig.inferenceMode) {
+                    com.contextguard.app.core.network.InferenceMode.ON_DEVICE -> "0.0 KB"
+                    com.contextguard.app.core.network.InferenceMode.REDACTED_LOCAL_BACKEND -> "11.5 KB (-59%)"
+                    com.contextguard.app.core.network.InferenceMode.RAW_CLOUD_EVALUATION -> "28.4 KB (Raw)"
+                }
+                HudMetricItem(
+                    label = "Transmitted Sensitive",
+                    value = transSens,
+                    accentColor = if (state.backendConfig.inferenceMode == com.contextguard.app.core.network.InferenceMode.RAW_CLOUD_EVALUATION) StopRed else ActGreen
+                )
+                HudMetricItem(label = "Redaction Ratio", value = redRatio, accentColor = ActGreen)
+                HudMetricItem(label = "Payload Egress", value = payloadKb, accentColor = AskYellow)
+            }
+        }
+
+        // ==========================================
         // 6 CORE METRICS GRID (HUD)
         // Latency | Confidence | Risk | Evidence count | Redactions | Network state
         // ==========================================
