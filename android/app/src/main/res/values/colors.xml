@@ -1,0 +1,9 @@
+<resources>
+    <color name="bg_dark">#121417</color>
+    <color name="surface_dark">#1A1D23</color>
+    <color name="primary_accent">#00E5FF</color>
+    <color name="act_green">#00E676</color>
+    <color name="ask_yellow">#FFD600</color>
+    <color name="warn_orange">#FF9100</color>
+    <color name="stop_red">#FF1744</color>
+</resources>

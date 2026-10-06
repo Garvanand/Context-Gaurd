@@ -2,72 +2,82 @@
 
 **Capstone Title:** CONTEXTGUARD: A Multimodal AI System for Pre-Action Risk Detection in Everyday Digital Tasks  
 **Institution:** Final-Year B.Tech Capstone Project  
-**Status Date:** Phase 0 (Environment Audit & Architectural Foundation) Completed  
-**Current Phase:** Transitioning to Phase 1 (Data Acquisition, ML Feature Extraction & XGBoost URL Model Training)
+**Status Date:** Initial Monorepo Foundation Completed  
+**Current Milestone:** Phase 0 (Monorepo Foundation & Core Abstractions) **COMPLETED**  
+**Next Milestone:** Phase 1 (ML Feature Extraction & XGBoost URL Phishing Model Training)
 
 ---
 
-## 1. System Environment Audit
+## 1. System Environment Audit & Verification
 
-| Component | Target / Required | Detected System Environment | Status | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **Operating System** | Windows 10/11 64-bit | Windows 11 Home Single Language (10.0.26200) | **PASS** | 64-bit architecture |
-| **System RAM** | 8+ GB | 12.0 GB Physical RAM (~1.6 GB free at idle) | **PASS** | Sufficient for local Python services & XGBoost; VLM requires quantization or Ollama |
-| **Available Storage** | 20+ GB | 51.15 GB Free on C: Drive | **PASS** | Adequate for Android SDK, ML weights, datasets |
-| **Git** | 2.x | Git 2.42.0.windows.2 | **PASS** | Functional |
-| **Python** | 3.11+ | Python 3.12.0 (`C:\Users\GARV ANAND\AppData\Local\Programs\Python\Python312\python.exe`) | **PASS** | Python 3.12 verified |
-| **Node.js / npm** | Node 18+, npm 9+ | Node v20.14.0, npm 10.9.0 | **PASS** | Available for dashboard/tooling |
-| **Java JDK** | JDK 17 LTS | - OpenJDK 17.0.6 (Android Studio JBR at `C:\Program Files\Android\Android Studio\jbr`)<br>- JDK 22.0.2 at `C:\Program Files\Java\jdk-22` | **PASS** | JAVA_HOME set to JDK 17 for AGP/Gradle |
-| **Android SDK** | API 34+ | Android SDK located at `C:\Users\GARV ANAND\AppData\Local\Android\Sdk`<br>- Platforms: `android-34`, `android-36`<br>- Build-tools: `34.0.0`, `36.1.0`, `37.0.0`<br>- Platform-tools: `adb 1.0.41 (37.0.1)` | **PASS** | Target API 34 supported out-of-the-box |
-| **Gradle** | 8.x | Gradle 8.3 (Cached at `C:\Users\GARV ANAND\.gradle\wrapper\dists\gradle-8.3-bin\...`) | **PASS** | Verified working with Java 17 and Kotlin 1.9 |
-| **Ollama** | Local LLM/VLM runtime | Not found in PATH / Port 11434 inactive | **FALLBACK READY** | System architecture includes resilient offline mode, heuristic fallback, and API abstraction |
-| **Internet Access** | PyPI, HuggingFace, UCI | Tested and Verified (HTTP 200 to httpbin, UCI PhiUSIIL archive endpoint accessible) | **PASS** | Package & dataset downloads enabled |
-
-### ML Environment Status (Python 3.12)
-- **FastAPI**: `0.141.1` (INSTALLED)
-- **Pydantic**: `2.13.4` (INSTALLED)
-- **Uvicorn**: `0.52.0` (INSTALLED)
-- **XGBoost**: `3.2.0` (INSTALLED)
-- **Scikit-learn**: `1.4.2` (INSTALLED)
-- **PyTorch**: `2.13.0+cpu` (INSTALLED)
-- **Transformers**: `5.17.0` (INSTALLED)
-- **Pandas**: `3.0.3` (INSTALLED)
-- **NumPy**: `1.26.4` (INSTALLED)
-- **Pillow**: `12.2.0` (INSTALLED)
-- **OpenCV (headless)**: `5.0.0.93` (INSTALLED)
-- **Pytest**: `9.0.3` (INSTALLED)
+| Component | Target / Required | Detected System Environment | Build & Test Status |
+| :--- | :--- | :--- | :---: |
+| **Operating System** | Windows 10/11 64-bit | Windows 11 Home Single Language (10.0.26200) | **PASS** |
+| **System RAM** | 8+ GB | 12.0 GB Physical RAM (~1.6 GB free at idle) | **PASS** |
+| **Available Storage** | 20+ GB | 51.15 GB Free on C: Drive | **PASS** |
+| **Git** | 2.x | Git 2.42.0.windows.2 | **PASS** |
+| **Python** | 3.11+ | Python 3.12.0 (`C:\Users\GARV ANAND\AppData\Local\Programs\Python\Python312\python.exe`) | **PASS** |
+| **Java JDK** | JDK 17 LTS | OpenJDK 17.0.6 (Android Studio JBR at `C:\Program Files\Android\Android Studio\jbr`) | **PASS** |
+| **Android SDK** | API 34+ | Android SDK located at `C:\Users\GARV ANAND\AppData\Local\Android\Sdk` (API 34, Build-tools 34.0.0) | **PASS** |
+| **Gradle** | 8.x | Gradle 8.3 (Wrapper generated in `android/gradlew.bat`) | **PASS** |
+| **FastAPI Backend** | 0.110+ | FastAPI 0.141.1, Uvicorn 0.52.0, Pydantic 2.13.4 | **PASS** (100% tests pass) |
+| **Android App** | Jetpack Compose | CompileSdk 34, MinSdk 26, Material 3, Kotlin 1.9.22, AGP 8.2.2 | **PASS** (100% tests pass, APK built) |
 
 ---
 
-## 2. Component Implementation Status
+## 2. Deliverable Verification Matrix
 
-| Component | Status | Description |
-| :--- | :--- | :--- |
-| **Repository Structure** | **COMPLETED** | Monorepo structured with `android`, `backend`, `ml`, `benchmark`, `dashboard`, `artifacts`, `docs`, `scripts`, `tests`. |
-| **Documentation & Rules** | **COMPLETED** | `PROJECT_RULES.md`, `ARCHITECTURE.md`, `PROJECT_STATUS.md`, `THREAT_MODEL.md`, `PRIVACY.md`, `DEMO_RUNBOOK.md`, `EXPERIMENTS.md` initialized. |
-| **Backend Service** | **PLANNED** | FastAPI server with deterministic policy engine, PII redaction pipeline, XGBoost inference service, VLM client, and health endpoints. |
-| **ML Phishing Model** | **PLANNED** | Feature extraction pipeline (35+ lexical/structural features), training on PhiUSIIL dataset, evaluation (AUC, F1, latency), model export. |
-| **EARB Benchmark** | **PLANNED** | 60 synthetic/consented artifact-action pairs across 4 categories with rigorous schema, negative controls, and evaluation harness. |
-| **Android Application** | **PLANNED** | Jetpack Compose app with Sharesheet interception, ML Kit OCR & Face detection, local PII redaction, Supervisor mode, and Central Demo. |
-| **Evaluation Suite** | **PLANNED** | Baselines B1–B5, ablations, confusion matrices, STOP recall, false-alarm analysis, latency benchmarking. |
+| Area | Deliverables Required | Implementation Details | Test & Verification Result |
+| :--- | :--- | :--- | :---: |
+| **Android** | - Single-Activity architecture<br>- Navigation Graph<br>- Material 3 Dark theme<br>- Logging & State abstractions<br>- Backend & Model Health abstractions<br>- 8 Production screens | - `MainActivity.kt` with `ACTION_SEND` intent filter<br>- `NavGraph.kt` linking 8 screens<br>- `Theme.kt`, `Color.kt`, `Type.kt`<br>- `AppLogger.kt`, `UiState.kt`<br>- `BackendConfig.kt`, `ModelHealthManager.kt`<br>- `WelcomeScreen`, `HomeScreen`, `AnalyzeScreen`, `ResultScreen`, `PrivacyScreen`, `SettingsScreen`, `DemoScreen`, `SupervisorScreen` | **PASS**<br>`testDebugUnitTest`: 22/22 tasks passed.<br>`assembleDebug`: `app-debug.apk` (15.8 MB) generated successfully. |
+| **Backend** | - FastAPI Application<br>- `GET /health`<br>- `GET /health/models`<br>- `GET /health/version`<br>- Structured logging<br>- Pydantic Settings config | - `backend/app/main.py`<br>- `backend/app/api/v1/health.py`<br>- `backend/app/core/config.py`<br>- `backend/app/core/logging.py` | **PASS**<br>Endpoints verified via TestClient and pytest suite (`tests/backend/`). |
+| **ML Interfaces** | - Placeholder interfaces<br>- No fake models<br>- URLRiskModel, VisionReasoner, ArtifactAnalyzer, PolicyEngine | - `ml/inference/interfaces.py`<br>- `ml/inference/types.py`<br>- `ml/inference/policy_engine.py` (Deterministic equation $\rho = s \times (1 + \lambda \times r)$ and Model Failure Safety Rule) | **PASS**<br>Clean ABCs + Deterministic reference engine tested via pytest (`tests/ml/test_policy.py`). |
+| **Benchmark** | - EARB schema<br>- Dataset validator<br>- Sample fixtures | - `benchmark/schema/earb_schema.py`<br>- `benchmark/schema/validator.py`<br>- `benchmark/data/sample_earb_pairs.json` (Seed pairs including Central Demo) | **PASS**<br>Schema validation verified via CLI validator and pytest (`tests/benchmark/test_earb_schema.py`). |
+| **Documentation** | - README.md<br>- PROJECT_STATUS.md<br>- ARCHITECTURE.md<br>- DEVELOPMENT.md | - Setup, test, build, architecture, and devrunbooks thoroughly documented | **PASS** |
 
 ---
 
-## 3. Immediate Next Milestones
-1. **Phase 1: ML Model & Feature Extraction Engine**
-   - Acquire/stream PhiUSIIL dataset or balanced subset.
-   - Implement deterministic URL lexical/structural feature extractor (exact parity between training and inference).
-   - Train XGBoost phishing classifier and evaluate metrics.
-   - Save model artifact (`artifacts/models/xgboost_phishing_v1.json`).
-2. **Phase 2: EARB Benchmark Creation & Validation**
-   - Create 20 synthetic base artifacts across 4 categories (Financial, Digital Security, Privacy Disclosure, Communication).
-   - Generate 60 artifact-action pairs adhering to EARB schema.
-   - Provide Central Demo bank statement artifact with 3 distinct action outcomes (ACT, WARN, STOP).
-3. **Phase 3: FastAPI Backend & Deterministic Policy Engine**
-   - Implement risk calculation: $\rho = s \times (1 + \lambda \times r)$.
-   - Implement policy logic ($STOP, ASK, WARN, ACT$) with strict Model Failure Safety Rule.
-   - Connect XGBoost inference, local VLM client, and health endpoints.
-4. **Phase 4: Android Application (Compose + ML Kit)**
-   - Build Android app with ML Kit OCR & Face Detection.
-   - Implement on-device PII masking and network request auditing.
-   - Integrate ACTION_SEND Sharesheet handler and Supervisor viva mode.
+## 3. Test Suite Execution Summary
+
+```text
+============================= test session starts =============================
+platform win32 -- Python 3.12.0, pytest-9.0.3, pluggy-1.5.0
+rootdir: C:\Users\GARV ANAND\Downloads\Krish project\Context-Gaurd
+
+tests\backend\test_config.py ...                                         [ 17%]
+tests\backend\test_health.py .....                                       [ 47%]
+tests\benchmark\test_earb_schema.py ...                                  [ 64%]
+tests\ml\test_policy.py ......                                           [100%]
+
+======================= 17 passed in 4.40s ====================================
+
+============================= Android Gradle Build =============================
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugUnitTestKotlin
+> Task :app:testDebugUnitTest
+BUILD SUCCESSFUL in 1m 36s (22 actionable tasks executed)
+
+> Task :app:assembleDebug
+BUILD SUCCESSFUL in 1m 41s (33 actionable tasks executed)
+Output APK: android/app/build/outputs/apk/debug/app-debug.apk (15.8 MB)
+```
+
+---
+
+## 4. Known Blockers & Risks
+
+1. **No Physical Android Device or Active AVD:**
+   - *Status:* Headless debug builds and unit tests pass with 100% success.
+   - *Mitigation:* AVD creation instructions provided in `DEVELOPMENT.md`; debug APK can be sideloaded to physical devices via `adb install`.
+2. **Ollama Inactive on Host Workstation:**
+   - *Status:* Expected during foundation phase.
+   - *Mitigation:* Backend health endpoint correctly reports fallback readiness; architecture enforces graceful degradation to deterministic heuristics and ASK intervention.
+
+---
+
+## 5. Next Immediate Phase
+**Phase 1: ML Model & Feature Extraction Engine**
+- Download and stream genuine **PhiUSIIL Phishing URL Dataset** (UCI ML Repository).
+- Implement 35+ lexical and structural feature extractor (`ml/features/url_features.py`).
+- Train and calibrate XGBoost phishing classifier (`ml/training/train_phishing.py`).
+- Export production model artifact (`artifacts/models/xgboost_phishing_v1.json`).

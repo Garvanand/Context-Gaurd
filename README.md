@@ -26,89 +26,114 @@ And maps the resulting risk score to exactly one definitive safety intervention:
 ```text
 /
 ├── android/            # Native Kotlin + Jetpack Compose Android Client
-│   ├── app/            # Domain, UI, Edge Perception (ML Kit), Local Redactor
+│   ├── app/            # Domain, UI (8 Screens), Components, ViewModel
 │   ├── build.gradle.kts
-│   └── settings.gradle.kts
+│   ├── settings.gradle.kts
+│   └── gradlew.bat     # Official Gradle 8.3 Wrapper
 ├── backend/            # FastAPI Python 3.12+ Backend
 │   ├── app/
-│   │   ├── api/v1/     # REST Endpoints (/analyze, /health, /policy, /audit)
-│   │   ├── core/       # Config, Logging, Hash Verification
-│   │   ├── models/     # Pydantic Schemas for Requests, Responses, Policy
-│   │   ├── policy/     # Deterministic Policy Engine & Fallbacks
-│   │   └── services/   # Inference Orchestrator, XGBoost Client, VLM Client
+│   │   ├── api/v1/     # REST Endpoints (/health, /health/models, /health/version)
+│   │   ├── core/       # Pydantic Settings, Structured JSON Logging
+│   │   └── main.py     # Application entry point with CORS & Lifespan
 │   └── requirements.txt
-├── ml/                 # Genuine Machine Learning Pipelines
-│   ├── data/           # Dataset Download & Preprocessing (PhiUSIIL URL)
+├── ml/                 # Genuine Machine Learning Architecture
+│   ├── datasets/       # Dataset pipelines (PhiUSIIL Phishing URL)
 │   ├── features/       # 35+ URL Lexical & Structural Feature Extractor
-│   ├── models/         # Serialized Model Artifacts
-│   ├── training/       # XGBoost Training, Validation, and Calibration
-│   └── evaluation/     # Metrics, Confusion Matrices, ROC/PR Curves
+│   ├── training/       # XGBoost Training & Validation
+│   ├── inference/      # Abstract Interfaces: URLRiskModel, VisionReasoner, ArtifactAnalyzer, PolicyEngine
+│   ├── artifacts/      # Exported weights & metadata
+│   └── evaluation/     # Metrics, ROC/PR Curves
 ├── benchmark/          # Everyday Action Risk Benchmark (EARB)
-│   ├── earb/           # 60 Action-Conditioned Pairs across 4 Categories
-│   ├── evaluators/     # Baselines (B1, B3, B4, B5) & Ablation Framework
-│   └── metrics/        # Evaluation Metric Computations (F1, ECE, STOP Recall)
-├── dashboard/          # Supervisor & Evaluation Web Dashboard
-├── docs/               # In-Depth Documentation
-├── scripts/            # Automation & Run Scripts
-├── artifacts/          # Generated Model Weights, Figures, and Logs
+│   ├── schema/         # Pydantic EARB Schema & CLI Validator
+│   ├── data/           # Seed datasets (sample_earb_pairs.json)
+│   ├── annotations/    # Annotator agreement records
+│   ├── scripts/        # Benchmark runners
+│   └── evaluation/     # Baseline evaluators
 ├── tests/              # End-to-End Automated Test Suites
-├── PROJECT_RULES.md    # Engineering Rules & Integrity Guidelines
-├── PROJECT_STATUS.md   # System Status and Environment Audit
-├── ARCHITECTURE.md     # Full Architectural Specification
-├── THREAT_MODEL.md     # Threat Analysis & Security Boundaries
-├── PRIVACY.md          # Data Privacy Guarantees & Redaction Protocol
-├── DEMO_RUNBOOK.md     # Step-by-Step Viva Demonstration Guide
+│   ├── backend/        # Health & Config tests
+│   ├── ml/             # Deterministic Policy Engine tests
+│   └── benchmark/      # Schema validation tests
+├── docs/               # Research, API, and System Documentation
+├── PROJECT_RULES.md    # 22 Engineering Rules & Integrity Guidelines
+├── PROJECT_STATUS.md   # System Status, Test Logs & Deliverables
+├── ARCHITECTURE.md     # Full Architectural Specification & Mermaid Dataflow
+├── DEVELOPMENT.md      # Comprehensive Local Operations & Run Guide
+├── THREAT_MODEL.md     # Threat Analysis & STRIDE Boundaries
+├── PRIVACY.md          # On-Device Redaction Protocol & Guarantees
+├── DEMO_RUNBOOK.md     # Viva Demonstration Guide (Central Bank Statement Demo)
 └── EXPERIMENTS.md      # Research Experiment Protocols & Baselines
 ```
 
 ---
 
-## ⚡ Quickstart
+## ⚡ Quickstart & Setup Instructions
 
 ### Prerequisites
-- **Python 3.11+** (Detected: 3.12.0)
-- **Java 17 LTS** (Detected: OpenJDK 17.0.6)
+- **Python 3.11+** (Detected: Python 3.12.0)
+- **Java JDK 17 LTS** (Detected: OpenJDK 17.0.6 at `C:\Program Files\Android\Android Studio\jbr`)
 - **Android SDK API 34** (Installed at `C:\Users\GARV ANAND\AppData\Local\Android\Sdk`)
-- **Gradle 8.3** (Cached locally)
+- **Gradle 8.3** (Bundled via `android/gradlew.bat`)
 
-### 1. Backend Setup
+---
+
+### 1. Backend Service Setup & Execution
 ```powershell
-# Navigate to backend
+# Navigate to backend directory and install dependencies
 cd backend
 python -m pip install -r requirements.txt
 
-# Run backend service
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+# Start the local FastAPI server
+python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 2. Train the XGBoost Phishing Model
+Endpoints available:
+- Health Check: `http://localhost:8000/health`
+- ML Subsystems Health: `http://localhost:8000/health/models`
+- Version Telemetry: `http://localhost:8000/health/version`
+- OpenAPI Documentation: `http://localhost:8000/docs`
+
+---
+
+### 2. Running Automated Tests & Benchmark Validation
 ```powershell
-python -m ml.training.train_phishing
+# Run backend, ML policy, and schema unit tests (17 passed)
+python -m pytest tests/ -v
+
+# Run the EARB dataset schema validator
+python -m benchmark.schema.validator benchmark/data/sample_earb_pairs.json
 ```
 
-### 3. Run Benchmark Suite
-```powershell
-python -m benchmark.evaluators.run_benchmark
-```
+---
 
-### 4. Build Android Application
+### 3. Android Application Build & Test
 ```powershell
+# Set Java 17 for Gradle execution
+$env:JAVA_HOME = 'C:\Program Files\Android\Android Studio\jbr'
+
+# Navigate to android directory
 cd android
-./gradlew assembleDebug
+
+# Run Android unit tests (Passed)
+.\gradlew.bat testDebugUnitTest
+
+# Assemble debug APK (15.8 MB APK generated in build/outputs/apk/debug/)
+.\gradlew.bat assembleDebug
 ```
 
 ---
 
-## 🛡️ The 3 AI/ML Layers
+## 🛡️ Core Architectural Features
 
-1. **Google ML Kit:** On-device OCR (Text Recognition) and Face Detection running completely locally before network transmission.
-2. **Trained XGBoost Classifier:** Real machine learning model trained on the public **PhiUSIIL Phishing URL Dataset** using 35+ derived lexical and structural features.
-3. **Qwen2.5-VL-3B-Instruct:** Multimodal vision-language reasoning for contextual hazard understanding and consequence estimation.
-
----
-
-## 🔬 Central Demo: Action-Conditioning
-The core demonstration uses a **single synthetic bank statement**:
-1. **Save privately:** $\rho = 0.05 \implies$ **ACT**
-2. **Send to unknown recipient:** $\rho = 0.62 \implies$ **WARN / ASK**
-3. **Post publicly:** $\rho = 1.57 \implies$ **STOP**
+1. **Native Jetpack Compose Client:** Single-Activity architecture with Material 3 dark graphite theme, ViewModel state management, and 8 dedicated screens:
+   - `WelcomeScreen`: System hypothesis and entry point.
+   - `HomeScreen`: Dashboard overview and workspace launcher.
+   - `AnalyzeScreen`: Artifact inspection, local PII masking toggle, and action selection.
+   - `ResultScreen`: Intervention banner, risk score breakdown, evidence cards, and user override.
+   - `PrivacyScreen`: Zero raw persistence guarantees and network audit log preview.
+   - `SettingsScreen`: Backend endpoint configuration and inference mode selection.
+   - `DemoScreen`: Central Viva Demo walkthrough (Bank Statement across ACT, WARN, STOP).
+   - `SupervisorScreen`: Examiner live telemetry panel exposing all 19 viva inspector metrics.
+2. **Deterministic Mathematical Policy:**
+   $$\rho = s \times (1 + \lambda \times r)$$
+   Strictly enforces the **Model Failure Safety Rule**: malformed AI outputs never silently yield `ACT`; they safely fall back to `ASK`.
+3. **EARB Benchmark Harness:** Formal Pydantic schema and CLI validator for 60 action-conditioned artifact pairs across Financial, Digital Security, Privacy Disclosure, and Communication categories.

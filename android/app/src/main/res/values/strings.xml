@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ContextGuard</string>
+    <string name="welcome_title">ContextGuard</string>
+    <string name="welcome_subtitle">A Multimodal AI System for Pre-Action Risk Detection in Everyday Digital Tasks</string>
+    <string name="action_analyze">Analyze Pre-Action Risk</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_analyze">Analyze</string>
+    <string name="nav_privacy">Privacy</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_demo">Demo</string>
+    <string name="nav_supervisor">Supervisor</string>
+</resources>
