@@ -64,10 +64,38 @@ graph TD
 
 ## 3. The 3 AI/ML Layers
 
-### Layer 1: Edge Perception (Google ML Kit & Local PII Engine)
-- **OCR (Text Recognition):** Runs entirely on-device via Google Play Services / ML Kit bundled vision API. Extracts text lines, blocks, and normalized bounding boxes.
-- **Face Detection:** Detects human facial contours and bounding coordinates to flag identity disclosure.
-- **Local PII Detector & Redactor:** Detects sensitive account patterns, phone numbers, email addresses, and names locally. Applies visual pixel masking / black-box redaction and in-memory text token masking (e.g. `[REDACTED_ACCOUNT]`).
+### Layer 1: Edge Perception (Google ML Kit, Native PdfRenderer & Local PII Engine)
+- **ML Kit Text Recognition (OCR):**
+  - Integrated via `com.google.mlkit:text-recognition:16.0.0` with bundled offline pipeline (`libmlkit_google_ocr_pipeline.so`).
+  - Implemented in [`MlKitPerceptionEngine.kt`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/android/app/src/main/java/com/contextguard/app/core/perception/MlKitPerceptionEngine.kt).
+  - Extracts hierarchical structures (`TextBlockResult`, `TextLineResult`, `TextElementResult`) with full bounding boxes (`Rect`), angle, and confidence.
+- **ML Kit Face Detection:**
+  - Integrated via `com.google.mlkit:face-detection:16.1.6` with on-device face detector runtime (`libface_detector_v2_jni.so`).
+  - Extracts face count, bounding boxes, Euler rotations (Y/Z), and tracking IDs.
+- **Multi-Format Artifact Support:**
+  - `IMAGE` and `SCREENSHOT`: Ingested via bounded downscaling (`ImagePreprocessor.kt`, max dimension 1536px, `inSampleSize` memory-safe decoding).
+  - `TEXT` and `URL`: Ingested directly into local lexical and URL pattern extractors.
+  - `PDF`: Ingested via native Android `PdfRenderer` ([`PdfPerceptionRenderer.kt`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/android/app/src/main/java/com/contextguard/app/core/perception/PdfPerceptionRenderer.kt)) on `Dispatchers.IO`. Safely renders the first 3 pages at bounded resolution, performs OCR per page, produces combined page-level evidence, and strictly closes native page descriptors to prevent leaks and ANRs.
+- **Local PII Detector & Spatial Mapper:**
+  - Implemented in [`PiiDetector.kt`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/android/app/src/main/java/com/contextguard/app/core/perception/PiiDetector.kt).
+  - Detects 9 sensitive data patterns:
+    1. Phone Numbers (Indian mobile + international E.164).
+    2. Email Addresses.
+    3. Contextual OTPs (bi-directional context matching: prefix e.g. "OTP: 123456" and suffix e.g. "593021 is your verification code").
+    4. Payment Cards (13-19 digit formats validated via Luhn checksum algorithm).
+    5. Aadhaar Numbers (12-digit Indian national identity format).
+    6. Bank Account Numbers (9-18 digit accounts grounded by banking keywords).
+    7. URLs (lexical regex and extraction).
+    8. Dates (DD/MM/YYYY, ISO, and standard calendar formats).
+    9. Postal PIN/ZIP codes (6-digit Indian PIN and 5-digit ZIP codes with context).
+  - Every finding contains: `type`, `patternId`, `confidence`, spatial `boundingBox`, and `source = "LOCAL_REGEX"`.
+  - Spatial mapping links matched textual tokens to the enclosing OCR line/element bounding boxes.
+  - Non-dogmatic safety guarantee: Explicitly does not claim regex detects all PII; serves as an edge-speed defense-in-depth pre-filter before multimodal reasoning.
+- **Strongly Typed Result Model:**
+  - [`LocalPerceptionResult`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/android/app/src/main/java/com/contextguard/app/core/perception/PerceptionModels.kt) encapsulating `ocrText`, `blocks`, `piiFindings`, `faces`, `urlCandidates`, `redactionRegions`, `processingTimeMs`, and `errors`.
+- **Performance & Concurrency Safeguards:**
+  - Offloaded from the main UI thread via Kotlin Coroutines (`Dispatchers.Default` for OCR/inference, `Dispatchers.IO` for PDF rendering).
+  - Zero unnecessary bitmap copies and strict lifecycle management for memory and native pointers.
 
 ### Layer 2: Trained XGBoost Phishing URL Classifier
 - **Model:** Gradient boosted decision trees trained on the genuine public **PhiUSIIL Phishing URL Dataset** (UCI ML Repository).

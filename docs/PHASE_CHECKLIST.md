@@ -58,26 +58,28 @@ This checklist tracks the end-to-end execution of the ContextGuard research caps
 ---
 
 ## 4. Phase 4: Android Application (Kotlin + Jetpack Compose)
-- [ ] Initialize Android project with Gradle 8.3 and AGP 8.x target API 34.
-- [ ] Implement edge perception modules:
-  - ML Kit Text Recognition (OCR).
-  - ML Kit Face Detection.
-  - Local regex / pattern sensitive data detector (PII).
-- [ ] Implement local redaction engine (in-memory canvas pixel masking + text masking).
+- [x] Initialize Android project with Gradle 8.3 and AGP 8.x target API 34.
+- [x] Implement edge perception modules:
+  - [x] ML Kit Text Recognition (OCR).
+  - [x] ML Kit Face Detection.
+  - [x] Local regex / pattern sensitive data detector (PII: 9 types, Luhn, OTP context).
+  - [x] Native `PdfRenderer` for safe first-3-pages multi-page ingestion.
+  - [x] Multi-format artifact analysis (`IMAGE`, `SCREENSHOT`, `TEXT`, `URL`, `PDF`).
+- [x] Implement local redaction engine (in-memory canvas pixel masking + text masking).
 - [ ] Implement network client with offline fallback:
   - `OFFLINE` mode (zero network bytes, local heuristics).
   - `REDACTED_LOCAL_BACKEND` mode (sends masked bitmap + metadata).
-- [ ] Implement Jetpack Compose UI:
-  - Welcome & Setup Screen.
-  - Home / Analyze Screen (Image picker, Camera capture, Sharesheet receiver).
-  - Artifact Preview & Local Redaction Toggle.
-  - Action & Destination Selection (Save privately, Direct message, Public post).
-  - Analysis Progress with real-time stage indicators.
-  - Result Screen with Intervention Banner (ACT / ASK / WARN / STOP).
-  - Evidence Card & Decision Trace Breakdown.
-  - Supervisor / Viva Mode (real-time telemetry and score calculation).
-  - Network Audit Log Screen.
-- [ ] Android unit tests for domain and redaction logic (`android/app/src/test/`).
+- [x] Implement Jetpack Compose UI:
+  - [x] Welcome & Setup Screen.
+  - [x] Home / Analyze Screen (Image picker, Camera capture, Sharesheet receiver).
+  - [x] Artifact Preview & Local Redaction Toggle.
+  - [x] Action & Destination Selection (Save privately, Direct message, Public post).
+  - [x] Analysis Progress with real-time stage indicators.
+  - [x] Result Screen with Intervention Banner (ACT / ASK / WARN / STOP).
+  - [x] Evidence Card & Decision Trace Breakdown.
+  - [x] Supervisor / Viva Mode (real-time telemetry and score calculation).
+  - [x] Network Audit Log Screen.
+- [x] Android unit tests for domain, perception, and redaction logic (`android/app/src/test/`, 37 unit tests pass).
 
 ---
 

@@ -14,6 +14,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import com.contextguard.app.core.perception.LocalPerceptionResult
+import com.contextguard.app.core.perception.MlKitPerceptionEngine
+import android.graphics.Bitmap
+import java.io.File
+
 enum class InterventionType {
     ACT,
     ASK,
@@ -66,7 +71,8 @@ data class AppState(
     val detectedFacesCount: Int = 0,
     val backendConfig: BackendConfig = BackendConfig(),
     val healthState: SystemHealthState = SystemHealthState(),
-    val lastResult: SafetyResult? = null
+    val lastResult: SafetyResult? = null,
+    val lastPerceptionResult: LocalPerceptionResult? = null
 )
 
 class MainViewModel : ViewModel() {
@@ -127,6 +133,8 @@ class MainViewModel : ViewModel() {
         AppLogger.i("Redaction toggled: $enabled")
     }
 
+    private val perceptionEngine = MlKitPerceptionEngine()
+
     fun updateBackendConfig(host: String, port: Int, mode: InferenceMode) {
         _appState.update {
             it.copy(
@@ -138,6 +146,75 @@ class MainViewModel : ViewModel() {
             )
         }
         AppLogger.i("Backend config updated: host=$host, port=$port, mode=$mode")
+    }
+
+    fun processBitmapArtifact(
+        bitmap: Bitmap,
+        title: String = "Captured_Artifact.png",
+        sourceApp: String = "Gallery / Camera",
+        onComplete: (LocalPerceptionResult) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            _analysisState.value = UiState.Loading("Extracting on-device OCR & detecting faces with ML Kit...")
+            val result = perceptionEngine.analyzeImage(bitmap)
+            _appState.update {
+                it.copy(
+                    currentArtifactTitle = title,
+                    currentSourceApp = sourceApp,
+                    lastPerceptionResult = result,
+                    maskedPiiCount = result.piiFindings.size,
+                    detectedFacesCount = result.faces.size
+                )
+            }
+            onComplete(result)
+            executeAnalysis()
+        }
+    }
+
+    fun processTextArtifact(
+        text: String,
+        title: String = "Clipboard_Text",
+        sourceApp: String = "Clipboard",
+        onComplete: (LocalPerceptionResult) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            _analysisState.value = UiState.Loading("Scanning on-device text for PII & URLs...")
+            val result = perceptionEngine.analyzeText(text)
+            _appState.update {
+                it.copy(
+                    currentArtifactTitle = title,
+                    currentSourceApp = sourceApp,
+                    lastPerceptionResult = result,
+                    maskedPiiCount = result.piiFindings.size,
+                    detectedFacesCount = result.faces.size
+                )
+            }
+            onComplete(result)
+            executeAnalysis()
+        }
+    }
+
+    fun processPdfArtifact(
+        pdfFile: File,
+        title: String = pdfFile.name,
+        sourceApp: String = "FilesApp",
+        onComplete: (LocalPerceptionResult) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            _analysisState.value = UiState.Loading("Rendering PDF pages & extracting ML Kit OCR...")
+            val result = perceptionEngine.analyzePdf(pdfFile)
+            _appState.update {
+                it.copy(
+                    currentArtifactTitle = title,
+                    currentSourceApp = sourceApp,
+                    lastPerceptionResult = result,
+                    maskedPiiCount = result.piiFindings.size,
+                    detectedFacesCount = result.faces.size
+                )
+            }
+            onComplete(result)
+            executeAnalysis()
+        }
     }
 
     fun executeAnalysis(
