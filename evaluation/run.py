@@ -29,8 +29,8 @@ async def main_async():
     parser.add_argument(
         "--baseline",
         type=str,
-        choices=["b1", "b3", "b4", "b5", "all"],
-        help="Baseline system to evaluate (b1, b3, b4, b5, or all)",
+        choices=["b1", "b3", "b4", "b5", "b6", "all"],
+        help="Baseline system to evaluate (b1, b3, b4, b5, b6, or all)",
     )
     parser.add_argument(
         "--ablation",

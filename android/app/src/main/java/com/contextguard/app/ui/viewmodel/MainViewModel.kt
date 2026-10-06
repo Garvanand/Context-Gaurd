@@ -47,7 +47,8 @@ data class SafetyResult(
     val latencyMs: Long = 142L,
     val hashSha256: String = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     val canOverride: Boolean = true,
-    val alternativeAction: String = "Save to encrypted personal storage instead."
+    val alternativeAction: String = "Save to encrypted personal storage instead.",
+    val intentSource: String = "USER CONFIRMED"
 )
 
 data class DemoScenario(
@@ -470,6 +471,7 @@ class MainViewModel : ViewModel() {
         customRationale: String? = null,
         customAlternativeAction: String? = null,
         customEvidence: List<String>? = null,
+        customIntentSource: String? = null,
         onComplete: (SafetyResult) -> Unit = {}
     ) {
         viewModelScope.launch {
@@ -555,7 +557,8 @@ class MainViewModel : ViewModel() {
                 intendedAction = state.selectedAction,
                 destination = state.selectedDestination,
                 latencyMs = (120L..180L).random(),
-                alternativeAction = altAction
+                alternativeAction = altAction,
+                intentSource = customIntentSource ?: "USER CONFIRMED"
             )
 
             // Audit record

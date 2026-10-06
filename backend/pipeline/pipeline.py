@@ -91,7 +91,7 @@ class ContextGuardPipeline:
     # =========================================================================
     # STAGE 2: INTENT RESOLUTION
     # =========================================================================
-    def stage_2_intent(
+    async def stage_2_intent(
         self,
         request: AnalysisRequest,
         context: Stage1ContextOutput
@@ -103,19 +103,29 @@ class ContextGuardPipeline:
         """
         selected = request.selected_action.upper().strip() if request.selected_action else None
 
-        # Determine inferred intent for evaluation baseline
-        dest_lower = context.destination.lower()
-        source_lower = context.source_app.lower()
-        if context.is_public_channel or any(k in dest_lower for k in ["upload", "post", "feed"]):
-            inferred = "POST"
-        elif any(k in dest_lower for k in ["vault", "drive", "backup", "local", "save"]):
-            inferred = "SAVE"
-        elif request.url or any(k in dest_lower for k in ["login", "portal", "verify"]):
-            inferred = "LOGIN"
-        elif any(k in source_lower for k in ["chat", "whatsapp", "messages", "telegram", "sms"]):
-            inferred = "SEND"
-        else:
-            inferred = "SEND"
+        # Gather context for VLM inference
+        image_bytes = None
+        if request.artifact and request.artifact.startswith("data:image"):
+            import base64
+            try:
+                base64_data = request.artifact.split(",")[1]
+                image_bytes = base64.b64decode(base64_data)
+            except Exception:
+                pass
+
+        vlm_context = {
+            "source_app": context.source_app,
+            "destination": context.destination,
+            "recipient": context.recipient,
+            "candidate_actions": ["SEND", "UPLOAD", "POST", "SIGN", "LOGIN", "APPROVE", "SAVE", "OPEN"]
+        }
+
+        inferred_result = await self.vlm.infer_intent(
+            image_bytes=image_bytes,
+            ocr_text=context.ocr_text,
+            context=vlm_context
+        )
+        inferred = inferred_result.predicted_action
 
         # Explicit user selection takes strict precedence
         if selected:
@@ -554,7 +564,7 @@ class ContextGuardPipeline:
             ctx = self.stage_1_context(request)
 
             # 2. Intent
-            intent = self.stage_2_intent(request, ctx)
+            intent = await self.stage_2_intent(request, ctx)
 
             # 3. Evidence
             evidence = await self.stage_3_evidence(request, ctx, intent)

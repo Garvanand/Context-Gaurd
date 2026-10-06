@@ -21,6 +21,7 @@ from backend.app.core.logging import logger
 from backend.models.base import (
     VisionReasoner,
     StructuredVisionOutput,
+    InferredIntentOutput,
     EvidenceItem,
     ImageNormalizer,
 )
@@ -270,6 +271,97 @@ class QwenVisionReasoner(VisionReasoner):
             recommended_action=recommended_action,
             alternative_action=alt,
             reason=reason,
+        )
+
+    async def infer_intent(
+        self,
+        image_bytes: Optional[bytes],
+        ocr_text: Optional[str],
+        context: Dict[str, Any],
+    ) -> InferredIntentOutput:
+        """
+        Infer the user's intent using multimodal evidence.
+        """
+        b64_image: Optional[str] = None
+        if image_bytes:
+            try:
+                _, b64_image, _ = ImageNormalizer.normalize_image(image_bytes)
+            except Exception as e:
+                logger.warning(f"Image normalization failed for intent inference: {e}")
+
+        text = ocr_text or "[No OCR]"
+        source_app = context.get("source_app", "Unknown App")
+        destination = context.get("destination", "Unknown Destination")
+        recipient = context.get("recipient", "Unknown Recipient")
+        candidate_actions = context.get("candidate_actions", ["SEND", "UPLOAD", "POST", "SIGN", "LOGIN", "APPROVE", "SAVE", "OPEN"])
+
+        prompt = (
+            "You are an intent inference engine. Predict the intended user action based on the context.\n"
+            f"Candidate actions: {candidate_actions}\n\n"
+            f"Context:\n"
+            f"- OCR Text: {text}\n"
+            f"- Source App: {source_app}\n"
+            f"- Destination: {destination}\n"
+            f"- Recipient: {recipient}\n\n"
+            "Output strictly a JSON object with fields:\n"
+            "- predicted_action: string\n"
+            "- probabilities: dict mapping candidate actions to float probabilities [0, 1]\n"
+            "- confidence: float [0, 1]\n"
+            "- ambiguity: list of strings (reasons for uncertainty if any)"
+        )
+
+        try:
+            async with httpx.AsyncClient(timeout=float(self.timeout_seconds)) as client:
+                payload: Dict[str, Any] = {
+                    "model": self.model_name,
+                    "messages": [
+                        {
+                            "role": "user",
+                            "content": prompt,
+                            **({"images": [b64_image]} if b64_image else {}),
+                        }
+                    ],
+                    "format": "json",
+                    "stream": False,
+                }
+                resp = await client.post(f"{self.ollama_url}/api/chat", json=payload)
+                if resp.status_code == 200:
+                    raw_content = resp.json().get("message", {}).get("content", "")
+                    
+                    # Clean and parse JSON
+                    clean_text = raw_content.strip()
+                    if clean_text.startswith("```json"): clean_text = clean_text[7:]
+                    elif clean_text.startswith("```"): clean_text = clean_text[3:]
+                    if clean_text.endswith("```"): clean_text = clean_text[:-3]
+                    clean_text = clean_text.strip()
+                    match = re.search(r"\{.*\}", clean_text, re.DOTALL)
+                    if match: clean_text = match.group(0)
+
+                    try:
+                        data = json.loads(clean_text)
+                        return InferredIntentOutput(**data)
+                    except Exception as e:
+                        logger.warning(f"Failed to parse infer_intent JSON: {e}")
+        except Exception as e:
+            logger.info(f"Ollama infer_intent unavailable: {e}")
+
+        # Fallback to naive heuristics
+        dest_lower = destination.lower()
+        source_lower = source_app.lower()
+        
+        inferred = "SEND"
+        if any(k in dest_lower for k in ["public", "twitter", "x.com", "social", "forum", "broadcast", "upload", "post", "feed"]):
+            inferred = "POST"
+        elif any(k in dest_lower for k in ["vault", "drive", "backup", "local", "save"]):
+            inferred = "SAVE"
+        elif any(k in dest_lower for k in ["login", "portal", "verify"]):
+            inferred = "LOGIN"
+
+        return InferredIntentOutput(
+            predicted_action=inferred,
+            probabilities={a: (0.9 if a == inferred else 0.0) for a in candidate_actions},
+            confidence=0.5,
+            ambiguity=["Local fallback used due to unavailable VLM."]
         )
 
     async def check_health(self) -> Dict[str, Any]:

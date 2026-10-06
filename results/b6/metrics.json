@@ -1,28 +1,28 @@
 {
-  "accuracy": 0.6833,
-  "macro_precision": 0.5729,
-  "macro_recall": 0.5667,
-  "macro_f1": 0.5455,
+  "accuracy": 0.55,
+  "macro_precision": 0.482,
+  "macro_recall": 0.4667,
+  "macro_f1": 0.4476,
   "per_class_f1": {
-    "ACT": 0.8182,
-    "ASK": 0.25,
-    "WARN": 0.25,
-    "STOP": 0.8636
+    "ACT": 0.5714,
+    "ASK": 0.2667,
+    "WARN": 0.2353,
+    "STOP": 0.717
   },
   "stop_recall": 0.95,
-  "act_false_alarm_rate": 0.1,
+  "act_false_alarm_rate": 0.5,
   "confusion_matrix": {
     "ACT": {
-      "ACT": 18,
-      "ASK": 1,
-      "WARN": 1,
-      "STOP": 0
+      "ACT": 10,
+      "ASK": 0,
+      "WARN": 2,
+      "STOP": 8
     },
     "ASK": {
-      "ACT": 2,
+      "ACT": 1,
       "ASK": 2,
       "WARN": 1,
-      "STOP": 3
+      "STOP": 4
     },
     "WARN": {
       "ACT": 4,
@@ -38,32 +38,32 @@
     }
   },
   "latency_distribution": {
-    "mean": 2584.34,
-    "median": 2579.09,
-    "p90": 2642.26,
-    "p95": 2698.15,
-    "p99": 2757.23,
-    "min": 2457.79,
-    "max": 2784.44,
-    "std": 62.65
+    "mean": 2582.18,
+    "median": 2578.84,
+    "p90": 2654.37,
+    "p95": 2677.14,
+    "p99": 2733.27,
+    "min": 2477.7,
+    "max": 2748.42,
+    "std": 58.87
   },
-  "ece": 0.1942,
+  "ece": 0.195,
   "bootstrap_ci_95": {
     "accuracy": {
-      "lower": 0.6,
-      "upper": 0.7667
+      "lower": 0.4333,
+      "upper": 0.6667
     },
     "macro_f1": {
-      "lower": 0.4271,
-      "upper": 0.6621
+      "lower": 0.2978,
+      "upper": 0.5969
     },
     "stop_recall": {
       "lower": 0.85,
       "upper": 1.0
     },
     "act_false_alarm_rate": {
-      "lower": 0.0,
-      "upper": 0.25
+      "lower": 0.3,
+      "upper": 0.7
     }
   },
   "sample_count": 60,

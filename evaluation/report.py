@@ -44,6 +44,7 @@ def generate_figures():
     b3 = load_metrics(RESULTS_DIR / "b3" / "metrics.json")
     b4 = load_metrics(RESULTS_DIR / "b4" / "metrics.json")
     b5 = load_metrics(RESULTS_DIR / "b5" / "metrics.json")
+    b6 = load_metrics(RESULTS_DIR / "b6" / "metrics.json")
 
     systems = []
     f1s = []
@@ -52,7 +53,7 @@ def generate_figures():
     stop_recalls = []
     act_fars = []
 
-    for name, data in [("B1: Artifact-Only", b1), ("B3: No Intent", b3), ("B4: Fixed Policy", b4), ("B5: ContextGuard", b5)]:
+    for name, data in [("B1: Artifact-Only", b1), ("B3: No Intent", b3), ("B4: Fixed Policy", b4), ("B5: ContextGuard (Oracle)", b5), ("B6: ContextGuard (Inferred)", b6)]:
         if data:
             systems.append(name)
             f1 = data["macro_f1"]
@@ -68,8 +69,8 @@ def generate_figures():
     # -------------------------------------------------------------
     if f1s:
         plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
-        fig, ax = plt.subplots(figsize=(8, 5), dpi=300)
-        colors = ["#e74c3c", "#f39c12", "#3498db", "#2ecc71"]
+        fig, ax = plt.subplots(figsize=(10, 5), dpi=300)
+        colors = ["#e74c3c", "#f39c12", "#3498db", "#2ecc71", "#9b59b6"]
         x = np.arange(len(systems))
 
         bars = ax.bar(
@@ -215,6 +216,7 @@ def update_experiments_md():
     b3 = load_metrics(RESULTS_DIR / "b3" / "metrics.json")
     b4 = load_metrics(RESULTS_DIR / "b4" / "metrics.json")
     b5 = load_metrics(RESULTS_DIR / "b5" / "metrics.json")
+    b6 = load_metrics(RESULTS_DIR / "b6" / "metrics.json")
 
     def format_row(name, data, status):
         if not data:
@@ -232,7 +234,8 @@ def update_experiments_md():
     r_b2 = "| **B2: Warn-Everything** | `0.1000` | `0.0%` | `100.0%` | `0.4000` | `0.05 ms` | **Completed** |"
     r_b3 = format_row("B3: Multimodal (No Intent)", b3, "Pending")
     r_b4 = format_row("B4: Intent-Aware (lambda = 0)", b4, "Pending")
-    r_b5 = format_row("B5: ContextGuard (Full)", b5, "Pending")
+    r_b5 = format_row("B5: ContextGuard (Oracle Intent)", b5, "Pending")
+    r_b6 = format_row("B6: ContextGuard (Inferred Intent)", b6, "Pending")
 
     new_table = f"""| Model / System | Macro F1 | STOP Recall | ACT False Alarm | ECE | Latency (ms) | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -240,7 +243,8 @@ def update_experiments_md():
 {r_b2}
 {r_b3}
 {r_b4}
-{r_b5}"""
+{r_b5}
+{r_b6}"""
 
     content = experiments_path.read_text(encoding="utf-8")
     table_start = content.find("| Model / System | Macro F1 | STOP Recall")
@@ -258,6 +262,7 @@ def generate_research_report():
     b3 = load_metrics(RESULTS_DIR / "b3" / "metrics.json")
     b4 = load_metrics(RESULTS_DIR / "b4" / "metrics.json")
     b5 = load_metrics(RESULTS_DIR / "b5" / "metrics.json")
+    b6 = load_metrics(RESULTS_DIR / "b6" / "metrics.json")
 
     report = f"""# ContextGuard: Comprehensive Research Evaluation Report
 
@@ -291,7 +296,8 @@ def generate_research_report():
 | **B1** | Artifact-Only Static Baseline | {b1['accuracy'] * 100:.1f}% | `{b1['macro_f1']:.4f}` [{b1['bootstrap_ci_95']['macro_f1']['lower']:.3f}, {b1['bootstrap_ci_95']['macro_f1']['upper']:.3f}] | {b1['stop_recall'] * 100:.1f}% | {b1['act_false_alarm_rate'] * 100:.1f}% | `{b1['ece']:.4f}` | {b1['latency_distribution']['mean']:.2f} ms |
 | **B3** | Multimodal (No Intent) | {b3['accuracy'] * 100:.1f}% | `{b3['macro_f1']:.4f}` [{b3['bootstrap_ci_95']['macro_f1']['lower']:.3f}, {b3['bootstrap_ci_95']['macro_f1']['upper']:.3f}] | {b3['stop_recall'] * 100:.1f}% | {b3['act_false_alarm_rate'] * 100:.1f}% | `{b3['ece']:.4f}` | {b3['latency_distribution']['mean']:.2f} ms |
 | **B4** | Intent-Aware (lambda = 0) | {b4['accuracy'] * 100:.1f}% | `{b4['macro_f1']:.4f}` [{b4['bootstrap_ci_95']['macro_f1']['lower']:.3f}, {b4['bootstrap_ci_95']['macro_f1']['upper']:.3f}] | {b4['stop_recall'] * 100:.1f}% | {b4['act_false_alarm_rate'] * 100:.1f}% | `{b4['ece']:.4f}` | {b4['latency_distribution']['mean']:.2f} ms |
-| **B5** | **ContextGuard (Full System)** | **{b5['accuracy'] * 100:.1f}%** | **`{b5['macro_f1']:.4f}`** [{b5['bootstrap_ci_95']['macro_f1']['lower']:.3f}, {b5['bootstrap_ci_95']['macro_f1']['upper']:.3f}] | **{b5['stop_recall'] * 100:.1f}%** | **{b5['act_false_alarm_rate'] * 100:.1f}%** | **`{b5['ece']:.4f}`** | **{b5['latency_distribution']['mean']:.2f} ms** |
+| **B5** | **ContextGuard (Oracle Intent)** | **{b5['accuracy'] * 100:.1f}%** | **`{b5['macro_f1']:.4f}`** [{b5['bootstrap_ci_95']['macro_f1']['lower']:.3f}, {b5['bootstrap_ci_95']['macro_f1']['upper']:.3f}] | **{b5['stop_recall'] * 100:.1f}%** | **{b5['act_false_alarm_rate'] * 100:.1f}%** | **`{b5['ece']:.4f}`** | **{b5['latency_distribution']['mean']:.2f} ms** |
+| **B6** | **ContextGuard (Inferred Intent)** | **{b6['accuracy'] * 100:.1f}%** | **`{b6['macro_f1']:.4f}`** [{b6['bootstrap_ci_95']['macro_f1']['lower']:.3f}, {b6['bootstrap_ci_95']['macro_f1']['upper']:.3f}] | **{b6['stop_recall'] * 100:.1f}%** | **{b6['act_false_alarm_rate'] * 100:.1f}%** | **`{b6['ece']:.4f}`** | **{b6['latency_distribution']['mean']:.2f} ms** |
 
 ---
 

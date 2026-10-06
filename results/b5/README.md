@@ -3,7 +3,7 @@
 **System Identifier:** `b5`  
 **Category:** `BASELINE`  
 **Dataset Split:** `all` (60 samples)  
-**Execution Timestamp:** `2026-10-06T08:50:13.813059+00:00`  
+**Execution Timestamp:** `2026-10-06T13:54:22.113959+00:00`  
 **Platform:** `Windows 11`  
 **Python Runtime:** `3.12.0`  
 
@@ -47,13 +47,13 @@
 
 ## 4. Latency Distribution (Wall-Clock ms)
 
-- **Mean Latency:** `0.28 ms`
-- **Median Latency:** `0.13 ms`
-- **P90 Latency:** `0.85 ms`
-- **P95 Latency:** `1.02 ms`
-- **P99 Latency:** `1.53 ms`
-- **Min / Max:** `0.10 ms` / `2.06 ms`
-- **Standard Deviation:** `0.37 ms`
+- **Mean Latency:** `2584.34 ms`
+- **Median Latency:** `2579.09 ms`
+- **P90 Latency:** `2642.26 ms`
+- **P95 Latency:** `2698.15 ms`
+- **P99 Latency:** `2757.23 ms`
+- **Min / Max:** `2457.79 ms` / `2784.44 ms`
+- **Standard Deviation:** `62.65 ms`
 
 ---
 

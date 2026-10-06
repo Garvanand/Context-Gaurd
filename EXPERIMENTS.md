@@ -67,7 +67,8 @@
 | **B2: Warn-Everything** | `0.1000` | `0.0%` | `100.0%` | `0.4000` | `0.05 ms` | **Completed** |
 | **B3: Multimodal (No Intent)** | `0.1364` | `40.0%` | `100.0%` | `0.2800` | `0.53 ms` | **Completed** |
 | **B4: Intent-Aware (lambda = 0)** | `0.5455` | `95.0%` | `10.0%` | `0.1775` | `0.30 ms` | **Completed** |
-| **B5: ContextGuard (Full)** | `0.5455` | `95.0%` | `10.0%` | `0.1942` | `0.28 ms` | **Completed** |
+| **B5: ContextGuard (Oracle Intent)** | `0.5455` | `95.0%` | `10.0%` | `0.1942` | `2584.34 ms` | **Completed** |
+| **B6: ContextGuard (Inferred Intent)** | `0.4476` | `95.0%` | `50.0%` | `0.1950` | `2582.18 ms` | **Completed** |
 
 ---
 

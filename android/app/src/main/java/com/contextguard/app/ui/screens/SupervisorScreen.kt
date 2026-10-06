@@ -205,6 +205,7 @@ fun SupervisorScreen(
             SupervisorField("Runtime Daemon", "Ollama Local Service (http://10.0.2.2:11434)")
             SupervisorField("Prompt Architecture", "Action-Conditioned Visual Grounding Prompt")
             SupervisorField("Reasoning Modality", "Image + OCR + Action + Destination Context")
+            SupervisorField("Intent Source", result?.intentSource ?: "USER CONFIRMED")
             SupervisorField("Fallbacks", "Local Heuristic Policy Engine (Non-blocking fallback)")
             SupervisorField("Estimated Severity (s)", "${result?.severity ?: 0.05}")
             SupervisorField("Irreversibility (r)", "${result?.irreversibility ?: 0.00}")

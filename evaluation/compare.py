@@ -47,6 +47,7 @@ async def ensure_runs(auto_run: bool = False, split: str = "all"):
         ("b3", BASELINES["b3"](), RESULTS_DIR / "b3" / "metrics.json"),
         ("b4", BASELINES["b4"](), RESULTS_DIR / "b4" / "metrics.json"),
         ("b5", BASELINES["b5"](), RESULTS_DIR / "b5" / "metrics.json"),
+        ("b6", BASELINES["b6"](), RESULTS_DIR / "b6" / "metrics.json"),
         ("a1", ABLATIONS["a1"](), RESULTS_DIR / "ablations" / "a1" / "metrics.json"),
         ("a2", ABLATIONS["a2"](), RESULTS_DIR / "ablations" / "a2" / "metrics.json"),
         ("a3", ABLATIONS["a3"](), RESULTS_DIR / "ablations" / "a3" / "metrics.json"),
@@ -93,7 +94,8 @@ def compare_systems():
         ("B1: Artifact-Only", RESULTS_DIR / "b1" / "metrics.json"),
         ("B3: Multimodal (No Intent)", RESULTS_DIR / "b3" / "metrics.json"),
         ("B4: Intent + Fixed Threshold", RESULTS_DIR / "b4" / "metrics.json"),
-        ("B5: ContextGuard (Proposed)", RESULTS_DIR / "b5" / "metrics.json"),
+        ("B5: ContextGuard (Oracle Intent)", RESULTS_DIR / "b5" / "metrics.json"),
+        ("B6: ContextGuard (Inferred Intent)", RESULTS_DIR / "b6" / "metrics.json"),
     ]
 
     ablation_entries = [

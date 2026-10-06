@@ -26,6 +26,18 @@ class EvidenceItem(BaseModel):
         return max(0.0, min(1.0, float(v)))
 
 
+class InferredIntentOutput(BaseModel):
+    predicted_action: str = Field(..., description="The most likely intended action")
+    probabilities: Dict[str, float] = Field(..., description="Probabilities for candidate actions")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence in the inferred action")
+    ambiguity: List[str] = Field(default_factory=list, description="Reasons for ambiguity if evidence is insufficient")
+
+    @field_validator("confidence", mode="before")
+    @classmethod
+    def clamp_confidence(cls, v: Any) -> float:
+        return max(0.0, min(1.0, float(v)))
+
+
 class StructuredVisionOutput(BaseModel):
     """
     Strict JSON output contract for multimodal vision reasoning.
@@ -119,6 +131,18 @@ class VisionReasoner(ABC):
     ) -> StructuredVisionOutput:
         """
         Perform multimodal action-conditioned reasoning.
+        """
+        pass
+
+    @abstractmethod
+    async def infer_intent(
+        self,
+        image_bytes: Optional[bytes],
+        ocr_text: Optional[str],
+        context: Dict[str, Any],
+    ) -> InferredIntentOutput:
+        """
+        Infer the user's intent based on contextual evidence and artifact.
         """
         pass
 
