@@ -13,6 +13,7 @@ from fastapi.responses import JSONResponse
 from backend.app.core.config import settings
 from backend.app.core.logging import logger
 from backend.app.api.v1.health import router as health_router
+from backend.app.api.v1.analyze import router as analyze_router
 
 
 @asynccontextmanager
@@ -58,11 +59,13 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-# Include health routes at root level (/health, /health/models, /health/version)
+# Include routes at root level (/health, /analyze)
 app.include_router(health_router, tags=["Health"])
+app.include_router(analyze_router, tags=["Analyze"])
 
-# Also include health routes under /api/v1 prefix
+# Include routes under /api/v1 prefix (/api/v1/health, /api/v1/analyze)
 app.include_router(health_router, prefix="/api/v1", tags=["Health v1"])
+app.include_router(analyze_router, prefix="/api/v1", tags=["Analyze v1"])
 
 
 @app.get("/", summary="Root Welcome")

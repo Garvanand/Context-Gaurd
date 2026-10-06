@@ -105,40 +105,79 @@ graph TD
 
 ---
 
-## 4. Deterministic Policy Engine
+## 4. The Six-Stage ContextGuard Reasoning Pipeline
 
-The policy layer is purely deterministic and separates raw AI scoring from final safety action gating.
+The pre-action safety assessment is executed through a strictly sequenced, six-stage pipeline:
 
-### Mathematical Formulation
-Given:
-- **Severity** $s \in [0, 1]$ (predicted hazard magnitude)
-- **Irreversibility** $r \in [0, 1]$ (difficulty of undoing consequences: $0.0 = \text{fully reversible}, 0.5 = \text{partially}, 1.0 = \text{irreversible}$)
-- **Confidence** $c \in [0, 1]$ (model epistemic and aleatoric confidence)
-- **Reversibility Weight Penalty** $\lambda \ge 0$ (default $\lambda = 0.75$)
+```mermaid
+graph LR
+    S1[Stage 1: Context] --> S2[Stage 2: Intent]
+    S2 --> S3[Stage 3: Evidence]
+    S3 --> S4[Stage 4: Consequence]
+    S4 --> S5[Stage 5: Uncertainty]
+    S5 --> S6[Stage 6: Intervention]
+```
 
-The composite risk score $\rho$ is computed as:
-$$\rho = s \times (1 + \lambda \times r)$$
+### Stage 1: Context Aggregation
+Combines artifact characteristics, OCR text, face contours, PII entities, source app, recipient, destination, and network state.
+- **Missing Field Rule:** Unavailable fields are explicitly represented as `None` or `"UNKNOWN"` without hallucinating facts.
 
-### Decision Threshold Rules
-With calibrated thresholds:
+### Stage 2: Intent Resolution
+- **Primary Demo Mode:** User explicitly selects one of the 8 canonical actions: `SEND`, `UPLOAD`, `POST`, `SIGN`, `LOGIN`, `APPROVE`, `SAVE`, `OPEN`.
+- **Inferred Intent Mode:** Infers intent from destination/context signals for research benchmarking.
+- **Strict Precedence Invariant:** Inferred intent never silently overrides an explicitly selected user action.
+
+### Stage 3: Action-Relevant Evidence Extraction
+Extracts concrete observations with strict source traceability:
+- `OCR`: Financial balances, credentials, OTP codes, tax IDs, binding legal clauses, urgency lures.
+- `ML_KIT`: Human faces detected, on-device regex PII entities.
+- `URL_MODEL`: XGBoost classifier malicious/phishing probability.
+- `VLM`: Multimodal visual perception and spatial grounding.
+- `CONTEXT`: Unverified recipients, public destination channels, network exposure.
+- `RULE`: Consequential action heuristics.
+
+### Stage 4: Consequence Estimation (Separate Severity & Reversibility)
+Estimates harm severity $s \in [0.0, 1.0]$ and irreversibility $r \in [0.0, 1.0]$ independently:
+- **Action-Conditioning Core:**
+  - Identical bank statement + `SAVE` in personal vault $\implies s = 0.05, r = 0.00$ (Low harm, fully reversible).
+  - Identical bank statement + `SEND` to unverified contact $\implies s = 0.40, r = 0.50$ (Moderate risk).
+  - Identical bank statement + `POST` to public Twitter $\implies s = 0.90, r = 1.00$ (Severe harm, completely irreversible).
+
+### Stage 5: Epistemic Uncertainty Estimation
+Computes confidence $c \in [0.0, 1.0]$ based on signal completeness, OCR availability, recipient verifiability, and model agreement.
+- **Uncertainty Principle:** Uncertainty is never treated as safety. Moderate risk with low confidence triggers `ASK`.
+
+### Stage 6: Deterministic Policy Intervention & Grounded Explanation
+Computes $\rho = s \times (1 + \lambda \times r)$ and applies calibrated mathematical thresholds:
 - $T_{\text{STOP}} = 0.65$
 - $T_{\text{ASK}} = 0.35$
 - $C_{\text{MIN}} = 0.70$
+- $T_{\text{HIGH\_SEV}} = 0.80$ (Severe/critical risk triggers `STOP` regardless of lower confidence).
 
 ```text
 if rho >= T_STOP:
-    INTERVENTION = STOP
-else if rho >= T_ASK and confidence < C_MIN:
-    INTERVENTION = ASK
+    if severity >= T_HIGH_SEV or confidence >= C_MIN:
+        INTERVENTION = STOP
+    else:
+        INTERVENTION = ASK
 else if rho >= T_ASK:
-    INTERVENTION = WARN
+    if confidence < C_MIN:
+        INTERVENTION = ASK
+    else:
+        INTERVENTION = WARN
 else:
-    INTERVENTION = ACT
+    if confidence < C_MIN:
+        INTERVENTION = ASK
+    else:
+        INTERVENTION = ACT
 ```
 
+### Deterministic Explanation Synthesis
+User-facing reasons and recommended alternatives are synthesized directly from mathematical decision fields and top evidence items (`backend/policy/explain.py`). No secondary LLM is invoked, guaranteeing deterministic and grounded explanations.
+
 ### Model Failure Safety Rule
-**Fail-Safe Invariant:** If AI output is invalid, missing, malformed, unparseable, or inconsistent:
-$$\text{Output} \leftarrow \text{ASK or Safe Fallback} \quad (\text{NEVER } \text{ACT})$$
+**Fail-Safe Invariant:** If AI models, parsers, or pipeline stages fail or return out-of-bounds metrics:
+$$\text{Output} \leftarrow \text{ASK with safe fallback defaults} \quad (\text{NEVER } \text{ACT})$$
 
 ---
 

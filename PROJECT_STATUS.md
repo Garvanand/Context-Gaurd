@@ -2,9 +2,9 @@
 
 **Capstone Title:** CONTEXTGUARD: A Multimodal AI System for Pre-Action Risk Detection in Everyday Digital Tasks  
 **Institution:** Final-Year B.Tech Capstone Project  
-**Status Date:** Multimodal AI Reasoning Layer (Qwen2.5-VL-3B & Health Telemetry) Completed  
-**Current Milestone:** Multimodal Vision Reasoner & Safe Fallback **COMPLETED**  
-**Next Milestone:** Phase 2 (Everyday Action Risk Benchmark - EARB Dataset & Central Demo Generation)
+**Status Date:** Six-Stage ContextGuard Reasoning Pipeline & Policy Engine Completed  
+**Current Milestone:** Six-Stage Pipeline & Deterministic Policy **COMPLETED**  
+**Next Milestone:** Phase 2 (Everyday Action Risk Benchmark - EARB Dataset & 60 Action-Conditioned Pairs)
 
 ---
 
@@ -21,6 +21,7 @@
 | **Android App** | Jetpack Compose | CompileSdk 34, MinSdk 26, Material 3, Kotlin 1.9.22, AGP 8.2.2 | **PASS** (100% tests pass, APK built) |
 | **ML Component** | Trained Classifier | XGBoost 3.2.0 trained on PhiUSIIL (UCI ID: 967) | **PASS** (Test F1: 0.9951, AUC: 0.9990) |
 | **Multimodal Reasoner** | Qwen2.5-VL-3B / Ollama | `backend/models/qwen_vision.py`, `backend/prompts/*` | **PASS** (20/20 tests pass, safe fallback active) |
+| **Six-Stage Pipeline** | Full Reasoning Pipeline | `backend/pipeline/pipeline.py`, `backend/policy/*` | **PASS** (18/18 pipeline & policy tests pass) |
 
 ---
 
@@ -28,17 +29,22 @@
 
 | Area | Deliverables Required | Implementation Details | Test & Verification Result |
 | :--- | :--- | :--- | :--- | :---: |
-| **Multimodal Vision Reasoner** | - `VisionReasoner.analyze(...)`<br>- `qwen2.5vl:3b` Ollama runtime<br>- Strict JSON schema<br>- Safe unavailable fallback | - `backend/models/base.py`<br>- `backend/models/qwen_vision.py`<br>- `ImageNormalizer` (JPEG, PNG, WebP)<br>- Bounded $[0.0, 1.0]$ metrics (`severity`, `reversibility`, `confidence`, `importance`)<br>- Model Failure Safety Rule enforced (never silent `ACT`) | **PASS**<br>Tested with mock VLM, codeblock wrappers, malformed JSON, and offline fallback across all 8 archetypes. |
+| **Canonical Input/Output Contract** | - Canonical `AnalysisRequest`<br>- Explicit missing fields representation<br>- Canonical `AnalysisResponse` | - `backend/app/models/schemas.py`<br>- Fields: artifact, artifact_type, ocr_text, detected_faces, detected_pii, redaction_metadata, url, selected_action, recipient, destination, source_app, network_state, user_context<br>- Output: intervention, risk_score, severity, reversibility, confidence, evidence, reason, recommended_alternative, can_override | **PASS**<br>Schema validation tested; handles null and omitted fields cleanly. |
+| **Stage 1 — Context** | - Multi-source context aggregation<br>- No invented missing fields | - `ContextGuardPipeline.stage_1_context`<br>- Integrates OCR, face counts, PII, source_app, recipient, destination, network_state | **PASS**<br>Tested across multiple channels (public feed, vault, unverified chat). |
+| **Stage 2 — Intent** | - Explicit selected actions<br>- Inferred intent for research<br>- Strict precedence rule | - `ContextGuardPipeline.stage_2_intent`<br>- Actions: SEND, UPLOAD, POST, SIGN, LOGIN, APPROVE, SAVE, OPEN<br>- Inferred intent NEVER silently overrides explicit selected intent | **PASS**<br>Precedence verified via unit tests. |
+| **Stage 3 — Evidence** | - Action-relevant extraction<br>- Explicit evidence sources | - `ContextGuardPipeline.stage_3_evidence`<br>- Detects OTP, credentials, financial records, faces, phishing URLs, public destinations, unverified recipients<br>- Strict sources: `OCR`, `ML_KIT`, `URL_MODEL`, `VLM`, `CONTEXT`, `RULE` | **PASS**<br>Every evidence item verified against valid enum sources. |
+| **Stage 4 — Consequence** | - Separate severity & reversibility<br>- Action-conditioned divergence | - `ContextGuardPipeline.stage_4_consequence`<br>- Financial + SAVE = severity 0.05, reversibility 0.0<br>- Financial + POST = severity 0.90, reversibility 1.0<br>- Financial + SEND unverified = severity 0.40, reversibility 0.50 | **PASS**<br>Central viva bank statement divergence verified. |
+| **Stage 5 — Uncertainty** | - Epistemic confidence calculation<br>- Uncertainty is not safety | - `ContextGuardPipeline.stage_5_uncertainty`<br>- Calculates confidence $c \in [0.0, 1.0]$<br>- Missing OCR / unverified recipient penalizes confidence<br>- Moderate risk + low confidence mandates ASK | **PASS**<br>Uncertainty gating verified. |
+| **Stage 6 — Intervention** | - Deterministic policy engine<br>- Freezeable thresholds<br>- Grounded explanation | - `backend/policy/thresholds.py`: $\rho = s \times (1 + \lambda \times r)$, frozen evaluation lock<br>- `backend/policy/explain.py`: Non-hallucinatory deterministic reason and alternative<br>- `backend/policy/policy.py`: STOP, ASK, WARN, ACT gating | **PASS**<br>All mathematical thresholds and frozen lock verified. |
+| **Model Failure Safety Rule** | - No silent ACT on failure<br>- Safe fallback | - `DeterministicPolicyEngine.safe_fallback`<br>- Invoked on VLM failure, URL model failure, schema anomaly, or out-of-bounds metrics<br>- Emits ASK with safe default parameters | **PASS**<br>Verified under pipeline monkeypatching and corrupt metrics. |
+| **Multimodal Vision Reasoner** | - `VisionReasoner.analyze(...)`<br>- `qwen2.5vl:3b` Ollama runtime<br>- Strict JSON schema<br>- Safe unavailable fallback | - `backend/models/base.py`<br>- `backend/models/qwen_vision.py`<br>- `ImageNormalizer` (JPEG, PNG, WebP)<br>- Bounded $[0.0, 1.0]$ metrics (`severity`, `reversibility`, `confidence`, `importance`) | **PASS**<br>Tested with mock VLM, codeblock wrappers, malformed JSON, and offline fallback across all 8 archetypes. |
 | **Prompt Engineering** | - 6 immutable versioned prompts<br>- Grounded evidence & uncertainty | - `backend/prompts/context_v1.txt`<br>- `backend/prompts/intent_v1.txt`<br>- `backend/prompts/evidence_v1.txt`<br>- `backend/prompts/consequence_v1.txt`<br>- `backend/prompts/uncertainty_v1.txt`<br>- `backend/prompts/reasoning_v1.txt` | **PASS**<br>All prompts present, tested for string substitution and JSON constraints. |
-| **Model Health & Telemetry** | - `GET /health/models`<br>- Never fake health<br>- Real test inference probe | - `backend/app/api/v1/health.py`<br>- Returns `ollama_reachable`, `model_installed`, `model_name`, `startup_latency`, `test_inference_status`, `vlm_healthy`<br>- Performs live ping test when daemon is reachable | **PASS**<br>Returns authentic status (`service_unavailable` / `model_not_pulled` / `passed`). |
-| **Synthetic Test Artifacts** | - 8 threat archetypes<br>- Zero raw image persistence<br>- Hashes and structured outputs | - `tests/ml/generate_synthetic_artifacts.py`<br>- Evaluates: benign photo, bank statement, phishing screenshot, OTP, KYC message, ordinary doc, sensitive doc, QR payment<br>- `artifacts/evaluations/synthetic_test_outputs.json` | **PASS**<br>8/8 evaluated; outputs and SHA-256 digests recorded without persisting raw images to disk. |
-| **Dataset Acquisition** | - Reproducible script<br>- PhiUSIIL (UCI ID 967)<br>- No manual copy | - `ml/datasets/acquire_phiusiil.py`<br>- Downloads from `https://archive.ics.uci.edu/static/public/967/phiusiil+phishing+url+dataset.zip` | **PASS**<br>Downloaded 14.66 MB zip and extracted 54.22 MB CSV (235,795 rows). |
-| **Feature Extraction** | - Deterministic features<br>- 30+ lexical/structural properties<br>- Identical training & inference | - `ml/features/url_features.py`<br>- Implements 36 reproducible features (length, subdomains, Shannon entropy, ratios, keywords, TLD, IP host, etc.) | **PASS**<br>Throughput: >20,000 URLs/sec. Verified across 25 deterministic unit test URLs. |
-| **Model Training & Comparison** | - Logistic Regression<br>- Random Forest<br>- XGBoost<br>- Stratified splits<br>- Model selection by validation | - `ml/training/train_phishing.py`<br>- 60,000 stratified samples (42k Train, 9k Val, 9k Test)<br>- Validation: LogReg (F1: 0.9935), RF (F1: 0.9958), **XGBoost (F1: 0.9961)** | **PASS**<br>XGBoost selected as champion. Evaluated on 9,000 held-out test samples. |
-| **Model Artifacts** | - Serialized model<br>- Metadata payload | - `ml/artifacts/url_risk_model.joblib` (295.7 KB)<br>- `ml/artifacts/url_model_metadata.json` (5.39 KB) | **PASS**<br>Both artifacts generated and verified. |
-| **Inference Service** | - `backend/services/url_risk.py`<br>- Exact same feature extractor<br>- Required JSON output schema | - `backend/services/url_risk.py`<br>- Imports `URLFeatureExtractor`<br>- Implements `predict(raw_url)` returning `{is_phishing, probability, confidence, risk_level, model, features_used}` | **PASS**<br>Tested and verified on legitimate, IP, localhost, and phishing URLs. |
-| **Automated Testing** | - Unit tests for URLs<br>- Schema, malformed, edge cases<br>- 20+ deterministic URLs<br>- Vision reasoner & health tests | - `tests/ml/test_url_risk.py` (9 tests covering 25 test URLs)<br>- `tests/backend/test_vision_reasoner.py` (20 tests)<br>- `tests/backend/test_health.py` (5 tests)<br>- `tests/backend/test_config.py` (3 tests)<br>- `tests/ml/test_policy.py` (6 tests)<br>- `tests/benchmark/test_earb_schema.py` (3 tests) | **PASS**<br>**46 passed in 19.27s** across entire pytest suite. |
-| **Android Client** | - 8 Compose screens<br>- Single Activity<br>- Material 3 Dark theme<br>- Architecture abstractions | - `MainActivity.kt`<br>- `NavGraph.kt`<br>- `MainViewModel.kt`<br>- `Welcome`, `Home`, `Analyze`, `Result`, `Privacy`, `Settings`, `Demo`, `Supervisor` screens | **PASS**<br>`testDebugUnitTest`: 22/22 tasks passed.<br>`assembleDebug`: `app-debug.apk` (15.8 MB) generated. |
+| **Model Health & Telemetry** | - `GET /health/models`<br>- Never fake health<br>- Real test inference probe | - `backend/app/api/v1/health.py`<br>- Returns `ollama_reachable`, `model_installed`, `model_name`, `startup_latency`, `test_inference_status`, `vlm_healthy` | **PASS**<br>Authentic telemetry returned. |
+| **Dataset Acquisition** | - Reproducible script<br>- PhiUSIIL (UCI ID 967) | - `ml/datasets/acquire_phiusiil.py`<br>- 235,795 rows extracted | **PASS** |
+| **Feature Extraction** | - Deterministic features<br>- 30+ properties | - `ml/features/url_features.py` (36 features) | **PASS** |
+| **Model Training & Comparison** | - Model comparison<br>- XGBoost champion | - `ml/training/train_phishing.py`<br>- XGBoost test F1: 0.9951, AUC: 0.9990 | **PASS** |
+| **Automated Testing** | - Unit & integration tests<br>- Full test suite | - 64 automated test cases across monorepo | **PASS**<br>**64 passed in 19.25s**. |
+| **Android Client** | - 8 Compose screens<br>- Single Activity | - Material 3 Dark theme, single activity architecture, edge perception stubs | **PASS**<br>`testDebugUnitTest`: 22/22 passed.<br>`assembleDebug`: `app-debug.apk` built. |
 
 ---
 
@@ -49,14 +55,16 @@
 platform win32 -- Python 3.12.0, pytest-9.0.3, pluggy-1.5.0
 rootdir: C:\Users\GARV ANAND\Downloads\Krish project\Context-Gaurd
 
-tests/backend/test_config.py ...                                         [  6%]
-tests/backend/test_health.py .....                                       [ 17%]
-tests/backend/test_vision_reasoner.py ....................               [ 60%]
-tests/benchmark/test_earb_schema.py ...                                  [ 67%]
-tests/ml/test_policy.py ......                                           [ 80%]
+tests/backend/test_config.py ...                                         [  4%]
+tests/backend/test_health.py .....                                       [ 12%]
+tests/backend/test_pipeline.py ..........                                [ 28%]
+tests/backend/test_policy_engine.py ........                             [ 40%]
+tests/backend/test_vision_reasoner.py ....................               [ 71%]
+tests/benchmark/test_earb_schema.py ...                                  [ 76%]
+tests/ml/test_policy.py ......                                           [ 85%]
 tests/ml/test_url_risk.py .........                                      [100%]
 
-======================= 46 passed in 19.27s ====================================
+======================= 64 passed in 19.25s ====================================
 
 ============================= Android Gradle Build =============================
 > Task :app:compileDebugKotlin UP-TO-DATE
@@ -72,7 +80,7 @@ Output APK: android/app/build/outputs/apk/debug/app-debug.apk (15.8 MB)
 ---
 
 ## 4. Next Immediate Phase
-**Phase 2: Everyday Action Risk Benchmark (EARB) Dataset & Central Demo Generation**
+**Phase 2: Everyday Action Risk Benchmark (EARB) Dataset & 60 Action-Conditioned Pairs**
 1. Generate 20 high-fidelity synthetic base digital artifacts across 4 categories:
    - Financial (Bank statement, invoice, payment QR, credit card form, tax summary).
    - Digital Security (Password reset email, 2FA backup codes, SSH key, session token, login alert).
@@ -80,4 +88,4 @@ Output APK: android/app/build/outputs/apk/debug/app-debug.apk (15.8 MB)
    - Communication (Confidential Slack DM, strategy memo, NDA draft, support ticket, executive calendar).
 2. Generate 60 artifact-action pairs conforming to the EARB schema.
 3. Validate dataset via `benchmark.schema.validator`.
-4. Ensure Central Demo bank statement is rendered with realistic layout.
+4. Run ablation and benchmark evaluation.
