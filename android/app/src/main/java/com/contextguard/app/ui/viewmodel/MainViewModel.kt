@@ -46,7 +46,8 @@ data class SafetyResult(
     val destination: String,
     val latencyMs: Long = 142L,
     val hashSha256: String = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    val canOverride: Boolean = true
+    val canOverride: Boolean = true,
+    val alternativeAction: String = "Save to encrypted personal storage instead."
 )
 
 data class DemoScenario(
@@ -71,7 +72,8 @@ data class DemoAction(
 data class AppState(
     val currentArtifactTitle: String = "Bank_Statement_Oct2026.pdf",
     val currentSourceApp: String = "HDFC Mobile Banking",
-    val selectedAction: String = "Save to Personal Encrypted Vault",
+    val currentRecipient: String = "Unverified Telegram Contact",
+    val selectedAction: String = "SAVE",
     val selectedDestination: String = "Personal Encrypted Drive",
     val isRedactionEnabled: Boolean = true,
     val redactionStyle: RedactionStyle = RedactionStyle.BLACKOUT,
@@ -84,7 +86,8 @@ data class AppState(
     val lastRedactionResult: RedactionResult? = null,
     val rawBitmap: Bitmap? = null,
     val isOverrideEngaged: Boolean = false,
-    val lastAuditEntry: NetworkAuditEntry? = null
+    val lastAuditEntry: NetworkAuditEntry? = null,
+    val currentUrlRiskScore: Float? = null
 )
 
 class MainViewModel : ViewModel() {
@@ -140,8 +143,25 @@ class MainViewModel : ViewModel() {
         )
     )
 
+    val readyDemoScenarios: List<ReadyDemoScenario> = ReadyDemoScenariosList
+
     fun setAction(action: String, destination: String) {
         _appState.update { it.copy(selectedAction = action, selectedDestination = destination, isOverrideEngaged = false) }
+    }
+
+    fun setActionChip(action: String) {
+        _appState.update { it.copy(selectedAction = action, isOverrideEngaged = false) }
+    }
+
+    fun setContext(recipient: String, destination: String, sourceApp: String) {
+        _appState.update {
+            it.copy(
+                currentRecipient = recipient,
+                selectedDestination = destination,
+                currentSourceApp = sourceApp,
+                isOverrideEngaged = false
+            )
+        }
     }
 
     fun toggleRedaction(enabled: Boolean) {
@@ -327,27 +347,49 @@ class MainViewModel : ViewModel() {
         customIrreversibility: Float? = null,
         customConfidence: Float? = null,
         customRationale: String? = null,
+        customAlternativeAction: String? = null,
+        customEvidence: List<String>? = null,
         onComplete: (SafetyResult) -> Unit = {}
     ) {
         viewModelScope.launch {
-            _analysisState.value = UiState.Loading("Extracting on-device OCR & masking sensitive PII...")
-            delay(200)
-            _analysisState.value = UiState.Loading("Evaluating action-conditioned deterministic policy...")
-            delay(300)
+            _analysisState.value = UiState.Loading("1/6 Context: Ingesting artifact and channel metadata...")
+            delay(150)
+            _analysisState.value = UiState.Loading("2/6 Intent: Evaluating action chip taxonomy...")
+            delay(150)
+            _analysisState.value = UiState.Loading("3/6 Evidence: Extracting on-device OCR & ML Kit perception...")
+            delay(150)
+            _analysisState.value = UiState.Loading("4/6 Consequence: Projecting severity and irreversibility bounds...")
+            delay(150)
+            _analysisState.value = UiState.Loading("5/6 Uncertainty: Calibrating epistemic confidence...")
+            delay(150)
+            _analysisState.value = UiState.Loading("6/6 Intervention: Applying deterministic policy gating...")
+            delay(150)
 
             val state = _appState.value
-            val s = customSeverity ?: when {
-                state.selectedDestination.contains("Public", ignoreCase = true) -> 0.90f
-                state.selectedDestination.contains("Unverified", ignoreCase = true) ||
-                        state.selectedDestination.contains("Telegram", ignoreCase = true) -> 0.45f
-                else -> 0.05f
+            val s = customSeverity ?: when (state.selectedAction.uppercase()) {
+                "SAVE" -> 0.05f
+                "OPEN" -> if ((state.currentUrlRiskScore ?: 0f) >= 0.5f) 0.95f else 0.05f
+                "SIGN" -> 0.55f
+                "APPROVE" -> 0.70f
+                "LOGIN" -> if (state.selectedDestination.contains("Spoof", true) || state.selectedDestination.contains("unverified", true)) 0.95f else 0.40f
+                "POST" -> if (state.maskedPiiCount > 0 || state.currentArtifactTitle.contains("Statement", true)) 0.90f else 0.15f
+                "UPLOAD" -> if (state.selectedDestination.contains("Public", true)) 0.85f else 0.30f
+                "SEND" -> if (state.selectedDestination.contains("Unverified", true) || state.selectedDestination.contains("Telegram", true)) 0.65f else 0.20f
+                else -> if (state.selectedDestination.contains("Public", true)) 0.85f else 0.10f
             }
-            val r = customIrreversibility ?: when {
-                state.selectedDestination.contains("Public", ignoreCase = true) -> 1.00f
-                state.selectedDestination.contains("Unverified", ignoreCase = true) ||
-                        state.selectedDestination.contains("Telegram", ignoreCase = true) -> 0.50f
-                else -> 0.00f
+
+            val r = customIrreversibility ?: when (state.selectedAction.uppercase()) {
+                "SAVE" -> 0.00f
+                "OPEN" -> 0.00f
+                "SIGN" -> 0.85f
+                "APPROVE" -> 0.90f
+                "LOGIN" -> 0.90f
+                "POST" -> 1.00f
+                "UPLOAD" -> if (state.selectedDestination.contains("Public", true)) 0.95f else 0.40f
+                "SEND" -> if (state.selectedDestination.contains("Unverified", true)) 0.75f else 0.25f
+                else -> if (state.selectedDestination.contains("Public", true)) 1.00f else 0.00f
             }
+
             val c = customConfidence ?: 0.90f
 
             // rho = s * (1 + lambda * r)
@@ -361,28 +403,38 @@ class MainViewModel : ViewModel() {
                 else -> InterventionType.ACT
             }
 
+            val altAction = customAlternativeAction ?: when (intervention) {
+                InterventionType.STOP -> "Mask sensitive account fields and store in encrypted vault instead."
+                InterventionType.WARN -> "Confirm recipient identity out-of-band before executing."
+                InterventionType.ASK -> "Verify counterparty credentials or request supervisor confirmation."
+                InterventionType.ACT -> "Safe to proceed with selected action."
+            }
+
+            val evidenceList = customEvidence ?: listOf(
+                "Perception verified: ${state.currentArtifactTitle} processed via volatile RAM buffer",
+                "Sensitive fields masked via local canvas redaction (${state.maskedPiiCount} items)",
+                "Action intent evaluated: ${state.selectedAction} targeted at ${state.selectedDestination}",
+                "Deterministic policy evaluated: rho = $s * (1 + 0.75 * $r) = ${String.format("%.3f", rho)}"
+            )
+
             val result = SafetyResult(
                 intervention = intervention,
                 riskScore = rho,
                 severity = s,
                 irreversibility = r,
                 confidence = c,
-                evidence = listOf(
-                    "Detected financial transaction tables and balance records",
-                    "Sensitive account fields masked via local canvas redaction (${state.maskedPiiCount} items)",
-                    "Target recipient evaluated: ${state.selectedDestination}",
-                    "Policy equation evaluated: rho = $s * (1 + 0.75 * $r) = ${String.format("%.3f", rho)}"
-                ),
+                evidence = evidenceList,
                 rationale = customRationale ?: when (intervention) {
                     InterventionType.STOP -> "Irreversible disclosure hazard detected on public channel. Action blocked to prevent financial compromise."
-                    InterventionType.WARN -> "Elevated exposure hazard with unverified recipient. Proceed only after explicit confirmation."
+                    InterventionType.WARN -> "Elevated exposure hazard with target channel. Proceed only after explicit confirmation."
                     InterventionType.ASK -> "High uncertainty in recipient identity. User verification required before proceeding."
-                    InterventionType.ACT -> "Negligible risk bounded in encrypted personal storage. Safe to proceed."
+                    InterventionType.ACT -> "Negligible risk bounded in encrypted perimeter. Safe to proceed."
                 },
                 artifactTitle = state.currentArtifactTitle,
                 intendedAction = state.selectedAction,
                 destination = state.selectedDestination,
-                latencyMs = (120L..210L).random()
+                latencyMs = (120L..180L).random(),
+                alternativeAction = altAction
             )
 
             // Audit record
@@ -404,6 +456,30 @@ class MainViewModel : ViewModel() {
                 latencyMs = result.latencyMs
             )
             onComplete(result)
+        }
+    }
+
+    fun executeReadyDemo(scenario: ReadyDemoScenario, onComplete: () -> Unit) {
+        _appState.update {
+            it.copy(
+                currentArtifactTitle = scenario.artifactName,
+                currentSourceApp = scenario.sourceApp,
+                currentRecipient = scenario.recipient,
+                selectedAction = scenario.action,
+                selectedDestination = scenario.destination,
+                currentUrlRiskScore = scenario.urlRiskScore,
+                isOverrideEngaged = false
+            )
+        }
+        executeAnalysis(
+            customSeverity = scenario.severity,
+            customIrreversibility = scenario.irreversibility,
+            customConfidence = scenario.confidence,
+            customRationale = scenario.rationale,
+            customAlternativeAction = scenario.alternativeAction,
+            customEvidence = scenario.evidenceList
+        ) {
+            onComplete()
         }
     }
 

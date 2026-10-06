@@ -1,19 +1,24 @@
 package com.contextguard.app.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
@@ -23,8 +28,19 @@ import androidx.compose.ui.unit.sp
 import com.contextguard.app.core.privacy.RedactionStyle
 import com.contextguard.app.core.state.UiState
 import com.contextguard.app.theme.*
-import com.contextguard.app.ui.components.LoadingOverlay
+import com.contextguard.app.ui.components.SixStageProgressOverlay
 import com.contextguard.app.ui.viewmodel.MainViewModel
+
+private val ACTION_CHIPS = listOf(
+    "SAVE",
+    "SEND",
+    "UPLOAD",
+    "POST",
+    "SIGN",
+    "LOGIN",
+    "APPROVE",
+    "OPEN"
+)
 
 @Composable
 fun AnalyzeScreen(
@@ -38,11 +54,10 @@ fun AnalyzeScreen(
 
     var previewMode by remember { mutableStateOf("AFTER") } // "BEFORE" vs "AFTER"
 
-    val actionOptions = listOf(
-        Pair("Save to Personal Encrypted Vault", "Personal Drive (Encrypted)"),
-        Pair("Send via Instant Messaging Chat", "Unverified Telegram Contact"),
-        Pair("Broadcast on Social Media Timeline", "Public Twitter/X Feed")
-    )
+    // Context form fields
+    var recipient by remember(state.currentRecipient) { mutableStateOf(state.currentRecipient) }
+    var destination by remember(state.selectedDestination) { mutableStateOf(state.selectedDestination) }
+    var sourceApp by remember(state.currentSourceApp) { mutableStateOf(state.currentSourceApp) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -51,16 +66,16 @@ fun AnalyzeScreen(
                 .background(BackgroundDark)
                 .padding(20.dp)
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Header
+            // Top Bar
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Icons.Default.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
                         tint = TextPrimary
                     )
@@ -73,7 +88,7 @@ fun AnalyzeScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Mode: ${state.backendConfig.networkMode.name}",
+                        text = "Mode: ${state.backendConfig.networkMode.name} • On-Device Pipeline",
                         color = CyanAccent,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
@@ -81,105 +96,66 @@ fun AnalyzeScreen(
                 }
             }
 
-            // Artifact Information Card
+            // ==========================================
+            // STEP 1: ARTIFACT PREVIEW
+            // ==========================================
+            StepHeader(stepNumber = "1", title = "Artifact Preview")
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(SurfaceDark, RoundedCornerShape(16.dp))
-                    .border(1.dp, SurfaceBorder, RoundedCornerShape(16.dp))
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .background(SurfaceDark, RoundedCornerShape(18.dp))
+                    .border(1.dp, SurfaceBorder, RoundedCornerShape(18.dp))
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Text(
-                    text = "CURRENT ARTIFACT",
-                    color = CyanAccent,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Description,
-                        contentDescription = "File",
-                        tint = CyanAccent,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Column {
-                        Text(
-                            text = state.currentArtifactTitle,
-                            color = TextPrimary,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            text = "Origin: ${state.currentSourceApp}",
-                            color = TextSecondary,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-
-                HorizontalDivider(color = DividerColor)
-
+                // Artifact Meta Row
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column {
-                        Text(
-                            text = "On-Device Masking",
-                            color = TextPrimary,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = "${state.maskedPiiCount} PII entities masked locally",
-                            color = ActGreen,
-                            fontSize = 11.sp
-                        )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(CyanAccent.copy(alpha = 0.15f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Description,
+                                contentDescription = "Artifact",
+                                tint = CyanAccent,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = state.currentArtifactTitle,
+                                color = TextPrimary,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1
+                            )
+                            Text(
+                                text = "Origin: ${state.currentSourceApp}",
+                                color = TextSecondary,
+                                fontSize = 11.sp
+                            )
+                        }
                     }
-                    Switch(
-                        checked = state.isRedactionEnabled,
-                        onCheckedChange = { viewModel.toggleRedaction(it) },
-                        colors = SwitchDefaults.colors(checkedThumbColor = CyanAccent)
-                    )
-                }
-            }
 
-            // Interactive BEFORE vs AFTER REDACTION Preview Card
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(SurfaceDark, RoundedCornerShape(16.dp))
-                    .border(1.dp, SurfaceBorder, RoundedCornerShape(16.dp))
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "REDACTION PREVIEW",
-                        color = CyanAccent,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-
-                    // Before vs After Switch Pills
+                    // Before vs After Toggle Pills
                     Row(
                         modifier = Modifier
                             .background(BackgroundDark, RoundedCornerShape(8.dp))
                             .border(1.dp, SurfaceBorder, RoundedCornerShape(8.dp))
                             .padding(2.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Box(
                             modifier = Modifier
@@ -188,12 +164,12 @@ fun AnalyzeScreen(
                                     RoundedCornerShape(6.dp)
                                 )
                                 .clickable { previewMode = "BEFORE" }
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Text(
                                 text = "BEFORE",
                                 color = if (previewMode == "BEFORE") WarnOrange else TextSecondary,
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -204,12 +180,12 @@ fun AnalyzeScreen(
                                     RoundedCornerShape(6.dp)
                                 )
                                 .clickable { previewMode = "AFTER" }
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
                         ) {
                             Text(
                                 text = "AFTER REDACTION",
                                 color = if (previewMode == "AFTER") ActGreen else TextSecondary,
-                                fontSize = 11.sp,
+                                fontSize = 10.sp,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -225,7 +201,7 @@ fun AnalyzeScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(180.dp)
+                            .height(170.dp)
                             .background(BackgroundDark, RoundedCornerShape(12.dp))
                             .border(1.dp, SurfaceBorder, RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
@@ -238,18 +214,21 @@ fun AnalyzeScreen(
                         )
                     }
                 } else {
-                    // Text / OCR Preview
+                    // Document / OCR Text Box
                     val displayText = if (previewMode == "AFTER") {
-                        state.lastRedactionResult?.redactedText ?: state.lastPerceptionResult?.ocrText ?: "Sample Account PII masked locally: [REDACTED_ACCOUNT] ending in 5671"
+                        state.lastRedactionResult?.redactedText
+                            ?: state.lastPerceptionResult?.ocrText
+                            ?: "Account Number: [REDACTED_ACCOUNT] ending in 5671\nPhone: [REDACTED_PHONE]\nOTP: [REDACTED_SECRET]"
                     } else {
-                        state.lastPerceptionResult?.ocrText?.ifEmpty { "Account Number: 4532 0150 1234 5671\nPhone: +91 9876543210\nOTP: 482910" }
-                            ?: "Account Number: 4532 0150 1234 5671\nPhone: +91 9876543210\nOTP: 482910"
+                        state.lastPerceptionResult?.ocrText?.ifEmpty {
+                            "HDFC Bank Statement - Oct 2026\nAccount: 4532 0150 1234 5671 | IFSC: HDFC0000128\nAvailable Balance: INR 1,48,290.40"
+                        } ?: "HDFC Bank Statement - Oct 2026\nAccount: 4532 0150 1234 5671 | IFSC: HDFC0000128\nAvailable Balance: INR 1,48,290.40"
                     }
 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(100.dp)
+                            .height(110.dp)
                             .background(BackgroundDark, RoundedCornerShape(12.dp))
                             .border(1.dp, SurfaceBorder, RoundedCornerShape(12.dp))
                             .padding(12.dp)
@@ -264,14 +243,21 @@ fun AnalyzeScreen(
                     }
                 }
 
-                // Redaction Style Options (Blackout vs Blur)
+                // Redaction Controls
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Style:", color = TextSecondary, fontSize = 12.sp)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Redaction Style:",
+                            color = TextSecondary,
+                            fontSize = 12.sp
+                        )
                         FilterChip(
                             selected = state.redactionStyle == RedactionStyle.BLACKOUT,
                             onClick = { viewModel.setRedactionStyle(RedactionStyle.BLACKOUT) },
@@ -283,61 +269,229 @@ fun AnalyzeScreen(
                             label = { Text("Blur", fontSize = 11.sp) }
                         )
                     }
-                }
-            }
 
-            // Intended Action Selector
-            Text(
-                text = "SELECT INTENDED ACTION",
-                color = TextTertiary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            )
-
-            actionOptions.forEach { (actionName, destName) ->
-                val isSelected = state.selectedAction == actionName
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            if (isSelected) SurfaceGlass else SurfaceDark,
-                            RoundedCornerShape(14.dp)
-                        )
-                        .border(
-                            1.5.dp,
-                            if (isSelected) CyanAccent else SurfaceBorder,
-                            RoundedCornerShape(14.dp)
-                        )
-                        .clickable { viewModel.setAction(actionName, destName) }
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    RadioButton(
-                        selected = isSelected,
-                        onClick = { viewModel.setAction(actionName, destName) },
-                        colors = RadioButtonDefaults.colors(selectedColor = CyanAccent)
-                    )
-                    Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Text(
-                            text = actionName,
-                            color = if (isSelected) CyanAccent else TextPrimary,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold
+                            text = "${state.maskedPiiCount} masked",
+                            color = ActGreen,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                        Text(
-                            text = "Target: $destName",
-                            color = TextSecondary,
-                            fontSize = 12.sp
+                        Switch(
+                            checked = state.isRedactionEnabled,
+                            onCheckedChange = { viewModel.toggleRedaction(it) },
+                            colors = SwitchDefaults.colors(checkedThumbColor = CyanAccent)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // ==========================================
+            // STEP 2: WHAT ARE YOU ABOUT TO DO?
+            // ==========================================
+            StepHeader(stepNumber = "2", title = "What are you about to do?")
 
-            // Action Button
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(SurfaceDark, RoundedCornerShape(18.dp))
+                    .border(1.dp, SurfaceBorder, RoundedCornerShape(18.dp))
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(
+                    text = "SELECT ACTION INTENT",
+                    color = CyanAccent,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+
+                // 8 Action Chips Grid (2 rows of 4)
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    val row1 = ACTION_CHIPS.take(4)
+                    val row2 = ACTION_CHIPS.drop(4)
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        row1.forEach { action ->
+                            val isSelected = state.selectedAction.equals(action, ignoreCase = true)
+                            ActionChipItem(
+                                action = action,
+                                isSelected = isSelected,
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.setActionChip(action) }
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        row2.forEach { action ->
+                            val isSelected = state.selectedAction.equals(action, ignoreCase = true)
+                            ActionChipItem(
+                                action = action,
+                                isSelected = isSelected,
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.setActionChip(action) }
+                            )
+                        }
+                    }
+                }
+
+                // Active Action Description Note
+                Text(
+                    text = "Selected Action: ${state.selectedAction} • Risk assessment will condition on this exact operation.",
+                    color = TextSecondary,
+                    fontSize = 11.sp
+                )
+            }
+
+            // ==========================================
+            // STEP 3: CONTEXT
+            // ==========================================
+            StepHeader(stepNumber = "3", title = "Context")
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(SurfaceDark, RoundedCornerShape(18.dp))
+                    .border(1.dp, SurfaceBorder, RoundedCornerShape(18.dp))
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(
+                    text = "ROUTING & BOUNDARIES",
+                    color = CyanAccent,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+
+                // Recipient Field
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(text = "Recipient", color = TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    OutlinedTextField(
+                        value = recipient,
+                        onValueChange = {
+                            recipient = it
+                            viewModel.setContext(it, destination, sourceApp)
+                        },
+                        placeholder = { Text("e.g., Unverified Telegram Contact, alice@company.com", fontSize = 12.sp, color = TextTertiary) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = CyanAccent,
+                            unfocusedBorderColor = SurfaceBorder,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+
+                    // Quick Pills for Recipient
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf("Personal Vault (Self)", "Telegram Contact", "alice@company.com", "Support Bot").forEach { pill ->
+                            ContextSuggestionPill(text = pill) {
+                                recipient = pill
+                                viewModel.setContext(pill, destination, sourceApp)
+                            }
+                        }
+                    }
+                }
+
+                // Destination Field
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(text = "Destination", color = TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    OutlinedTextField(
+                        value = destination,
+                        onValueChange = {
+                            destination = it
+                            viewModel.setContext(recipient, it, sourceApp)
+                        },
+                        placeholder = { Text("e.g., Public Twitter/X Feed, Encrypted Vault", fontSize = 12.sp, color = TextTertiary) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = CyanAccent,
+                            unfocusedBorderColor = SurfaceBorder,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+
+                    // Quick Pills for Destination
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf("Personal Encrypted Drive", "Unverified Telegram Chat", "Public Twitter/X Feed", "Payment Gateway").forEach { pill ->
+                            ContextSuggestionPill(text = pill) {
+                                destination = pill
+                                viewModel.setContext(recipient, pill, sourceApp)
+                            }
+                        }
+                    }
+                }
+
+                // Source App Field
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(text = "Source App", color = TextPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                    OutlinedTextField(
+                        value = sourceApp,
+                        onValueChange = {
+                            sourceApp = it
+                            viewModel.setContext(recipient, destination, it)
+                        },
+                        placeholder = { Text("e.g., HDFC Mobile Banking, Chrome, WhatsApp", fontSize = 12.sp, color = TextTertiary) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = CyanAccent,
+                            unfocusedBorderColor = SurfaceBorder,
+                            focusedTextColor = TextPrimary,
+                            unfocusedTextColor = TextPrimary
+                        ),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+
+                    // Quick Pills for Source App
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        listOf("HDFC Mobile Banking", "WhatsApp", "Chrome", "DocuSign").forEach { pill ->
+                            ContextSuggestionPill(text = pill) {
+                                sourceApp = pill
+                                viewModel.setContext(recipient, destination, pill)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ==========================================
+            // STEP 4: ANALYZE CTA
+            // ==========================================
+            StepHeader(stepNumber = "4", title = "Analyze")
+
             Button(
                 onClick = {
                     viewModel.executeAnalysis {
@@ -356,20 +510,103 @@ fun AnalyzeScreen(
                     tint = BackgroundDark,
                     modifier = Modifier.size(20.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Evaluate Pre-Action Safety",
+                    text = "Analyze Pre-Action Risk",
                     color = BackgroundDark,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Loading overlay
+        // Animated Six-Stage Progress Overlay
         if (analysisState is UiState.Loading) {
             val msg = (analysisState as UiState.Loading).message
-            LoadingOverlay(message = msg)
+            SixStageProgressOverlay(currentMessage = msg)
         }
+    }
+}
+
+@Composable
+private fun StepHeader(stepNumber: String, title: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(26.dp)
+                .clip(CircleShape)
+                .background(CyanAccent.copy(alpha = 0.2f))
+                .border(1.dp, CyanAccent, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stepNumber,
+                color = CyanAccent,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Text(
+            text = title,
+            color = TextPrimary,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun ActionChipItem(
+    action: String,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .background(
+                if (isSelected) SurfaceGlassHigh else SurfaceDark,
+                RoundedCornerShape(12.dp)
+            )
+            .border(
+                1.5.dp,
+                if (isSelected) CyanAccent else SurfaceBorder,
+                RoundedCornerShape(12.dp)
+            )
+            .clickable { onClick() }
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = action,
+            color = if (isSelected) CyanAccent else TextSecondary,
+            fontSize = 13.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun ContextSuggestionPill(
+    text: String,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .background(BackgroundDark, RoundedCornerShape(8.dp))
+            .border(1.dp, SurfaceBorder, RoundedCornerShape(8.dp))
+            .clickable { onClick() }
+            .padding(horizontal = 10.dp, vertical = 5.dp)
+    ) {
+        Text(
+            text = text,
+            color = TextSecondary,
+            fontSize = 11.sp
+        )
     }
 }

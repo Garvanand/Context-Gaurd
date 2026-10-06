@@ -70,17 +70,16 @@ This checklist tracks the end-to-end execution of the ContextGuard research caps
   - [x] `OFFLINE` mode (zero network bytes, local heuristics).
   - [x] `LOCAL_BACKEND` mode (sends masked bitmap + metadata).
   - [x] `RESTRICTED_EVALUATION` mode (academic ablation testing).
-- [x] Implement Jetpack Compose UI:
-  - [x] Welcome & Setup Screen.
-  - [x] Home / Analyze Screen (Image picker, Camera capture, Sharesheet receiver).
-  - [x] Artifact Preview & Local Redaction Toggle (BEFORE vs AFTER preview).
-  - [x] Action & Destination Selection (Save privately, Direct message, Public post).
-  - [x] Analysis Progress with real-time stage indicators.
-  - [x] Result Screen with Intervention Banner (ACT / ASK / WARN / STOP + Override).
-  - [x] Evidence Card & Decision Trace Breakdown.
-  - [x] Supervisor / Viva Mode (real-time telemetry and score calculation).
-  - [x] Privacy Center & Network Audit Log Screen.
-- [x] Android unit tests for domain, perception, and privacy architecture (`android/app/src/test/`, 43 unit tests pass).
+- [x] Presentation-Grade UI Architecture:
+  - [x] Dark graphite & glassmorphic design system (`BackgroundDark = #090D14`, `SurfaceGlass`, `CyanAccent`).
+  - [x] Home Screen with exact Hero ("Before you act, ContextGuard."), supporting text, and 3 CTAs ("Analyze something", "Demo scenarios", "Privacy center").
+  - [x] 4-Step Analysis Flow: Step 1 Artifact preview (BEFORE/AFTER toggle, blackout/blur), Step 2 "What are you about to do?" (8 chips: `SAVE`, `SEND`, `UPLOAD`, `POST`, `SIGN`, `LOGIN`, `APPROVE`, `OPEN`), Step 3 Context (Recipient, Destination, Source app), Step 4 Analyze CTA with animated `SixStageProgressOverlay` (Context -> Intent -> Evidence -> Consequence -> Uncertainty -> Intervention).
+  - [x] Dominant Result Screen with exact user copy: ACT ("Looks safe to proceed."), ASK ("Before you continue, we need to clarify something."), WARN ("This action carries a meaningful risk."), STOP ("We strongly recommend not proceeding."). Displays risk score, confidence, severity, reversibility, evidence, alternative action, and exact buttons (Continue, Review evidence, Change action / Continue anyway, Review evidence).
+  - [x] Expandable 8-node visual Decision Trace Pipeline (Artifact ↓ Context ↓ Intent ↓ Evidence ↓ Consequence ↓ Uncertainty ↓ Policy ↓ Intervention).
+  - [x] Grounded Evidence Card: image spatial coordinates, XGBoost URL risk score $P(\text{phishing})$, OCR document excerpts.
+  - [x] Demo Mode with 8 ready-to-run cards (Bank statement, Fake KYC link, OTP screenshot, Unknown recipient document, Routine family photo, Routine news URL, Contract lock-in, Payment request).
+  - [x] Supervisor Viva Mode: 5 sections (`MODEL`, `PERCEPTION`, `VLM`, `URL MODEL`, `POLICY`) + live HUD metrics (Latency, Confidence, Risk, Evidence count, Redactions, Network state).
+- [x] Android unit tests passing (`44 passed`) and `app-debug.apk` successfully assembled (94.9 MB).
 
 ---
 
