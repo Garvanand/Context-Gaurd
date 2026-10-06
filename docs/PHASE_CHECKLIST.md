@@ -102,16 +102,23 @@ This checklist tracks the end-to-end execution of the ContextGuard research caps
 ---
 
 ## 5. Phase 5: Empirical Benchmark & Ablation Study
-- [ ] Implement baseline evaluators:
-  - B1: Artifact-only baseline.
-  - B2: Warn-everything baseline.
-  - B3: Multimodal context-free baseline.
-  - B4: Intent-aware fixed threshold baseline ($\lambda = 0$).
-  - B5: Full ContextGuard system.
-- [ ] Execute automated benchmark evaluation across all 60 EARB pairs (`scripts/run_evaluations.py`).
-- [ ] Compute empirical metrics: Macro F1, STOP Recall, ACT False Alarm Rate, ECE, Latency.
-- [ ] Generate confusion matrices and calibration plots.
-- [ ] Update `EXPERIMENTS.md` and `PROJECT_STATUS.md` with true empirical numbers.
+- [x] Implement baseline evaluators:
+  - [x] B1: Artifact-only baseline (`evaluation/baselines/b1_artifact_only.py`).
+  - [x] B3: Multimodal context-free baseline (`evaluation/baselines/b3_no_intent.py`).
+  - [x] B4: Intent-aware fixed threshold baseline ($\lambda = 0$) (`evaluation/baselines/b4_fixed_threshold.py`).
+  - [x] B5: Full ContextGuard system (`evaluation/baselines/b5_full_contextguard.py`).
+- [x] Implement component ablations:
+  - [x] A1: No intent (`evaluation/ablations/a1_no_intent.py`).
+  - [x] A2: No multimodality (`evaluation/ablations/a2_no_multimodal.py`).
+  - [x] A3: Fixed policy ($\lambda = 0$) (`evaluation/ablations/a3_fixed_policy.py`).
+  - [x] A4: Adaptive policy ($\lambda = 0.75$) (`evaluation/ablations/a4_adaptive_policy.py`).
+  - [x] A5: Warn everything (`evaluation/ablations/a5_warn_everything.py`).
+- [x] Common Evaluation Contract enforced across all runs (`evaluation/schemas.py`).
+- [x] Execute automated benchmark evaluation across all 60 EARB pairs (`python -m evaluation.run --all`).
+- [x] Compute empirical metrics: Macro F1, STOP Recall, ACT False Alarm Rate, ECE, Mean Latency, and clustered bootstrap 95% CIs (`evaluation/metrics.py`).
+- [x] Generate confusion matrices, safety tradeoff curves, and calibration plots in `results/figures/` (`python -m evaluation.report`).
+- [x] Generate comparative tables in `results/tables/` (`python -m evaluation.compare`).
+- [x] Update `EXPERIMENTS.md`, `results/RESEARCH_REPORT.md`, and `PROJECT_STATUS.md` with true empirical numbers.
 
 ---
 

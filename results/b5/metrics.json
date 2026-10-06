@@ -1,0 +1,72 @@
+{
+  "accuracy": 0.6833,
+  "macro_precision": 0.5729,
+  "macro_recall": 0.5667,
+  "macro_f1": 0.5455,
+  "per_class_f1": {
+    "ACT": 0.8182,
+    "ASK": 0.25,
+    "WARN": 0.25,
+    "STOP": 0.8636
+  },
+  "stop_recall": 0.95,
+  "act_false_alarm_rate": 0.1,
+  "confusion_matrix": {
+    "ACT": {
+      "ACT": 18,
+      "ASK": 1,
+      "WARN": 1,
+      "STOP": 0
+    },
+    "ASK": {
+      "ACT": 2,
+      "ASK": 2,
+      "WARN": 1,
+      "STOP": 3
+    },
+    "WARN": {
+      "ACT": 4,
+      "ASK": 4,
+      "WARN": 2,
+      "STOP": 2
+    },
+    "STOP": {
+      "ACT": 0,
+      "ASK": 1,
+      "WARN": 0,
+      "STOP": 19
+    }
+  },
+  "latency_distribution": {
+    "mean": 0.28,
+    "median": 0.13,
+    "p90": 0.85,
+    "p95": 1.02,
+    "p99": 1.53,
+    "min": 0.1,
+    "max": 2.06,
+    "std": 0.37
+  },
+  "ece": 0.1942,
+  "bootstrap_ci_95": {
+    "accuracy": {
+      "lower": 0.6,
+      "upper": 0.7667
+    },
+    "macro_f1": {
+      "lower": 0.4271,
+      "upper": 0.6621
+    },
+    "stop_recall": {
+      "lower": 0.85,
+      "upper": 1.0
+    },
+    "act_false_alarm_rate": {
+      "lower": 0.0,
+      "upper": 0.25
+    }
+  },
+  "sample_count": 60,
+  "failure_count": 0,
+  "failure_rate": 0.0
+}

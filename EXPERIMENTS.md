@@ -63,11 +63,11 @@
 
 | Model / System | Macro F1 | STOP Recall | ACT False Alarm | ECE | Latency (ms) | Status |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **B1: Artifact-Only** | *Not evaluated* | *Not evaluated* | *Not evaluated* | *Not evaluated* | *Not evaluated* | Pending run |
-| **B2: Warn-Everything** | *Not evaluated* | *Not evaluated* | *Not evaluated* | *Not evaluated* | *Not evaluated* | Pending run |
-| **B3: Multimodal (No Intent)** | *Not evaluated* | *Not evaluated* | *Not evaluated* | *Not evaluated* | *Not evaluated* | Pending run |
-| **B4: Intent-Aware ($\lambda = 0$)** | *Not evaluated* | *Not evaluated* | *Not evaluated* | *Not evaluated* | *Not evaluated* | Pending run |
-| **B5: ContextGuard (Full)** | *Not evaluated* | *Not evaluated* | *Not evaluated* | *Not evaluated* | *Not evaluated* | Pending run |
+| **B1: Artifact-Only** | `0.1767` | `90.0%` | `95.0%` | `0.5667` | `0.15 ms` | **Completed** |
+| **B2: Warn-Everything** | `0.1000` | `0.0%` | `100.0%` | `0.4000` | `0.05 ms` | **Completed** |
+| **B3: Multimodal (No Intent)** | `0.1364` | `40.0%` | `100.0%` | `0.2800` | `0.53 ms` | **Completed** |
+| **B4: Intent-Aware (lambda = 0)** | `0.5455` | `95.0%` | `10.0%` | `0.1775` | `0.30 ms` | **Completed** |
+| **B5: ContextGuard (Full)** | `0.5455` | `95.0%` | `10.0%` | `0.1942` | `0.28 ms` | **Completed** |
 
 ---
 

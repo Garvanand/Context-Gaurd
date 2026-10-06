@@ -63,11 +63,12 @@ class ContextGuardPipeline:
 
         is_public = any(k in dest_lower for k in ["public", "twitter", "x.com", "social", "forum", "broadcast", "reddit"])
         is_trusted = any(k in dest_lower or k in recip_lower for k in [
-            "vault", "personal", "encrypted", "local", "self", "drive", "family", "internal", "team", "slack"
+            "vault", "personal", "encrypted", "local", "self", "drive", "family", "internal", "team", "slack",
+            "gateway", "compliance", "board", "verified bank", "official"
         ])
         is_unknown = (
             recipient == "UNKNOWN_RECIPIENT"
-            or any(k in recip_lower or k in dest_lower for k in ["unknown", "unverified", "stranger", "telegram user"])
+            or any(k in recip_lower or k in dest_lower for k in ["unknown", "unverified", "stranger", "telegram user", "broker", "external"])
         )
 
         artifact_summary = f"{request.artifact_type} via {source_app}"
@@ -376,15 +377,34 @@ class ContextGuardPipeline:
         else:
             base_severity = 0.05
 
-        # Reversibility and action conditioning
-        if action == "SAVE" and context.is_trusted_channel:
-            # Action reduces severity and renders action fully reversible
+        # Protective refuse / safe local actions
+        protective_actions = {
+            "DECLINE", "BACK_TO_SAFETY", "REPORT_PHISH", "REPORT_SOC",
+            "REPORT_CLOSE", "VIEW_CERTIFICATE", "READ_DISCARD"
+        }
+        if action in protective_actions:
+            severity = 0.05
+            reversibility = 0.00
+            harm_desc = f"Protective safety action '{action}' eliminates external transmission and prevents harm"
+            rev_rationale = "Fully reversible: Refusal or local diagnostic action maintains system security without data egress"
+
+        # Reversibility and action conditioning for local vault storage
+        elif action == "SAVE" and (context.is_trusted_channel or not context.is_public_channel):
             severity = 0.05
             reversibility = 0.00
             harm_desc = "Local archival within personal encrypted vault"
             rev_rationale = "Fully reversible: Artifact stored locally under user control without external exposure"
 
-        elif action in ("POST", "UPLOAD") and context.is_public_channel:
+        # Deceptive authorization or credential submission
+        elif (action in ("APPROVE", "LOGIN", "BYPASS_WARNING") and
+              (has_phishing or has_credentials or "collect" in text or "phishing" in text or "refund" in text)):
+            severity = 0.95
+            reversibility = 0.95
+            harm_desc = "Direct authorization of fraudulent transaction or credential submission to adversary"
+            rev_rationale = "Extreme irreversibility: Irrevocable fund transfer or stolen session tokens enable immediate compromise"
+
+        # Public broadcasting or high exposure
+        elif action in ("POST", "POST_PUBLIC", "BYPASS_WARNING", "REPLY_ALL") or context.is_public_channel:
             severity = max(0.90, base_severity)
             reversibility = 1.00  # Completely irreversible
             harm_desc = "Unrestricted public dissemination of confidential artifacts"
@@ -396,15 +416,21 @@ class ContextGuardPipeline:
             harm_desc = "Direct credential and identity submission to adversary server"
             rev_rationale = "High irreversibility: Stolen credentials can be weaponized immediately for account takeover"
 
-        elif has_credentials and context.is_unknown_recipient:
+        elif has_credentials and (context.is_unknown_recipient or action in ("SEND", "SEND_TO_UNKNOWN", "FORWARD")):
             severity = 0.95
             reversibility = 0.95
-            harm_desc = "Authentication secret disclosed to unverified external recipient"
+            harm_desc = "Authentication secret disclosed to external recipient"
             rev_rationale = "Extreme irreversibility: Direct OTP transmission gives adversary immediate session access"
 
-        elif context.is_unknown_recipient and (has_financial or has_personal):
-            severity = 0.40
-            reversibility = 0.50
+        elif action in ("ASK_VERIFY", "REPLY_CLARIFY", "EDIT_RECIPIENT"):
+            severity = 0.35
+            reversibility = 0.40
+            harm_desc = "User initiates verification to resolve contextual ambiguity"
+            rev_rationale = "Moderate reversibility: Interlocutor requires identity confirmation before irreversible step"
+
+        elif context.is_unknown_recipient and (has_financial or has_personal or any(k in text for k in ["confidential", "contract", "vulnerability", "memo", "prescription"])):
+            severity = 0.50
+            reversibility = 0.60
             harm_desc = "Confidential record transmitted to unverified contact"
             rev_rationale = "Moderately irreversible: Recipient receives copy that cannot be remotely revoked"
 
@@ -454,6 +480,10 @@ class ContextGuardPipeline:
         if context.is_unknown_recipient:
             conf -= 0.30
             uncertainty_reasons.append(f"Recipient '{context.recipient}' identity is unverified.")
+
+        if intent.resolved_action in ("ASK_VERIFY", "REPLY_CLARIFY", "EDIT_RECIPIENT"):
+            conf -= 0.35
+            uncertainty_reasons.append(f"Action '{intent.resolved_action}' specifically requests recipient or transaction clarification.")
 
         if intent.intent_source == "INFERRED_RESEARCH":
             conf -= 0.15

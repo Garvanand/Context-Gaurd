@@ -2,9 +2,9 @@
 
 **Capstone Title:** CONTEXTGUARD: A Multimodal AI System for Pre-Action Risk Detection in Everyday Digital Tasks  
 **Institution:** Final-Year B.Tech Capstone Project  
-**Status Date:** Phase 2 (Everyday Action Risk Benchmark - 20 Base Artifacts, 60 Action Pairs) Completed  
-**Current Milestone:** Everyday Action Risk Benchmark (EARB) **COMPLETED**  
-**Next Milestone:** Phase 5 (Empirical Benchmark & Baseline Ablation Study across EARB)
+**Status Date:** Phase 5 (Research Evaluation Framework, Baselines & Ablation Study) Completed  
+**Current Milestone:** Research Evaluation Framework (Baselines B1/B3/B4/B5, Ablations A1-A5) **COMPLETED**  
+**Next Milestone:** Phase 6 (System Integration, End-to-End Testing & Viva Polish)
 
 ---
 
@@ -22,6 +22,7 @@
 | **ML Component** | Trained Classifier | XGBoost 3.2.0 trained on PhiUSIIL (UCI ID: 967) | **PASS** (Test F1: 0.9951, AUC: 0.9990) |
 | **Multimodal Reasoner** | Qwen2.5-VL-3B / Ollama | `backend/models/qwen_vision.py`, `backend/prompts/*` | **PASS** (20/20 tests pass, safe fallback active) |
 | **Six-Stage Pipeline** | Full Reasoning Pipeline | `backend/pipeline/pipeline.py`, `backend/policy/*` | **PASS** (18/18 pipeline & policy tests pass) |
+| **Evaluation Framework** | Baselines & Ablations | `evaluation/`, `results/`, `results/figures/`, `results/tables/` | **PASS** (76/76 Python tests pass) |
 
 ---
 
@@ -43,12 +44,12 @@
 | **Dataset Acquisition** | - Reproducible script<br>- PhiUSIIL (UCI ID 967) | - `ml/datasets/acquire_phiusiil.py`<br>- 235,795 rows extracted | **PASS** |
 | **Feature Extraction** | - Deterministic features<br>- 30+ properties | - `ml/features/url_features.py` (36 features) | **PASS** |
 | **Model Training & Comparison** | - Model comparison<br>- XGBoost champion | - `ml/training/train_phishing.py`<br>- XGBoost test F1: 0.9951, AUC: 0.9990 | **PASS** |
-| **Automated Testing** | - Unit & integration tests<br>- Full test suite | - 64 automated test cases across monorepo | **PASS**<br>**64 passed in 19.25s**. |
-| **Android Client** | - 8 Compose screens<br>- Single Activity | - Material 3 Dark theme, single activity architecture, edge perception integration | **PASS**<br>`testDebugUnitTest`: 37/37 passed.<br>`assembleDebug`: `app-debug.apk` built. |
+| **Android Client** | - 8 Compose screens<br>- Single Activity | - Material 3 Dark theme, single activity architecture, edge perception integration | **PASS**<br>`testDebugUnitTest`: 28/28 passed.<br>`assembleDebug`: `app-debug.apk` built. |
 | **Android Perception Layer** | - Google ML Kit Text Recognition<br>- Google ML Kit Face Detection<br>- Native `PdfRenderer` (first 3 pages)<br>- Local PII Detector (9 types, Luhn check, OTP context)<br>- Strongly typed `LocalPerceptionResult` | - `MlKitPerceptionEngine.kt`<br>- `PiiDetector.kt`<br>- `PdfPerceptionRenderer.kt`<br>- `ImagePreprocessor.kt`<br>- Coroutines off-UI dispatchers (`Dispatchers.Default`, `Dispatchers.IO`) | **PASS**<br>15 dedicated unit tests passed.<br>APK packaged with real native ML Kit runtime (`libface_detector_v2_jni.so`, `libmlkit_google_ocr_pipeline.so`). |
-| **Privacy Architecture** | - 9-stage Serial Privacy Pipeline<br>- In-memory Redaction Engine (`BLACKOUT` & `BLUR`)<br>- 3 Network Modes (`OFFLINE`, `LOCAL_BACKEND`, `RESTRICTED_EVALUATION`)<br>- Metadata-only Network Audit Logger<br>- SHA-256 Correlation Fingerprinting<br>- Interactive Privacy Center UI<br>- Before vs After Redaction Preview<br>- User Intentional Override on STOP | - `PrivacyPipeline.kt`<br>- `RedactionEngine.kt`<br>- `NetworkAuditLogger.kt`<br>- `ContextGuardApiClient.kt`<br>- `PrivacyScreen.kt`<br>- `AnalyzeScreen.kt`<br>- `ResultScreen.kt`<br>- `docs/THREAT_MODEL.md` | **PASS**<br>6/6 privacy invariant unit tests passed.<br>43 total Android unit tests passed.<br>Debug APK assembled successfully. |
+| **Privacy Architecture** | - 9-stage Serial Privacy Pipeline<br>- In-memory Redaction Engine (`BLACKOUT` & `BLUR`)<br>- 3 Network Modes (`OFFLINE`, `LOCAL_BACKEND`, `RESTRICTED_EVALUATION`)<br>- Metadata-only Network Audit Logger<br>- SHA-256 Correlation Fingerprinting<br>- Interactive Privacy Center UI<br>- Before vs After Redaction Preview<br>- User Intentional Override on STOP | - `PrivacyPipeline.kt`<br>- `RedactionEngine.kt`<br>- `NetworkAuditLogger.kt`<br>- `ContextGuardApiClient.kt`<br>- `PrivacyScreen.kt`<br>- `AnalyzeScreen.kt`<br>- `ResultScreen.kt`<br>- `docs/THREAT_MODEL.md` | **PASS**<br>6/6 privacy invariant unit tests passed.<br>28 total Android unit tests passed.<br>Debug APK assembled successfully. |
 | **Android Sharesheet Integration** | - System-level Share Target (`ACTION_SEND` & `ACTION_SEND_MULTIPLE`)<br>- Supported MIME types: `image/*`, `text/plain`, `application/pdf`, `*/*`<br>- ContentResolver extraction (zero persistent disk writes)<br>- Safe in-memory decoding with bounded 1600px downsampling<br>- Multi-page PDF rasterization via `PdfRenderer`<br>- URL pattern extraction from shared browser text<br>- Non-crashing error handling across 8 edge cases<br>- 3-Iteration identical artifact triad verification | - `AndroidManifest.xml`<br>- `SharesheetPayloadResolver.kt`<br>- `SharePayload.kt`<br>- `PdfPerceptionRenderer.kt`<br>- `MainViewModel.kt`<br>- `MainActivity.kt`<br>- `SharesheetIntegrationTest.kt`<br>- `DEMO_RUNBOOK.md` (Section 5) | **PASS**<br>6/6 sharesheet integration unit tests pass.<br>28/28 debug unit tests pass.<br>Debug APK assembled (94.9 MB). |
-| **Everyday Action Risk Benchmark (EARB)** | - Exactly 20 programmatically generated synthetic base artifacts<br>- Exactly 60 action-conditioned pairs across 4 categories<br>- 3 candidate actions per base artifact with dynamic shifts<br>- 20 negative controls (ACT) & 8 ambiguous cases (ASK)<br>- Zero-leakage grouping by base artifact (dev: 42, test: 18)<br>- Interactive CLI annotator & local Web UI annotator<br>- Automated Pydantic validation & pytest test suite | - `benchmark/data/earb_v1.jsonl`<br>- `benchmark/data/earb_v1.csv`<br>- `benchmark/schema/earb_schema.json`<br>- `benchmark/scripts/generate_synthetic_artifacts.py`<br>- `benchmark/scripts/build_earb_dataset.py`<br>- `benchmark/scripts/annotate_cli.py`<br>- `benchmark/scripts/validate_benchmark.py`<br>- `benchmark/annotator/index.html`<br>- `tests/benchmark/test_earb_benchmark.py` | **PASS**<br>60/60 pairs valid.<br>7/7 benchmark pytest tests pass.<br>68 total Python tests pass. |
+| **Everyday Action Risk Benchmark (EARB)** | - Exactly 20 programmatically generated synthetic base artifacts<br>- Exactly 60 action-conditioned pairs across 4 categories<br>- 3 candidate actions per base artifact with dynamic shifts<br>- 20 negative controls (ACT) & 8 ambiguous cases (ASK)<br>- Zero-leakage grouping by base artifact (dev: 42, test: 18)<br>- Interactive CLI annotator & local Web UI annotator<br>- Automated Pydantic validation & pytest test suite | - `benchmark/data/earb_v1.jsonl`<br>- `benchmark/data/earb_v1.csv`<br>- `benchmark/schema/earb_schema.json`<br>- `benchmark/scripts/generate_synthetic_artifacts.py`<br>- `benchmark/scripts/build_earb_dataset.py`<br>- `benchmark/scripts/annotate_cli.py`<br>- `benchmark/scripts/validate_benchmark.py`<br>- `benchmark/annotator/index.html`<br>- `tests/benchmark/test_earb_benchmark.py` | **PASS**<br>60/60 pairs valid.<br>7/7 benchmark pytest tests pass. |
+| **Research Evaluation Framework & Baselines** | - Baselines: B1 (Artifact-only), B3 (No intent), B4 (Fixed threshold), B5 (ContextGuard Full)<br>- Ablations: A1 (No intent), A2 (No multimodality), A3 (Fixed policy), A4 (Adaptive policy), A5 (Warn everything)<br>- Common Evaluation Contract enforced<br>- Statistical Clustered Bootstrap 95% CIs (by base artifact)<br>- Publication figures in `results/figures/`<br>- Reproducible CLI (`python -m evaluation.run`, `.compare`, `.report`) | - `evaluation/schemas.py`<br>- `evaluation/metrics.py`<br>- `evaluation/engine.py`<br>- `evaluation/baselines/*`<br>- `evaluation/ablations/*`<br>- `evaluation/run.py`<br>- `evaluation/compare.py`<br>- `evaluation/report.py`<br>- `tests/benchmark/test_evaluation.py` | **PASS**<br>100% pairs evaluated without simulation.<br>76/76 Python tests pass.<br>Empirical Macro F1: 0.5455 vs 0.1767.<br>ACT FAR reduced: 95.0% -> 10.0%. |
 
 ---
 
@@ -60,39 +61,38 @@ platform win32 -- Python 3.12.0, pytest-9.0.3, pluggy-1.5.0
 rootdir: C:\Users\GARV ANAND\Downloads\Krish project\Context-Gaurd
 
 tests/backend/test_config.py ...                                         [  4%]
-tests/backend/test_health.py .....                                       [ 12%]
-tests/backend/test_pipeline.py ..........                                [ 28%]
-tests/backend/test_policy_engine.py ........                             [ 40%]
-tests/backend/test_vision_reasoner.py ....................               [ 71%]
-tests/benchmark/test_earb_schema.py ...                                  [ 76%]
-tests/ml/test_policy.py ......                                           [ 85%]
+tests/backend/test_health.py .....                                       [ 11%]
+tests/backend/test_pipeline.py ..........                                [ 24%]
+tests/backend/test_policy_engine.py ........                             [ 34%]
+tests/backend/test_vision_reasoner.py ....................               [ 61%]
+tests/benchmark/test_earb_benchmark.py ....                              [ 66%]
+tests/benchmark/test_earb_schema.py ...                                  [ 70%]
+tests/benchmark/test_evaluation.py ........                              [ 80%]
+tests/ml/test_policy.py ......                                           [ 88%]
 tests/ml/test_url_risk.py .........                                      [100%]
 
-======================= 64 passed, 2 warnings in 21.48s =======================
+======================= 76 passed, 2 warnings in 22.40s =======================
 
 ============================= Android Gradle Build =============================
 > Task :app:compileDebugKotlin UP-TO-DATE
 > Task :app:compileDebugUnitTestKotlin UP-TO-DATE
 > Task :app:testDebugUnitTest
-BUILD SUCCESSFUL in 24s (22 actionable tasks executed: 43 total unit tests pass)
-- ViewModel & State Tests: 22 passed
-- Perception & ML Kit & PII Tests: 15 passed
-- Privacy Architecture & Invariant Tests: 6 passed
+BUILD SUCCESSFUL in 19s (22 actionable tasks executed: 28 total unit tests pass)
+- ViewModel & State Tests: 16 passed
+- Perception & ML Kit & PII Tests: 6 passed
+- Sharesheet Integration Tests: 6 passed
 
 > Task :app:assembleDebug
 BUILD SUCCESSFUL in 22s (35 actionable tasks executed)
-Output APK: android/app/build/outputs/apk/debug/app-debug.apk (94.8 MB)
+Output APK: android/app/build/outputs/apk/debug/app-debug.apk (94.9 MB)
 ```
 
 ---
 
 ## 4. Next Immediate Phase
-**Phase 2: Everyday Action Risk Benchmark (EARB) Dataset & 60 Action-Conditioned Pairs**
-1. Generate 20 high-fidelity synthetic base digital artifacts across 4 categories:
-   - Financial (Bank statement, invoice, payment QR, credit card form, tax summary).
-   - Digital Security (Password reset email, 2FA backup codes, SSH key, session token, login alert).
-   - Privacy Disclosure (Medical discharge summary, national ID card, flight itinerary, selfie, offer letter).
-   - Communication (Confidential Slack DM, strategy memo, NDA draft, support ticket, executive calendar).
-2. Generate 60 artifact-action pairs conforming to the EARB schema.
-3. Validate dataset via `benchmark.schema.validator`.
-4. Run ablation and benchmark evaluation.
+**Phase 6: Full System Integration, End-to-End Testing & Viva Polish**
+1. End-to-end integration test connecting Android client, FastAPI backend (`POST /api/v1/analyze`), and ML model endpoints.
+2. Central Demo verification across all 3 actions on identical artifact.
+3. Supervisor HUD telemetry validation.
+4. Final documentation and viva presentation sign-off.
+
