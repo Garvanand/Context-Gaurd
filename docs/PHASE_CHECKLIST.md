@@ -66,20 +66,21 @@ This checklist tracks the end-to-end execution of the ContextGuard research caps
   - [x] Native `PdfRenderer` for safe first-3-pages multi-page ingestion.
   - [x] Multi-format artifact analysis (`IMAGE`, `SCREENSHOT`, `TEXT`, `URL`, `PDF`).
 - [x] Implement local redaction engine (in-memory canvas pixel masking + text masking).
-- [ ] Implement network client with offline fallback:
-  - `OFFLINE` mode (zero network bytes, local heuristics).
-  - `REDACTED_LOCAL_BACKEND` mode (sends masked bitmap + metadata).
+- [x] Implement network client with offline fallback:
+  - [x] `OFFLINE` mode (zero network bytes, local heuristics).
+  - [x] `LOCAL_BACKEND` mode (sends masked bitmap + metadata).
+  - [x] `RESTRICTED_EVALUATION` mode (academic ablation testing).
 - [x] Implement Jetpack Compose UI:
   - [x] Welcome & Setup Screen.
   - [x] Home / Analyze Screen (Image picker, Camera capture, Sharesheet receiver).
-  - [x] Artifact Preview & Local Redaction Toggle.
+  - [x] Artifact Preview & Local Redaction Toggle (BEFORE vs AFTER preview).
   - [x] Action & Destination Selection (Save privately, Direct message, Public post).
   - [x] Analysis Progress with real-time stage indicators.
-  - [x] Result Screen with Intervention Banner (ACT / ASK / WARN / STOP).
+  - [x] Result Screen with Intervention Banner (ACT / ASK / WARN / STOP + Override).
   - [x] Evidence Card & Decision Trace Breakdown.
   - [x] Supervisor / Viva Mode (real-time telemetry and score calculation).
-  - [x] Network Audit Log Screen.
-- [x] Android unit tests for domain, perception, and redaction logic (`android/app/src/test/`, 37 unit tests pass).
+  - [x] Privacy Center & Network Audit Log Screen.
+- [x] Android unit tests for domain, perception, and privacy architecture (`android/app/src/test/`, 43 unit tests pass).
 
 ---
 

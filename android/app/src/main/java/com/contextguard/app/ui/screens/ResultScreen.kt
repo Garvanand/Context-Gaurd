@@ -8,10 +8,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +33,51 @@ fun ResultScreen(
     val scrollState = rememberScrollState()
 
     var showOverrideWarning by remember { mutableStateOf(false) }
+
+    if (showOverrideWarning && result != null) {
+        AlertDialog(
+            onDismissRequest = { showOverrideWarning = false },
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = "Warning",
+                        tint = StopRed
+                    )
+                    Text(text = "Engage Intentional User Override?", color = StopRed, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                }
+            },
+            text = {
+                Text(
+                    text = "ContextGuard identified this action as irreversible catastrophic exposure (rho = ${String.format("%.2f", result.riskScore)} >= 0.65).\n\nOverriding will bypass safety protections and proceed with '${result.intendedAction}' to '${result.destination}'.\n\nDo you confirm this action?",
+                    color = TextSecondary,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showOverrideWarning = false
+                        viewModel.overrideStopIntervention()
+                        onNavigateBack()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = StopRed)
+                ) {
+                    Text(text = "Confirm & Override", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showOverrideWarning = false }) {
+                    Text(text = "Cancel", color = TextPrimary)
+                }
+            },
+            containerColor = SurfaceDark
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -67,6 +114,31 @@ fun ResultScreen(
                 fontSize = 14.sp
             )
             return
+        }
+
+        // Active Override Banner
+        if (state.isOverrideEngaged) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(1.dp, StopRed, RoundedCornerShape(12.dp)),
+                colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Warning, contentDescription = "Override", tint = StopRed)
+                    Text(
+                        text = "Deliberate User Override Active: Safety intervention bypassed by user consent.",
+                        color = StopRed,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
 
         // Intervention Badge (Large)
@@ -154,13 +226,15 @@ fun ResultScreen(
                         Text(text = "Cancel Action (Recommended)", color = TextPrimary)
                     }
 
-                    OutlinedButton(
-                        onClick = { showOverrideWarning = true },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = StopRed),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text(text = "Emergency User Override (Proceed)", fontSize = 13.sp)
+                    if (result.canOverride) {
+                        OutlinedButton(
+                            onClick = { showOverrideWarning = true },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = StopRed),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text(text = "Emergency User Override (Proceed)", fontSize = 13.sp)
+                        }
                     }
                 }
             }

@@ -2,8 +2,8 @@
 
 **Capstone Title:** CONTEXTGUARD: A Multimodal AI System for Pre-Action Risk Detection in Everyday Digital Tasks  
 **Institution:** Final-Year B.Tech Capstone Project  
-**Status Date:** Android Perception Layer (ML Kit OCR, Face Detection, PDF Renderer & PII Engine) Completed  
-**Current Milestone:** Android Perception Layer & ML Kit Integration **COMPLETED**  
+**Status Date:** Android Privacy Architecture (Pipeline, Redaction Engine, Network Modes, Audit Logger, Threat Model & Privacy Center) Completed  
+**Current Milestone:** Privacy Architecture & Invariants **COMPLETED**  
 **Next Milestone:** Phase 2 (Everyday Action Risk Benchmark - EARB Dataset & 60 Action-Conditioned Pairs)
 
 ---
@@ -45,7 +45,8 @@
 | **Model Training & Comparison** | - Model comparison<br>- XGBoost champion | - `ml/training/train_phishing.py`<br>- XGBoost test F1: 0.9951, AUC: 0.9990 | **PASS** |
 | **Automated Testing** | - Unit & integration tests<br>- Full test suite | - 64 automated test cases across monorepo | **PASS**<br>**64 passed in 19.25s**. |
 | **Android Client** | - 8 Compose screens<br>- Single Activity | - Material 3 Dark theme, single activity architecture, edge perception integration | **PASS**<br>`testDebugUnitTest`: 37/37 passed.<br>`assembleDebug`: `app-debug.apk` built. |
-| **Android Perception Layer** | - Google ML Kit Text Recognition<br>- Google ML Kit Face Detection<br>- Native `PdfRenderer` (first 3 pages)<br>- Local PII Detector (9 types, Luhn check, OTP context)<br>- Strongly typed `LocalPerceptionResult` | - `MlKitPerceptionEngine.kt`<br>- `PiiDetector.kt`<br>- `PdfPerceptionRenderer.kt`<br>- `ImagePreprocessor.kt`<br>- Coroutines off-UI dispatchers (`Dispatchers.Default`, `Dispatchers.IO`) | **PASS**<br>15 dedicated unit tests passed in 13s.<br>APK packaged with real native ML Kit runtime (`libface_detector_v2_jni.so`, `libmlkit_google_ocr_pipeline.so`). |
+| **Android Perception Layer** | - Google ML Kit Text Recognition<br>- Google ML Kit Face Detection<br>- Native `PdfRenderer` (first 3 pages)<br>- Local PII Detector (9 types, Luhn check, OTP context)<br>- Strongly typed `LocalPerceptionResult` | - `MlKitPerceptionEngine.kt`<br>- `PiiDetector.kt`<br>- `PdfPerceptionRenderer.kt`<br>- `ImagePreprocessor.kt`<br>- Coroutines off-UI dispatchers (`Dispatchers.Default`, `Dispatchers.IO`) | **PASS**<br>15 dedicated unit tests passed.<br>APK packaged with real native ML Kit runtime (`libface_detector_v2_jni.so`, `libmlkit_google_ocr_pipeline.so`). |
+| **Privacy Architecture** | - 9-stage Serial Privacy Pipeline<br>- In-memory Redaction Engine (`BLACKOUT` & `BLUR`)<br>- 3 Network Modes (`OFFLINE`, `LOCAL_BACKEND`, `RESTRICTED_EVALUATION`)<br>- Metadata-only Network Audit Logger<br>- SHA-256 Correlation Fingerprinting<br>- Interactive Privacy Center UI<br>- Before vs After Redaction Preview<br>- User Intentional Override on STOP | - `PrivacyPipeline.kt`<br>- `RedactionEngine.kt`<br>- `NetworkAuditLogger.kt`<br>- `ContextGuardApiClient.kt`<br>- `PrivacyScreen.kt`<br>- `AnalyzeScreen.kt`<br>- `ResultScreen.kt`<br>- `docs/THREAT_MODEL.md` | **PASS**<br>6/6 privacy invariant unit tests passed.<br>43 total Android unit tests passed.<br>Debug APK assembled successfully. |
 
 ---
 
@@ -65,19 +66,20 @@ tests/benchmark/test_earb_schema.py ...                                  [ 76%]
 tests/ml/test_policy.py ......                                           [ 85%]
 tests/ml/test_url_risk.py .........                                      [100%]
 
-======================= 64 passed in 19.25s ====================================
+======================= 64 passed, 2 warnings in 21.48s =======================
 
 ============================= Android Gradle Build =============================
 > Task :app:compileDebugKotlin UP-TO-DATE
 > Task :app:compileDebugUnitTestKotlin UP-TO-DATE
 > Task :app:testDebugUnitTest
-BUILD SUCCESSFUL in 13s (22 actionable tasks executed: 37 total unit tests pass)
+BUILD SUCCESSFUL in 24s (22 actionable tasks executed: 43 total unit tests pass)
 - ViewModel & State Tests: 22 passed
 - Perception & ML Kit & PII Tests: 15 passed
+- Privacy Architecture & Invariant Tests: 6 passed
 
 > Task :app:assembleDebug
-BUILD SUCCESSFUL in 14s (35 actionable tasks executed)
-Output APK: android/app/build/outputs/apk/debug/app-debug.apk (94.7 MB, bundling ML Kit native vision engines)
+BUILD SUCCESSFUL in 22s (35 actionable tasks executed)
+Output APK: android/app/build/outputs/apk/debug/app-debug.apk (94.8 MB)
 ```
 
 ---

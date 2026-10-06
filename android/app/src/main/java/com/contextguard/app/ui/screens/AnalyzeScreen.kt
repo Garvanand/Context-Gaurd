@@ -1,5 +1,6 @@
 package com.contextguard.app.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,9 +14,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.contextguard.app.core.privacy.RedactionStyle
 import com.contextguard.app.core.state.UiState
 import com.contextguard.app.theme.*
 import com.contextguard.app.ui.components.LoadingOverlay
@@ -30,6 +35,8 @@ fun AnalyzeScreen(
     val state by viewModel.appState.collectAsState()
     val analysisState by viewModel.analysisState.collectAsState()
     val scrollState = rememberScrollState()
+
+    var previewMode by remember { mutableStateOf("AFTER") } // "BEFORE" vs "AFTER"
 
     val actionOptions = listOf(
         Pair("Save to Personal Encrypted Vault", "Personal Drive (Encrypted)"),
@@ -58,12 +65,20 @@ fun AnalyzeScreen(
                         tint = TextPrimary
                     )
                 }
-                Text(
-                    text = "Pre-Action Evaluation",
-                    color = TextPrimary,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Column {
+                    Text(
+                        text = "Pre-Action Evaluation",
+                        color = TextPrimary,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Mode: ${state.backendConfig.networkMode.name}",
+                        color = CyanAccent,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
             // Artifact Information Card
@@ -136,6 +151,141 @@ fun AnalyzeScreen(
                 }
             }
 
+            // Interactive BEFORE vs AFTER REDACTION Preview Card
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(SurfaceDark, RoundedCornerShape(16.dp))
+                    .border(1.dp, SurfaceBorder, RoundedCornerShape(16.dp))
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "REDACTION PREVIEW",
+                        color = CyanAccent,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+
+                    // Before vs After Switch Pills
+                    Row(
+                        modifier = Modifier
+                            .background(BackgroundDark, RoundedCornerShape(8.dp))
+                            .border(1.dp, SurfaceBorder, RoundedCornerShape(8.dp))
+                            .padding(2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    if (previewMode == "BEFORE") SurfaceGlass else BackgroundDark,
+                                    RoundedCornerShape(6.dp)
+                                )
+                                .clickable { previewMode = "BEFORE" }
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "BEFORE",
+                                color = if (previewMode == "BEFORE") WarnOrange else TextSecondary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    if (previewMode == "AFTER") SurfaceGlass else BackgroundDark,
+                                    RoundedCornerShape(6.dp)
+                                )
+                                .clickable { previewMode = "AFTER" }
+                                .padding(horizontal = 10.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "AFTER REDACTION",
+                                color = if (previewMode == "AFTER") ActGreen else TextSecondary,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                // Visual Bitmap Preview or Text Preview
+                val rawBmp = state.rawBitmap
+                val redBmp = state.lastRedactionResult?.redactedBitmap
+
+                if (rawBmp != null) {
+                    val displayBmp = if (previewMode == "AFTER") (redBmp ?: rawBmp) else rawBmp
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(180.dp)
+                            .background(BackgroundDark, RoundedCornerShape(12.dp))
+                            .border(1.dp, SurfaceBorder, RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            bitmap = displayBmp.asImageBitmap(),
+                            contentDescription = "Artifact Preview",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                } else {
+                    // Text / OCR Preview
+                    val displayText = if (previewMode == "AFTER") {
+                        state.lastRedactionResult?.redactedText ?: state.lastPerceptionResult?.ocrText ?: "Sample Account PII masked locally: [REDACTED_ACCOUNT] ending in 5671"
+                    } else {
+                        state.lastPerceptionResult?.ocrText?.ifEmpty { "Account Number: 4532 0150 1234 5671\nPhone: +91 9876543210\nOTP: 482910" }
+                            ?: "Account Number: 4532 0150 1234 5671\nPhone: +91 9876543210\nOTP: 482910"
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                            .background(BackgroundDark, RoundedCornerShape(12.dp))
+                            .border(1.dp, SurfaceBorder, RoundedCornerShape(12.dp))
+                            .padding(12.dp)
+                    ) {
+                        Text(
+                            text = displayText,
+                            color = if (previewMode == "AFTER") ActGreen else TextPrimary,
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily.Monospace,
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                // Redaction Style Options (Blackout vs Blur)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "Style:", color = TextSecondary, fontSize = 12.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = state.redactionStyle == RedactionStyle.BLACKOUT,
+                            onClick = { viewModel.setRedactionStyle(RedactionStyle.BLACKOUT) },
+                            label = { Text("Blackout", fontSize = 11.sp) }
+                        )
+                        FilterChip(
+                            selected = state.redactionStyle == RedactionStyle.BLUR,
+                            onClick = { viewModel.setRedactionStyle(RedactionStyle.BLUR) },
+                            label = { Text("Blur", fontSize = 11.sp) }
+                        )
+                    }
+                }
+            }
+
             // Intended Action Selector
             Text(
                 text = "SELECT INTENDED ACTION",
@@ -185,7 +335,7 @@ fun AnalyzeScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Action Button
             Button(
@@ -196,19 +346,27 @@ fun AnalyzeScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
+                    .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = CyanAccent),
                 shape = RoundedCornerShape(14.dp)
             ) {
+                Icon(
+                    imageVector = Icons.Default.Shield,
+                    contentDescription = "Evaluate",
+                    tint = BackgroundDark,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Evaluate Safety Policy",
+                    text = "Evaluate Pre-Action Safety",
                     color = BackgroundDark,
-                    fontSize = 16.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
         }
 
+        // Loading overlay
         if (analysisState is UiState.Loading) {
             val msg = (analysisState as UiState.Loading).message
             LoadingOverlay(message = msg)

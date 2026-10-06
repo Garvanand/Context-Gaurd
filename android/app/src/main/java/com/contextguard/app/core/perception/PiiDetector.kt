@@ -251,6 +251,21 @@ object PiiDetector {
     }
 
     /**
+     * Replaces detected sensitive PII substrings in text with masked tokens.
+     */
+    fun maskPiiInText(text: String, findings: List<PiiFinding>): String {
+        var result = text
+        val sorted = findings.sortedByDescending { it.rawValue.length }
+        for (f in sorted) {
+            if (f.rawValue.isNotEmpty()) {
+                val masked = if (f.maskedValue.isNotEmpty()) f.maskedValue else maskValue(f.rawValue, f.type)
+                result = result.replace(f.rawValue, masked)
+            }
+        }
+        return result
+    }
+
+    /**
      * Resolves the spatial bounding box in OCR results corresponding to a PII snippet.
      */
     private fun findBoundingBoxForText(targetText: String, blocks: List<TextBlockResult>): Rect? {

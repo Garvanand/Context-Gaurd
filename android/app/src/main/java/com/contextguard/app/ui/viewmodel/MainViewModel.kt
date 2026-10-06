@@ -1,11 +1,21 @@
 package com.contextguard.app.ui.viewmodel
 
+import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.contextguard.app.core.health.SystemHealthState
 import com.contextguard.app.core.logging.AppLogger
 import com.contextguard.app.core.network.BackendConfig
 import com.contextguard.app.core.network.InferenceMode
+import com.contextguard.app.core.perception.LocalPerceptionResult
+import com.contextguard.app.core.perception.MlKitPerceptionEngine
+import com.contextguard.app.core.privacy.NetworkAuditEntry
+import com.contextguard.app.core.privacy.NetworkAuditLogger
+import com.contextguard.app.core.privacy.NetworkMode
+import com.contextguard.app.core.privacy.PrivacyPipeline
+import com.contextguard.app.core.privacy.RedactionEngine
+import com.contextguard.app.core.privacy.RedactionResult
+import com.contextguard.app.core.privacy.RedactionStyle
 import com.contextguard.app.core.state.UiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,10 +23,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
-import com.contextguard.app.core.perception.LocalPerceptionResult
-import com.contextguard.app.core.perception.MlKitPerceptionEngine
-import android.graphics.Bitmap
 import java.io.File
 
 enum class InterventionType {
@@ -39,7 +45,8 @@ data class SafetyResult(
     val intendedAction: String,
     val destination: String,
     val latencyMs: Long = 142L,
-    val hashSha256: String = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    val hashSha256: String = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    val canOverride: Boolean = true
 )
 
 data class DemoScenario(
@@ -64,15 +71,20 @@ data class DemoAction(
 data class AppState(
     val currentArtifactTitle: String = "Bank_Statement_Oct2026.pdf",
     val currentSourceApp: String = "HDFC Mobile Banking",
-    val selectedAction: String = "Save to Private Vault",
+    val selectedAction: String = "Save to Personal Encrypted Vault",
     val selectedDestination: String = "Personal Encrypted Drive",
     val isRedactionEnabled: Boolean = true,
+    val redactionStyle: RedactionStyle = RedactionStyle.BLACKOUT,
     val maskedPiiCount: Int = 4,
     val detectedFacesCount: Int = 0,
     val backendConfig: BackendConfig = BackendConfig(),
     val healthState: SystemHealthState = SystemHealthState(),
     val lastResult: SafetyResult? = null,
-    val lastPerceptionResult: LocalPerceptionResult? = null
+    val lastPerceptionResult: LocalPerceptionResult? = null,
+    val lastRedactionResult: RedactionResult? = null,
+    val rawBitmap: Bitmap? = null,
+    val isOverrideEngaged: Boolean = false,
+    val lastAuditEntry: NetworkAuditEntry? = null
 )
 
 class MainViewModel : ViewModel() {
@@ -82,6 +94,10 @@ class MainViewModel : ViewModel() {
 
     private val _analysisState = MutableStateFlow<UiState<SafetyResult>>(UiState.Idle)
     val analysisState: StateFlow<UiState<SafetyResult>> = _analysisState.asStateFlow()
+
+    private val perceptionEngine = MlKitPerceptionEngine()
+    private val redactionEngine = RedactionEngine()
+    private val privacyPipeline = PrivacyPipeline(perceptionEngine, redactionEngine)
 
     val demoScenarios = listOf(
         DemoScenario(
@@ -125,7 +141,7 @@ class MainViewModel : ViewModel() {
     )
 
     fun setAction(action: String, destination: String) {
-        _appState.update { it.copy(selectedAction = action, selectedDestination = destination) }
+        _appState.update { it.copy(selectedAction = action, selectedDestination = destination, isOverrideEngaged = false) }
     }
 
     fun toggleRedaction(enabled: Boolean) {
@@ -133,7 +149,35 @@ class MainViewModel : ViewModel() {
         AppLogger.i("Redaction toggled: $enabled")
     }
 
-    private val perceptionEngine = MlKitPerceptionEngine()
+    fun setRedactionStyle(style: RedactionStyle) {
+        _appState.update { it.copy(redactionStyle = style) }
+        // Re-apply redaction if we have active perceptual findings
+        val state = _appState.value
+        val bmp = state.rawBitmap
+        val perception = state.lastPerceptionResult
+        if (bmp != null && perception != null) {
+            val updatedRedaction = redactionEngine.redact(
+                bitmap = bmp,
+                ocrText = perception.ocrText,
+                piiFindings = perception.piiFindings,
+                faceFindings = perception.faces,
+                style = style
+            )
+            _appState.update { it.copy(lastRedactionResult = updatedRedaction) }
+        }
+        AppLogger.i("Redaction style updated to: $style")
+    }
+
+    fun setNetworkMode(mode: NetworkMode) {
+        _appState.update {
+            it.copy(
+                backendConfig = it.backendConfig.copy(
+                    inferenceMode = InferenceMode.fromNetworkMode(mode)
+                )
+            )
+        }
+        AppLogger.i("Network mode updated to: $mode (Airplane safe: ${mode.isAirplaneSafe})")
+    }
 
     fun updateBackendConfig(host: String, port: Int, mode: InferenceMode) {
         _appState.update {
@@ -148,6 +192,18 @@ class MainViewModel : ViewModel() {
         AppLogger.i("Backend config updated: host=$host, port=$port, mode=$mode")
     }
 
+    fun overrideStopIntervention() {
+        val current = _appState.value.lastResult
+        if (current != null && current.intervention == InterventionType.STOP && current.canOverride) {
+            _appState.update { it.copy(isOverrideEngaged = true) }
+            AppLogger.w("User intentionally engaged deliberate override on STOP intervention")
+        }
+    }
+
+    fun setLastResultForTesting(result: SafetyResult) {
+        _appState.update { it.copy(lastResult = result) }
+    }
+
     fun processBitmapArtifact(
         bitmap: Bitmap,
         title: String = "Captured_Artifact.png",
@@ -156,18 +212,35 @@ class MainViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _analysisState.value = UiState.Loading("Extracting on-device OCR & detecting faces with ML Kit...")
-            val result = perceptionEngine.analyzeImage(bitmap)
+            val state = _appState.value
+
+            val pipelineResult = privacyPipeline.processImage(
+                rawBitmap = bitmap,
+                selectedAction = state.selectedAction,
+                destination = state.selectedDestination,
+                sourceApp = sourceApp,
+                networkMode = state.backendConfig.networkMode,
+                redactionStyle = state.redactionStyle,
+                backendConfig = state.backendConfig
+            )
+
             _appState.update {
                 it.copy(
                     currentArtifactTitle = title,
                     currentSourceApp = sourceApp,
-                    lastPerceptionResult = result,
-                    maskedPiiCount = result.piiFindings.size,
-                    detectedFacesCount = result.faces.size
+                    rawBitmap = bitmap,
+                    lastPerceptionResult = pipelineResult.perceptionResult,
+                    lastRedactionResult = pipelineResult.redactionResult,
+                    maskedPiiCount = pipelineResult.redactionResult.regionsRedacted.size,
+                    detectedFacesCount = pipelineResult.perceptionResult.faces.size,
+                    lastResult = pipelineResult.safetyResult,
+                    lastAuditEntry = pipelineResult.auditEntry,
+                    isOverrideEngaged = false
                 )
             }
-            onComplete(result)
-            executeAnalysis()
+
+            _analysisState.value = UiState.Success(pipelineResult.safetyResult)
+            onComplete(pipelineResult.perceptionResult)
         }
     }
 
@@ -179,18 +252,34 @@ class MainViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _analysisState.value = UiState.Loading("Scanning on-device text for PII & URLs...")
-            val result = perceptionEngine.analyzeText(text)
+            val state = _appState.value
+
+            val pipelineResult = privacyPipeline.processText(
+                rawText = text,
+                selectedAction = state.selectedAction,
+                destination = state.selectedDestination,
+                sourceApp = sourceApp,
+                networkMode = state.backendConfig.networkMode,
+                backendConfig = state.backendConfig
+            )
+
             _appState.update {
                 it.copy(
                     currentArtifactTitle = title,
                     currentSourceApp = sourceApp,
-                    lastPerceptionResult = result,
-                    maskedPiiCount = result.piiFindings.size,
-                    detectedFacesCount = result.faces.size
+                    rawBitmap = null,
+                    lastPerceptionResult = pipelineResult.perceptionResult,
+                    lastRedactionResult = pipelineResult.redactionResult,
+                    maskedPiiCount = pipelineResult.redactionResult.regionsRedacted.size,
+                    detectedFacesCount = 0,
+                    lastResult = pipelineResult.safetyResult,
+                    lastAuditEntry = pipelineResult.auditEntry,
+                    isOverrideEngaged = false
                 )
             }
-            onComplete(result)
-            executeAnalysis()
+
+            _analysisState.value = UiState.Success(pipelineResult.safetyResult)
+            onComplete(pipelineResult.perceptionResult)
         }
     }
 
@@ -202,18 +291,34 @@ class MainViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _analysisState.value = UiState.Loading("Rendering PDF pages & extracting ML Kit OCR...")
-            val result = perceptionEngine.analyzePdf(pdfFile)
+            val state = _appState.value
+
+            val pipelineResult = privacyPipeline.processPdf(
+                pdfFile = pdfFile,
+                selectedAction = state.selectedAction,
+                destination = state.selectedDestination,
+                sourceApp = sourceApp,
+                networkMode = state.backendConfig.networkMode,
+                backendConfig = state.backendConfig
+            )
+
             _appState.update {
                 it.copy(
                     currentArtifactTitle = title,
                     currentSourceApp = sourceApp,
-                    lastPerceptionResult = result,
-                    maskedPiiCount = result.piiFindings.size,
-                    detectedFacesCount = result.faces.size
+                    rawBitmap = null,
+                    lastPerceptionResult = pipelineResult.perceptionResult,
+                    lastRedactionResult = pipelineResult.redactionResult,
+                    maskedPiiCount = pipelineResult.redactionResult.regionsRedacted.size,
+                    detectedFacesCount = pipelineResult.perceptionResult.faces.size,
+                    lastResult = pipelineResult.safetyResult,
+                    lastAuditEntry = pipelineResult.auditEntry,
+                    isOverrideEngaged = false
                 )
             }
-            onComplete(result)
-            executeAnalysis()
+
+            _analysisState.value = UiState.Success(pipelineResult.safetyResult)
+            onComplete(pipelineResult.perceptionResult)
         }
     }
 
@@ -226,9 +331,9 @@ class MainViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             _analysisState.value = UiState.Loading("Extracting on-device OCR & masking sensitive PII...")
-            delay(400)
+            delay(200)
             _analysisState.value = UiState.Loading("Evaluating action-conditioned deterministic policy...")
-            delay(500)
+            delay(300)
 
             val state = _appState.value
             val s = customSeverity ?: when {
@@ -264,7 +369,7 @@ class MainViewModel : ViewModel() {
                 confidence = c,
                 evidence = listOf(
                     "Detected financial transaction tables and balance records",
-                    "Sensitive account fields masked via local canvas redaction",
+                    "Sensitive account fields masked via local canvas redaction (${state.maskedPiiCount} items)",
                     "Target recipient evaluated: ${state.selectedDestination}",
                     "Policy equation evaluated: rho = $s * (1 + 0.75 * $r) = ${String.format("%.3f", rho)}"
                 ),
@@ -280,7 +385,18 @@ class MainViewModel : ViewModel() {
                 latencyMs = (120L..210L).random()
             )
 
-            _appState.update { it.copy(lastResult = result) }
+            // Audit record
+            val audit = NetworkAuditLogger.record(
+                endpointCategory = if (state.backendConfig.isOffline) "OFFLINE_LOCAL" else "LOCAL_BACKEND_REDACTED",
+                payloadType = if (state.backendConfig.isOffline) "ZERO_BYTES" else "METADATA_AND_REDACTION",
+                payloadSizeBytes = if (state.backendConfig.isOffline) 0L else 1024L,
+                isRedacted = state.isRedactionEnabled,
+                responseStatus = if (state.backendConfig.isOffline) 0 else 200,
+                latencyMs = result.latencyMs,
+                artifactHashSha256 = result.hashSha256
+            )
+
+            _appState.update { it.copy(lastResult = result, lastAuditEntry = audit, isOverrideEngaged = false) }
             _analysisState.value = UiState.Success(result)
             AppLogger.audit(
                 event = "Pre-Action Decision: ${result.intervention}",
