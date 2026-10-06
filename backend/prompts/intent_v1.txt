@@ -1,0 +1,11 @@
+Evaluate the user's intended action and recipient context:
+- Intended Action: {intended_action}
+- Target Destination: {destination}
+- Target Recipient: {recipient}
+- Source Application: {source_app}
+
+Assess whether the intended action transforms or amplifies risk:
+- Distinguish internal storage/archival from external communication.
+- Distinguish private direct messages from public broadcast feeds.
+- Distinguish verified recipients from unknown or unverified third parties.
+Remember the core principle: The risk of an artifact cannot be determined from the artifact alone; the intended action and surrounding context change the appropriate safety intervention.

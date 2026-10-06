@@ -46,23 +46,21 @@ async def get_models_health() -> Dict[str, Any]:
     phishing_model_path = Path(settings.phishing_model_path)
     phishing_model_ready = phishing_model_path.exists()
 
-    # 2. Ollama / VLM reachability probe
-    ollama_reachable = False
-    ollama_message = "Not checked"
-    try:
-        async with httpx.AsyncClient(timeout=1.5) as client:
-            resp = await client.get(f"{settings.ollama_base_url}/api/tags")
-            if resp.status_code == 200:
-                ollama_reachable = True
-                ollama_message = "Ollama endpoint active"
-            else:
-                ollama_message = f"HTTP {resp.status_code}"
-    except Exception as e:
-        ollama_message = f"Ollama offline ({type(e).__name__}); fallback enabled"
+    # 2. VLM / Ollama real health check
+    from backend.models.qwen_vision import QwenVisionReasoner
+    vlm_reasoner = QwenVisionReasoner()
+    vlm_health = await vlm_reasoner.check_health()
 
     return {
         "status": "operational",
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        # Required Multimodal Health Contract
+        "ollama_reachable": vlm_health["ollama_reachable"],
+        "model_installed": vlm_health["model_installed"],
+        "model_name": vlm_health["model_name"],
+        "startup_latency": vlm_health["startup_latency_ms"],
+        "test_inference_status": vlm_health["test_inference_status"],
+        "vlm_healthy": vlm_health["test_inference_status"] == "passed",
         "layers": {
             "ml_kit_perception": {
                 "type": "on_device_edge",
@@ -81,11 +79,16 @@ async def get_models_health() -> Dict[str, Any]:
             },
             "multimodal_vlm": {
                 "type": "vision_language_reasoner",
-                "model_tag": settings.ollama_model,
+                "model_name": vlm_health["model_name"],
+                "model_tag": vlm_health["model_name"],
                 "provider_url": settings.ollama_base_url,
-                "is_reachable": ollama_reachable,
-                "fallback_active": not ollama_reachable,
-                "message": ollama_message,
+                "ollama_reachable": vlm_health["ollama_reachable"],
+                "is_reachable": vlm_health["ollama_reachable"],
+                "model_installed": vlm_health["model_installed"],
+                "startup_latency_ms": vlm_health["startup_latency_ms"],
+                "test_inference_status": vlm_health["test_inference_status"],
+                "fallback_active": vlm_health["fallback_active"],
+                "status": "healthy" if vlm_health["test_inference_status"] == "passed" else "fallback_active",
             },
             "policy_engine": {
                 "type": "deterministic_mathematical_gating",

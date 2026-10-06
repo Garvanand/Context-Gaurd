@@ -77,9 +77,31 @@ graph TD
 - **Service Layer:** [`backend/services/url_risk.py`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/backend/services/url_risk.py).
 
 ### Layer 3: Multimodal Vision-Language Reasoning (Qwen2.5-VL-3B)
-- **Model:** `Qwen2.5-VL-3B-Instruct` served locally via Ollama or local inference wrapper.
-- **Input:** Redacted artifact image + extracted text + contextual metadata (source app, intended action, recipient, destination).
-- **Output:** Structured JSON schema predicting severity $s \in [0, 1]$, reversibility $r \in [0, 1]$, confidence $c \in [0, 1]$, identified hazard categories, evidence snippets, and rationale.
+- **Model:** `Qwen2.5-VL-3B-Instruct` (target Ollama tag: `qwen2.5vl:3b` / `qwen2.5-vl:3b`) served locally via Ollama. No paid external APIs.
+- **Backend Abstraction:**
+  - Base interface: `VisionReasoner.analyze(...)` in [`backend/models/base.py`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/backend/models/base.py).
+  - Concrete implementation: `QwenVisionReasoner` in [`backend/models/qwen_vision.py`](file:///c:/Users/GARV%20ANAND/Downloads/Krish%20project/Context-Gaurd/backend/models/qwen_vision.py).
+- **Strict Structured JSON Contract:**
+  - Free-form prose is explicitly forbidden as the backend contract.
+  - Returns `StructuredVisionOutput`:
+    - `context_summary`: String summary of the artifact domain and layout.
+    - `intent_assessment`: Evaluation of the intended action and destination channel.
+    - `evidence`: List of `{type, description, importance}` items.
+    - `risk_type` & `risk_subtype`: Fine-grained hazard taxonomy classification.
+    - Bounded numerical metrics: $\text{severity} \in [0.0, 1.0]$, $\text{reversibility} \in [0.0, 1.0]$, $\text{confidence} \in [0.0, 1.0]$.
+    - `uncertainty_reasons`: Explicit epistemic uncertainty factors.
+    - `recommended_action`: `ACT`, `ASK`, `WARN`, or `STOP`.
+    - `alternative_action`: Optional safe path guidance.
+    - `reason`: Concrete grounding and rationale.
+- **Immutable Versioned Prompts:**
+  - Located under `backend/prompts/`: `context_v1.txt`, `intent_v1.txt`, `evidence_v1.txt`, `consequence_v1.txt`, `uncertainty_v1.txt`, `reasoning_v1.txt`.
+  - Prompts ground model reasoning in perceptual observations, distinguish artifact risk from action risk, and mandate reporting uncertainty without hallucination.
+- **In-Memory Image Normalizer:**
+  - Supports JPEG, PNG, WebP. Enforces a 10 MB payload limit and 1536px dimension bound.
+  - Normalizes color channels and formats entirely in volatile memory; zero raw images persisted to disk.
+- **Resilient Fallback & Model Health:**
+  - Safe deterministic action-conditioned fallback is engaged whenever Ollama is offline or unparseable, adhering to the **Model Failure Safety Rule** (never silently emits `ACT`).
+  - Endpoint `GET /health/models` provides authentic telemetry: `ollama_reachable`, `model_installed`, `model_name`, `startup_latency`, `test_inference_status`, and `vlm_healthy`. Model health is never fabricated.
 
 ---
 

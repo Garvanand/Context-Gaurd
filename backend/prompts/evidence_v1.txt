@@ -1,0 +1,5 @@
+Extract grounded pieces of visual and textual evidence from the artifact and context:
+- Identify explicit sensitive identifiers present (e.g. account numbers, balances, passwords, OTPs, QR codes, face contours).
+- Note any visual security warnings or phishing indicators (e.g. typosquatting, urgency cues, mismatched domains).
+- Assign an importance weight to each evidence item between 0.0 (marginal) and 1.0 (critical safety factor).
+CRITICAL RULE: Do NOT hallucinate or invent unobserved facts. If an entity is redacted or absent, state that it is absent.

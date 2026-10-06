@@ -32,6 +32,12 @@ def test_health_models_endpoint():
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "operational"
+    assert "ollama_reachable" in data
+    assert "model_installed" in data
+    assert "model_name" in data
+    assert "startup_latency" in data
+    assert "test_inference_status" in data
+    assert "vlm_healthy" in data
     assert "layers" in data
     layers = data["layers"]
     assert "ml_kit_perception" in layers

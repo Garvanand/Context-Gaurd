@@ -1,0 +1,5 @@
+Evaluate epistemic and aleatoric uncertainty:
+- Confidence (c in [0.0, 1.0]): How certain are you in this safety evaluation based on visible evidence?
+- If the image is blurry, low-resolution, occluded, or missing context, lower the confidence score.
+- Explicitly list uncertainty reasons in 'uncertainty_reasons'.
+- If confidence < 0.70, state the ambiguous factors requiring user confirmation.

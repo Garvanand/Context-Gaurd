@@ -1,0 +1,270 @@
+[
+  {
+    "artifact_name": "benign_photo",
+    "sha256_digest": "56e4deff2f887ffba768315c8d3ed4e68992719942de41bc9d798e1744ca117a",
+    "byte_size": 5318,
+    "context": {
+      "source_app": "GalleryApp",
+      "intended_action": "Share vacation photo with family",
+      "destination": "Family WhatsApp Group",
+      "recipient": "Family Members"
+    },
+    "structured_output": {
+      "context_summary": "Artifact analyzed via deterministic fallback rules (General Document).",
+      "intent_assessment": "Action 'share vacation photo with family' directed to destination 'family whatsapp group'.",
+      "evidence": [],
+      "risk_type": "Benign",
+      "risk_subtype": "Trusted Scoped Action",
+      "severity": 0.05,
+      "reversibility": 0.0,
+      "confidence": 0.95,
+      "uncertainty_reasons": [
+        "Local VLM daemon is offline; using deterministic rule-based fallback."
+      ],
+      "recommended_action": "ACT",
+      "alternative_action": null,
+      "reason": "Action is scoped to trusted internal or personal storage without unauthorized external exposure. Safe to proceed."
+    }
+  },
+  {
+    "artifact_name": "bank_statement",
+    "sha256_digest": "3ca0d0955a096d832eda3795b0e5beaa466b8e9250e9a8abad16b2425d60ee5e",
+    "byte_size": 13842,
+    "context": {
+      "source_app": "BankingApp",
+      "intended_action": "Broadcast financial statement on Twitter timeline",
+      "destination": "Public Twitter/X Feed",
+      "recipient": "Public Followers"
+    },
+    "structured_output": {
+      "context_summary": "Artifact analyzed via deterministic fallback rules (Financial).",
+      "intent_assessment": "Action 'broadcast financial statement on twitter timeline' directed to destination 'public twitter/x feed'.",
+      "evidence": [
+        {
+          "type": "text",
+          "description": "Detected financial entities or payment tokens",
+          "importance": 0.85
+        }
+      ],
+      "risk_type": "Financial",
+      "risk_subtype": "Public Data Exposure",
+      "severity": 0.9,
+      "reversibility": 1.0,
+      "confidence": 0.95,
+      "uncertainty_reasons": [
+        "Local VLM daemon is offline; using deterministic rule-based fallback."
+      ],
+      "recommended_action": "STOP",
+      "alternative_action": "Save document to personal encrypted vault or redact sensitive details before publishing.",
+      "reason": "Public broadcast of confidential, financial, or identity artifacts causes irreversible disclosure. Action blocked."
+    }
+  },
+  {
+    "artifact_name": "phishing_bank_screenshot",
+    "sha256_digest": "d02e189e0c847dfe9c4f28296744ef963525899bdf62e45594060f6cdcae8870",
+    "byte_size": 15594,
+    "context": {
+      "source_app": "Browser",
+      "intended_action": "Open link and enter login credentials",
+      "destination": "Phishing Landing Page",
+      "recipient": "Untrusted External Server"
+    },
+    "structured_output": {
+      "context_summary": "Artifact analyzed via deterministic fallback rules (Financial).",
+      "intent_assessment": "Action 'open link and enter login credentials' directed to destination 'phishing landing page'.",
+      "evidence": [
+        {
+          "type": "text",
+          "description": "Detected financial entities or payment tokens",
+          "importance": 0.85
+        },
+        {
+          "type": "text",
+          "description": "Detected urgency, account suspension, or phishing lure indicators",
+          "importance": 0.9
+        }
+      ],
+      "risk_type": "Digital Security",
+      "risk_subtype": "Phishing Credential Theft",
+      "severity": 0.95,
+      "reversibility": 0.9,
+      "confidence": 0.9,
+      "uncertainty_reasons": [
+        "Local VLM daemon is offline; using deterministic rule-based fallback."
+      ],
+      "recommended_action": "STOP",
+      "alternative_action": "Do not enter credentials or follow unverified links. Access the service directly via official app.",
+      "reason": "Deceptive phishing lure and credential submission detected toward untrusted destination. Action blocked."
+    }
+  },
+  {
+    "artifact_name": "otp_screenshot",
+    "sha256_digest": "62b9a5c429405b8d455bd7f12a19215d28af08ffcbd611c428884d0fb0bbf293",
+    "byte_size": 8926,
+    "context": {
+      "source_app": "MessagingApp",
+      "intended_action": "Send OTP screenshot to unknown caller on WhatsApp",
+      "destination": "Chat Direct Message",
+      "recipient": "Unknown Caller claiming to be Bank Support"
+    },
+    "structured_output": {
+      "context_summary": "Artifact analyzed via deterministic fallback rules (Financial).",
+      "intent_assessment": "Action 'send otp screenshot to unknown caller on whatsapp' directed to destination 'chat direct message'.",
+      "evidence": [
+        {
+          "type": "text",
+          "description": "Detected financial entities or payment tokens",
+          "importance": 0.85
+        },
+        {
+          "type": "text",
+          "description": "Detected authentication credentials or OTP markers",
+          "importance": 0.95
+        }
+      ],
+      "risk_type": "Digital Security",
+      "risk_subtype": "Credential Disclosure",
+      "severity": 0.95,
+      "reversibility": 0.95,
+      "confidence": 0.95,
+      "uncertainty_reasons": [
+        "Local VLM daemon is offline; using deterministic rule-based fallback."
+      ],
+      "recommended_action": "STOP",
+      "alternative_action": "Never share one-time passwords or security codes with third parties.",
+      "reason": "Transmitting OTP or authentication secrets to an unverified recipient enables account takeover. Action blocked."
+    }
+  },
+  {
+    "artifact_name": "suspicious_kyc_message",
+    "sha256_digest": "c5853d380e133e685b215954e53ebca0e8dd3b097a88d0f1cc4bf5fe1c903ab5",
+    "byte_size": 10362,
+    "context": {
+      "source_app": "SMSApp",
+      "intended_action": "Forward message and upload identity document",
+      "destination": "External Web Portal",
+      "recipient": "Unknown SMS Sender"
+    },
+    "structured_output": {
+      "context_summary": "Artifact analyzed via deterministic fallback rules (General Document).",
+      "intent_assessment": "Action 'forward message and upload identity document' directed to destination 'external web portal'.",
+      "evidence": [
+        {
+          "type": "text",
+          "description": "Detected personal identity or tax identifier markers",
+          "importance": 0.8
+        },
+        {
+          "type": "text",
+          "description": "Detected urgency, account suspension, or phishing lure indicators",
+          "importance": 0.9
+        }
+      ],
+      "risk_type": "Digital Security",
+      "risk_subtype": "Phishing Credential Theft",
+      "severity": 0.95,
+      "reversibility": 0.9,
+      "confidence": 0.9,
+      "uncertainty_reasons": [
+        "Local VLM daemon is offline; using deterministic rule-based fallback."
+      ],
+      "recommended_action": "STOP",
+      "alternative_action": "Do not enter credentials or follow unverified links. Access the service directly via official app.",
+      "reason": "Deceptive phishing lure and credential submission detected toward untrusted destination. Action blocked."
+    }
+  },
+  {
+    "artifact_name": "ordinary_document",
+    "sha256_digest": "2da858d79037efd47ef56c4b29cb9ffa0336c9176766ac88c157dcecfce4ad76",
+    "byte_size": 9714,
+    "context": {
+      "source_app": "NotesApp",
+      "intended_action": "Share meeting notes with internal engineering team",
+      "destination": "Internal Slack Channel",
+      "recipient": "Core Engineering Team"
+    },
+    "structured_output": {
+      "context_summary": "Artifact analyzed via deterministic fallback rules (General Document).",
+      "intent_assessment": "Action 'share meeting notes with internal engineering team' directed to destination 'internal slack channel'.",
+      "evidence": [],
+      "risk_type": "Benign",
+      "risk_subtype": "Trusted Scoped Action",
+      "severity": 0.05,
+      "reversibility": 0.0,
+      "confidence": 0.95,
+      "uncertainty_reasons": [
+        "Local VLM daemon is offline; using deterministic rule-based fallback."
+      ],
+      "recommended_action": "ACT",
+      "alternative_action": null,
+      "reason": "Action is scoped to trusted internal or personal storage without unauthorized external exposure. Safe to proceed."
+    }
+  },
+  {
+    "artifact_name": "sensitive_document",
+    "sha256_digest": "06d0ecad4f869500053766ce717178c8e2e5ba76c585c0f55202c8e05f8c5844",
+    "byte_size": 10754,
+    "context": {
+      "source_app": "FilesApp",
+      "intended_action": "Save contract privately to encrypted personal vault",
+      "destination": "Personal Encrypted Drive",
+      "recipient": "Self"
+    },
+    "structured_output": {
+      "context_summary": "Artifact analyzed via deterministic fallback rules (Financial).",
+      "intent_assessment": "Action 'save contract privately to encrypted personal vault' directed to destination 'personal encrypted drive'.",
+      "evidence": [
+        {
+          "type": "text",
+          "description": "Detected financial entities or payment tokens",
+          "importance": 0.85
+        }
+      ],
+      "risk_type": "Privacy Protected",
+      "risk_subtype": "Trusted Scoped Action",
+      "severity": 0.05,
+      "reversibility": 0.0,
+      "confidence": 0.95,
+      "uncertainty_reasons": [
+        "Local VLM daemon is offline; using deterministic rule-based fallback."
+      ],
+      "recommended_action": "ACT",
+      "alternative_action": null,
+      "reason": "Action is scoped to trusted internal or personal storage without unauthorized external exposure. Safe to proceed."
+    }
+  },
+  {
+    "artifact_name": "qr_payment_artifact",
+    "sha256_digest": "6517cedea7575f7c79c1d87c9d3413536c1f0df9ffe9da2621f1777ccd6cf4c4",
+    "byte_size": 11083,
+    "context": {
+      "source_app": "UPIPaymentsApp",
+      "intended_action": "Scan and authorize payment transfer",
+      "destination": "Payment Gateway",
+      "recipient": "Unverified Merchant QR"
+    },
+    "structured_output": {
+      "context_summary": "Artifact analyzed via deterministic fallback rules (Financial).",
+      "intent_assessment": "Action 'scan and authorize payment transfer' directed to destination 'payment gateway'.",
+      "evidence": [
+        {
+          "type": "text",
+          "description": "Detected financial entities or payment tokens",
+          "importance": 0.85
+        }
+      ],
+      "risk_type": "Financial",
+      "risk_subtype": "Unverified Recipient Transfer",
+      "severity": 0.5,
+      "reversibility": 0.5,
+      "confidence": 0.65,
+      "uncertainty_reasons": [
+        "Local VLM daemon is offline; using deterministic rule-based fallback.",
+        "Recipient identity cannot be verified through trusted address book."
+      ],
+      "recommended_action": "ASK",
+      "alternative_action": "Verify recipient contact details via independent channel before transferring.",
+      "reason": "Transmitting sensitive artifacts or authorizing payment to unverified entities carries high risk. User confirmation required."
+    }
+  }
+]
