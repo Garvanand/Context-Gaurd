@@ -100,3 +100,150 @@ Toggle **Supervisor Mode** in the top navigation bar or Settings.
 1. Send a corrupted or unparseable payload to the policy engine.
 2. Invariant Check: The system **NEVER** silently falls back to `ACT`.
 3. System immediately returns **ASK** with a clear explanation: "Inference uncertainty: Policy fell back to safe verification".
+
+---
+
+## 5. Android System Sharesheet Integration & Live Flows
+
+ContextGuard is registered directly into the Android system as a primary share target via `ACTION_SEND` and `ACTION_SEND_MULTIPLE`. It seamlessly intercepts incoming streams, text, and URLs before users complete downstream digital actions.
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       ANDROID SHARESHEET PIPELINE                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  External App (Gallery, Browser, Files, Chat)                               │
+│       │                                                                     │
+│       ▼ Intent (ACTION_SEND / ACTION_SEND_MULTIPLE)                         │
+│  [Android OS Sharesheet Dialog] ──► Select "ContextGuard"                   │
+│       │                                                                     │
+│       ▼ content:// URI / EXTRA_TEXT / ClipData                              │
+│  SharesheetPayloadResolver                                                  │
+│  ├── ContentResolver.openInputStream() (Zero disk persistence / volatile RAM)│
+│  ├── ImagePreprocessor: Bounded 1600px subsampling (prevents OOM on 48MP)    │
+│  ├── PdfPerceptionRenderer: In-memory page bitmap rasterization             │
+│  └── URL Regex Extractor: Isolates destination links from message bodies     │
+│       │                                                                     │
+│       ▼                                                                     │
+│  MainViewModel.processSharesheetPayload() ──► Auto-navigate to AnalyzeScreen│
+│  ├── Live Artifact Preview (Side-by-side Before / After Redaction)          │
+│  ├── User Selects Intended Action (SAVE, SEND, POST, OPEN, APPROVE)         │
+│  ├── 6-Stage Reasoning Pipeline (Context ➔ Intent ➔ Evidence ➔ ... )        │
+│  └── Pre-Action Intervention Modal (ACT / WARN / ASK / STOP)                │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 5.1 Real-World Flow 1: Gallery / Photos ➔ Sharesheet ➔ ContextGuard
+
+1. Open Android **Gallery** or **Google Photos**.
+2. Select a sensitive artifact (e.g., `synthetic_bank_statement.png` or `tax_document.pdf`).
+3. Tap **Share** ➔ select **ContextGuard**.
+4. ContextGuard launches directly into `AnalyzeScreen`:
+   - Decodes content stream in volatile memory via `ContentResolver`.
+   - Runs on-device ML Kit OCR & sensitive entity detection.
+   - Displays artifact preview with the **Redaction Toggle** (`Blackout` or `Gaussian Blur`).
+5. Select intended action:
+   - Tap **SAVE** ➔ Destination: `Personal Encrypted Drive`.
+   - Tap **Analyze Risk**.
+   - Result: **ACT (Green)** — risk score $< 0.35$.
+6. Repeat with **SEND** to `Unverified Telegram Contact`:
+   - Result: **WARN / ASK (Amber/Yellow)** — risk score $\approx 0.62$.
+7. Repeat with **POST** to `Public Twitter/X Feed`:
+   - Result: **STOP (Red)** — irreversible exposure of financial credentials blocked ($\rho \ge 0.65$).
+   - *Key Thesis Invariant: The artifact remains 100% identical across all three runs.*
+
+---
+
+### 5.2 Real-World Flow 2: Browser / Messaging ➔ Share URL ➔ ContextGuard
+
+1. Open **Chrome**, **Firefox**, or **SMS/WhatsApp**.
+2. Select or share a suspicious message:
+   ```text
+   Urgent KYC Update required: http://kyc-update-sbi-portal-verify.support-desk91.net/auth
+   ```
+3. Tap **Share** ➔ select **ContextGuard**.
+4. ContextGuard receives `EXTRA_TEXT` / `ClipData`:
+   - `SharesheetPayloadResolver.extractUrl` automatically detects the phishing link.
+   - Sets source app to `Browser / Web Client` and default intended action to `OPEN`.
+   - Evaluates link against the trained PhiUSIIL XGBoost lexical model.
+   - Model detects:
+     - IP/hex patterns, multiple subdomains, brand token spoofing (`sbi-portal`), suspicious TLD (`.net`).
+     - $P(\text{phishing}) = 0.974$.
+5. Policy Engine outputs **STOP (Red banner)**:
+   - "High-hazard credential harvesting domain detected. Opening this link exposes authentication tokens."
+
+---
+
+### 5.3 Deep Links & Stream Security Protocol
+
+To maintain maximum privacy and prevent side-channel leaks:
+1. **Zero Filesystem Footprint:** The application never writes incoming `content://` streams into persistent application storage or cache directories (`/data/data/...` or external storage).
+2. **Volatile RAM Processing:** All Bitmaps and OCR tokens exist strictly in transient memory structures and are garbage collected upon activity destruction.
+3. **Bounded Image Preprocessing:** Images shared from modern phone cameras (e.g. 48MP/108MP) are downsampled to a maximum bounding box of $1600 \times 1600$ px via `BitmapFactory.Options.inSampleSize` before decoding, preventing `OutOfMemoryError`.
+4. **Sandboxed PDF Rasterization:** Android-native `PdfRenderer` renders at most the first 3 pages into in-memory bitmaps with automatic resource descriptor cleanup (`ParcelFileDescriptor.close()`).
+
+---
+
+### 5.4 Defensive Error Handling Matrix
+
+ContextGuard enforces a strict **Never Crash** design contract on corrupted, malformed, or malicious share intents:
+
+| Edge Case | Sharesheet Handler Behavior | User Experience |
+| :--- | :--- | :--- |
+| **Missing Stream / Empty Text** | `SharePayload.ErrorPayload` returned | Informative toast/banner; returns to Home safely without crashing. |
+| **Inaccessible URI (`SecurityException`)** | Caught in `SharesheetPayloadResolver` | Displays "Inaccessible content URI (permission revoked)"; prompts re-selection. |
+| **Unsupported MIME Type** | Sniffs magic bytes (JPEG/PNG/PDF/Text) | If unrecognized, safely treats as text or displays friendly fallback message. |
+| **Multiple Attachments (`ACTION_SEND_MULTIPLE`)** | Ingests primary item; displays batch warning | Displays: *"Received N attachments. ContextGuard is analyzing primary attachment."* |
+| **Corrupted PDF Document** | Catches `IOException` in `PdfPerceptionRenderer` | Falls back to generic document perception or asks user for alternative format. |
+| **Malformed / Null Text** | Null-safe string coercion | Handled as empty note without throwing `NullPointerException`. |
+| **Cancelled Share Flow** | `SharePayload.EmptyOrCancelled` | Activity remains calm; no state corruption or unintended background triggers. |
+
+---
+
+### 5.5 CLI & Automated Verification Commands
+
+#### A. Automated Unit Testing
+Execute the complete test suite verifying `SharePayload` resolution, URL parsing, and the 3-iteration identical artifact triad:
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+cd android
+.\gradlew.bat testDebugUnitTest
+```
+
+#### B. Manual Android Sharesheet Verification via ADB
+
+1. **Simulate Browser Shared Phishing URL:**
+```bash
+adb shell am start -a android.intent.action.SEND \
+  -t "text/plain" \
+  --es android.intent.extra.TEXT "Urgent: Complete your KYC here http://kyc-update-sbi-portal-verify.support-desk91.net/auth" \
+  -n com.contextguard.app.debug/com.contextguard.app.MainActivity
+```
+
+2. **Simulate Gallery Shared Bank Statement Image:**
+```bash
+# Push test image to emulator/device
+adb push test_statement.png /sdcard/Download/test_statement.png
+
+# Broadcast SEND intent with content URI
+adb shell am start -a android.intent.action.SEND \
+  -t "image/png" \
+  --eu android.intent.extra.STREAM "content://media/external/images/media/1" \
+  -n com.contextguard.app.debug/com.contextguard.app.MainActivity
+```
+
+3. **Simulate Documents App Shared PDF:**
+```bash
+adb shell am start -a android.intent.action.SEND \
+  -t "application/pdf" \
+  --eu android.intent.extra.STREAM "content://media/external/file/10" \
+  -n com.contextguard.app.debug/com.contextguard.app.MainActivity
+```
+
+4. **Verify App Robustness Against Malformed Share Intent (Never Crash):**
+```bash
+adb shell am start -a android.intent.action.SEND \
+  -t "application/octet-stream" \
+  -n com.contextguard.app.debug/com.contextguard.app.MainActivity
+```
+Result: ContextGuard launches gracefully, catches the empty stream, informs the user, and remains stable.
+

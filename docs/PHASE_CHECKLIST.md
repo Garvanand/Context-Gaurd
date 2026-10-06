@@ -79,7 +79,15 @@ This checklist tracks the end-to-end execution of the ContextGuard research caps
   - [x] Grounded Evidence Card: image spatial coordinates, XGBoost URL risk score $P(\text{phishing})$, OCR document excerpts.
   - [x] Demo Mode with 8 ready-to-run cards (Bank statement, Fake KYC link, OTP screenshot, Unknown recipient document, Routine family photo, Routine news URL, Contract lock-in, Payment request).
   - [x] Supervisor Viva Mode: 5 sections (`MODEL`, `PERCEPTION`, `VLM`, `URL MODEL`, `POLICY`) + live HUD metrics (Latency, Confidence, Risk, Evidence count, Redactions, Network state).
-- [x] Android unit tests passing (`44 passed`) and `app-debug.apk` successfully assembled (94.9 MB).
+- [x] Android System Sharesheet Integration:
+  - [x] Declared system intent filters (`ACTION_SEND` and `ACTION_SEND_MULTIPLE`) for `image/*`, `text/plain`, `application/pdf`, and `*/*`.
+  - [x] Strongly-typed `SharePayload` sealed model hierarchy with zero persistent storage writing.
+  - [x] Non-crashing `SharesheetPayloadResolver` using `ContentResolver`, bounded `ImagePreprocessor` downsampling, and regex URL parsing.
+  - [x] Safe in-memory PDF rendering via `PdfPerceptionRenderer.renderPdfFromPfd(...)`.
+  - [x] Direct navigation pipeline in `MainViewModel` and `MainActivity` for seamless auto-routing to `AnalyzeScreen`.
+  - [x] Robust handling across 8 edge cases (missing stream, inaccessible URI, unsupported MIME, corrupted PDF, cancelled share).
+  - [x] Dedicated automated test suite in `SharesheetIntegrationTest.kt` verifying model parsing, error resilience, and the 3-iteration identical artifact triad (`SAVE` -> `ACT`, `SEND` -> `WARN/ASK`, `POST` -> `STOP`).
+- [x] Android unit tests passing (`28 passed`) and presentation-ready `app-debug.apk` (94.9 MB) successfully assembled.
 
 ---
 

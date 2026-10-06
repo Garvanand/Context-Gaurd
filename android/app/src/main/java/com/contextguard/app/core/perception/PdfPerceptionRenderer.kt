@@ -91,4 +91,66 @@ object PdfPerceptionRenderer {
             } catch (_: Exception) {}
         }
     }
+
+    /**
+     * Renders up to 3 pages from an existing ParcelFileDescriptor (e.g. from ContentResolver).
+     * Does not require filesystem persistence.
+     */
+    suspend fun renderPdfFromPfd(
+        pfd: ParcelFileDescriptor,
+        maxPages: Int = MAX_PDF_PAGES
+    ): Result<List<Bitmap>> = withContext(Dispatchers.IO) {
+        var renderer: PdfRenderer? = null
+        val renderedBitmaps = mutableListOf<Bitmap>()
+
+        try {
+            renderer = PdfRenderer(pfd)
+            val totalPages = renderer.pageCount
+            val pagesToProcess = min(totalPages, maxPages)
+
+            for (i in 0 until pagesToProcess) {
+                val page = renderer.openPage(i)
+                try {
+                    val pageWidth = page.width
+                    val pageHeight = page.height
+
+                    val maxDim = max(pageWidth, pageHeight)
+                    val scale = if (maxDim > PDF_RENDER_MAX_DIMENSION) {
+                        PDF_RENDER_MAX_DIMENSION.toFloat() / maxDim.toFloat()
+                    } else {
+                        min(2.0f, PDF_RENDER_MAX_DIMENSION.toFloat() / maxDim.toFloat())
+                    }
+
+                    val bmpWidth = max(1, (pageWidth * scale).toInt())
+                    val bmpHeight = max(1, (pageHeight * scale).toInt())
+
+                    val bitmap = Bitmap.createBitmap(bmpWidth, bmpHeight, Bitmap.Config.ARGB_8888)
+                    bitmap.eraseColor(Color.WHITE)
+
+                    page.render(
+                        bitmap,
+                        null,
+                        null,
+                        PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
+                    )
+
+                    renderedBitmaps.add(bitmap)
+                } finally {
+                    page.close()
+                }
+            }
+
+            Result.success(renderedBitmaps)
+        } catch (e: Exception) {
+            renderedBitmaps.forEach { if (!it.isRecycled) it.recycle() }
+            Result.failure(e)
+        } finally {
+            try {
+                renderer?.close()
+            } catch (_: Exception) {}
+            try {
+                pfd.close()
+            } catch (_: Exception) {}
+        }
+    }
 }

@@ -98,6 +98,17 @@ class MainViewModel : ViewModel() {
     private val _analysisState = MutableStateFlow<UiState<SafetyResult>>(UiState.Idle)
     val analysisState: StateFlow<UiState<SafetyResult>> = _analysisState.asStateFlow()
 
+    private val _pendingNavigation = MutableStateFlow<String?>(null)
+    val pendingNavigation: StateFlow<String?> = _pendingNavigation.asStateFlow()
+
+    fun triggerNavigation(route: String) {
+        _pendingNavigation.value = route
+    }
+
+    fun consumeNavigation() {
+        _pendingNavigation.value = null
+    }
+
     private val perceptionEngine = MlKitPerceptionEngine()
     private val redactionEngine = RedactionEngine()
     private val privacyPipeline = PrivacyPipeline(perceptionEngine, redactionEngine)
@@ -342,6 +353,116 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun processPdfPagesArtifact(
+        pages: List<Bitmap>,
+        title: String = "Shared_Document.pdf",
+        sourceApp: String = "Files / Documents",
+        onComplete: (LocalPerceptionResult) -> Unit = {}
+    ) {
+        if (pages.isEmpty()) return
+        val primaryBmp = pages.first()
+        processBitmapArtifact(
+            bitmap = primaryBmp,
+            title = "$title (${pages.size} pages)",
+            sourceApp = sourceApp,
+            onComplete = onComplete
+        )
+    }
+
+    fun processSharesheetPayload(
+        payload: com.contextguard.app.core.sharesheet.SharePayload,
+        onReadyToAnalyze: () -> Unit = {}
+    ) {
+        when (payload) {
+            is com.contextguard.app.core.sharesheet.SharePayload.ImagePayload -> {
+                triggerNavigation("analyze")
+                _appState.update {
+                    it.copy(
+                        currentArtifactTitle = payload.title,
+                        currentSourceApp = payload.sourceApp,
+                        selectedAction = "SAVE",
+                        selectedDestination = "Personal Encrypted Drive",
+                        currentRecipient = "Self / Personal Vault"
+                    )
+                }
+                if (payload.bitmap != null) {
+                    processBitmapArtifact(
+                        bitmap = payload.bitmap,
+                        title = payload.title,
+                        sourceApp = payload.sourceApp
+                    ) {
+                        onReadyToAnalyze()
+                    }
+                } else {
+                    onReadyToAnalyze()
+                }
+            }
+            is com.contextguard.app.core.sharesheet.SharePayload.TextPayload -> {
+                triggerNavigation("analyze")
+                val isUrl = payload.detectedUrl != null
+                val initialAction = if (isUrl) "OPEN" else "SEND"
+                val initialDest = payload.detectedUrl ?: "Unverified Contact"
+                val urlScore = if (isUrl) {
+                    val lowerUrl = payload.detectedUrl!!.lowercase()
+                    if (lowerUrl.contains("kyc") || lowerUrl.contains("support-desk") || lowerUrl.contains("phish") || lowerUrl.contains("verify-portal")) {
+                        0.974f
+                    } else if (lowerUrl.contains("reuters") || lowerUrl.contains("google") || lowerUrl.contains("wikipedia")) {
+                        0.008f
+                    } else {
+                        0.45f
+                    }
+                } else null
+
+                _appState.update {
+                    it.copy(
+                        currentArtifactTitle = payload.title,
+                        currentSourceApp = payload.sourceApp,
+                        selectedAction = initialAction,
+                        selectedDestination = initialDest,
+                        currentRecipient = initialDest,
+                        currentUrlRiskScore = urlScore
+                    )
+                }
+                processTextArtifact(
+                    text = payload.text,
+                    title = payload.title,
+                    sourceApp = payload.sourceApp
+                ) {
+                    onReadyToAnalyze()
+                }
+            }
+            is com.contextguard.app.core.sharesheet.SharePayload.PdfPayload -> {
+                triggerNavigation("analyze")
+                _appState.update {
+                    it.copy(
+                        currentArtifactTitle = payload.title,
+                        currentSourceApp = payload.sourceApp,
+                        selectedAction = "SAVE",
+                        selectedDestination = "Personal Encrypted Drive"
+                    )
+                }
+                processPdfPagesArtifact(
+                    pages = payload.pageBitmaps,
+                    title = payload.title,
+                    sourceApp = payload.sourceApp
+                ) {
+                    onReadyToAnalyze()
+                }
+            }
+            is com.contextguard.app.core.sharesheet.SharePayload.MultipleAttachmentsPayload -> {
+                AppLogger.w("Multiple attachments: ${payload.warningMessage}")
+                processSharesheetPayload(payload.primaryPayload, onReadyToAnalyze)
+            }
+            is com.contextguard.app.core.sharesheet.SharePayload.ErrorPayload -> {
+                AppLogger.e("Sharesheet resolution error: ${payload.reason}")
+                _analysisState.value = UiState.Error(payload.reason)
+            }
+            is com.contextguard.app.core.sharesheet.SharePayload.EmptyOrCancelled -> {
+                // No action needed
+            }
+        }
+    }
+
     fun executeAnalysis(
         customSeverity: Float? = null,
         customIrreversibility: Float? = null,
@@ -374,7 +495,7 @@ class MainViewModel : ViewModel() {
                 "LOGIN" -> if (state.selectedDestination.contains("Spoof", true) || state.selectedDestination.contains("unverified", true)) 0.95f else 0.40f
                 "POST" -> if (state.maskedPiiCount > 0 || state.currentArtifactTitle.contains("Statement", true)) 0.90f else 0.15f
                 "UPLOAD" -> if (state.selectedDestination.contains("Public", true)) 0.85f else 0.30f
-                "SEND" -> if (state.selectedDestination.contains("Unverified", true) || state.selectedDestination.contains("Telegram", true)) 0.65f else 0.20f
+                "SEND" -> if (state.selectedDestination.contains("Unverified", true) || state.selectedDestination.contains("Telegram", true)) 0.38f else 0.20f
                 else -> if (state.selectedDestination.contains("Public", true)) 0.85f else 0.10f
             }
 
@@ -386,7 +507,7 @@ class MainViewModel : ViewModel() {
                 "LOGIN" -> 0.90f
                 "POST" -> 1.00f
                 "UPLOAD" -> if (state.selectedDestination.contains("Public", true)) 0.95f else 0.40f
-                "SEND" -> if (state.selectedDestination.contains("Unverified", true)) 0.75f else 0.25f
+                "SEND" -> if (state.selectedDestination.contains("Unverified", true)) 0.50f else 0.25f
                 else -> if (state.selectedDestination.contains("Public", true)) 1.00f else 0.00f
             }
 
