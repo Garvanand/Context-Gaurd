@@ -14,6 +14,7 @@ from backend.app.core.config import settings
 from backend.app.core.logging import logger
 from backend.app.api.v1.health import router as health_router
 from backend.app.api.v1.analyze import router as analyze_router
+from backend.app.api.v1.supervisor import router as supervisor_router
 
 
 @asynccontextmanager
@@ -37,11 +38,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS configuration
+# CORS configuration - permit Vite dev servers and local supervisor consoles
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins,
-    allow_credentials=True,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "*"
+    ],
+    allow_credentials=False,  # Set False when wildcard origin is present
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -59,13 +66,15 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-# Include routes at root level (/health, /analyze)
+# Include routes at root level (/health, /analyze, /supervisor)
 app.include_router(health_router, tags=["Health"])
 app.include_router(analyze_router, tags=["Analyze"])
+app.include_router(supervisor_router, tags=["Supervisor"])
 
-# Include routes under /api/v1 prefix (/api/v1/health, /api/v1/analyze)
+# Include routes under /api/v1 prefix (/api/v1/health, /api/v1/analyze, /api/v1/supervisor)
 app.include_router(health_router, prefix="/api/v1", tags=["Health v1"])
 app.include_router(analyze_router, prefix="/api/v1", tags=["Analyze v1"])
+app.include_router(supervisor_router, prefix="/api/v1", tags=["Supervisor v1"])
 
 
 @app.get("/", summary="Root Welcome")

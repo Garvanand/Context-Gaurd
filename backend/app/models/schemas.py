@@ -130,6 +130,9 @@ class AnalysisResponse(BaseModel):
     recommended_alternative: Optional[str] = Field(None, description="Recommended safe alternative action")
     can_override: bool = Field(True, description="Whether intentional user emergency override is permissible")
     stages: Optional[Dict[str, Any]] = Field(None, description="Granular outputs from the six stages for supervision/audit")
+    latency_ms: Optional[float] = Field(None, description="Pipeline latency in milliseconds")
+    model_path: Optional[str] = Field("Qwen 2.5-VL 3B + XGBoost Hybrid", description="Active model path")
+    network_mode: Optional[str] = Field("REDACTED_LOCAL_BACKEND", description="Network privacy transmission mode")
 
     @field_validator("severity", "reversibility", "confidence", mode="before")
     @classmethod
