@@ -1,0 +1,23 @@
+{
+  "dataset_name": "Consolidated SMS Phishing & Benign Mobile Messages Dataset",
+  "created_at": "2026-10-10",
+  "total_samples": 9917,
+  "benign_samples": 4508,
+  "phishing_samples": 5409,
+  "sources": [
+    {
+      "name": "NCSU SMS Phishing Data Releases",
+      "repository": "https://github.com/wspr-ncsu/sms-phishing",
+      "license": "MIT License (Copyright (c) 2023 wspr-ncsu)",
+      "authors": "Nahapetyan et al. (WSPR Lab, NC State University)",
+      "phishing_extracted_count": 5409
+    },
+    {
+      "name": "UCI SMS Spam Collection (Benign Partition)",
+      "repository": "https://archive.ics.uci.edu/dataset/228/sms+spam+collection",
+      "license": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "authors": "Almeida & Hidalgo (2012)",
+      "benign_count": 4508
+    }
+  ]
+}

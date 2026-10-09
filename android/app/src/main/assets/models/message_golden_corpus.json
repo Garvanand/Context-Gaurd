@@ -1,0 +1,137 @@
+[
+  {
+    "id": 1,
+    "text": "Hey, are you free for coffee this afternoon?",
+    "category": "benign_chat",
+    "expected_is_phishing": false,
+    "raw_margin": -2.39967,
+    "calibrated_probability": 0.010047,
+    "predicted_is_phishing": false
+  },
+  {
+    "id": 2,
+    "text": "Your Swiggy order has been picked up and is arriving in 15 mins.",
+    "category": "benign_delivery",
+    "expected_is_phishing": false,
+    "raw_margin": -0.957166,
+    "calibrated_probability": 0.222707,
+    "predicted_is_phishing": false
+  },
+  {
+    "id": 3,
+    "text": "Meeting with the engineering team rescheduled to 4 PM in room 302.",
+    "category": "benign_work",
+    "expected_is_phishing": false,
+    "raw_margin": -2.824836,
+    "calibrated_probability": 0.003777,
+    "predicted_is_phishing": false
+  },
+  {
+    "id": 4,
+    "text": "Dad called, said he will be home by 8 PM.",
+    "category": "benign_family",
+    "expected_is_phishing": false,
+    "raw_margin": -3.130329,
+    "calibrated_probability": 0.001865,
+    "predicted_is_phishing": false
+  },
+  {
+    "id": 5,
+    "text": "Thanks for lunch today, let's catch up again soon!",
+    "category": "benign_social",
+    "expected_is_phishing": false,
+    "raw_margin": -2.62577,
+    "calibrated_probability": 0.005976,
+    "predicted_is_phishing": false
+  },
+  {
+    "id": 6,
+    "text": "Your one-time password (OTP) for transaction at Amazon is 582910. Do not share.",
+    "category": "benign_otp",
+    "expected_is_phishing": false,
+    "raw_margin": -1.727303,
+    "calibrated_probability": 0.04594,
+    "predicted_is_phishing": false
+  },
+  {
+    "id": 7,
+    "text": "Your HDFC Bank account statement for October is now ready for download.",
+    "category": "benign_bank_statement",
+    "expected_is_phishing": false,
+    "raw_margin": -1.083503,
+    "calibrated_probability": 0.176169,
+    "predicted_is_phishing": false
+  },
+  {
+    "id": 8,
+    "text": "Security alert: New login detected from Chrome on Windows. If this was you, ignore.",
+    "category": "benign_security_notice",
+    "expected_is_phishing": false,
+    "raw_margin": 1.833762,
+    "calibrated_probability": 0.994584,
+    "predicted_is_phishing": true
+  },
+  {
+    "id": 9,
+    "text": "URGENT: Your bank account is locked due to KYC expiry. Update immediately at http://bit.ly/sbi-kyc-auth",
+    "category": "phish_kyc_shortener",
+    "expected_is_phishing": true,
+    "raw_margin": 2.804478,
+    "calibrated_probability": 0.999425,
+    "predicted_is_phishing": true
+  },
+  {
+    "id": 10,
+    "text": "Congratulations! You won a $1,000 Walmart gift card. Claim your prize here: http://claim-rewards.top/win",
+    "category": "phish_gift_card",
+    "expected_is_phishing": true,
+    "raw_margin": 1.270801,
+    "calibrated_probability": 0.980341,
+    "predicted_is_phishing": true
+  },
+  {
+    "id": 11,
+    "text": "Debit card blocked. Call 1800-999-222 or verify your details at http://paypa1-security.xyz/login",
+    "category": "phish_card_blocked",
+    "expected_is_phishing": true,
+    "raw_margin": 1.46856,
+    "calibrated_probability": 0.987474,
+    "predicted_is_phishing": true
+  },
+  {
+    "id": 12,
+    "text": "Inland Revenue Alert: You have an outstanding tax refund of GBP 420. Submit details: http://tax-refund-gov.work",
+    "category": "phish_tax_refund",
+    "expected_is_phishing": true,
+    "raw_margin": 0.963481,
+    "calibrated_probability": 0.960748,
+    "predicted_is_phishing": true
+  },
+  {
+    "id": 13,
+    "text": "Your package cannot be delivered due to missing house number. Update address: http://royalmail-tracking.icu/auth",
+    "category": "phish_postal_tracking",
+    "expected_is_phishing": true,
+    "raw_margin": 2.857681,
+    "calibrated_probability": 0.999492,
+    "predicted_is_phishing": true
+  },
+  {
+    "id": 14,
+    "text": "Aapka account block ho gaya hai turant kyc complete karein http://bit.ly/sbi-kyc",
+    "category": "phish_hinglish_kyc",
+    "expected_is_phishing": true,
+    "raw_margin": 2.774953,
+    "calibrated_probability": 0.999385,
+    "predicted_is_phishing": true
+  },
+  {
+    "id": 15,
+    "text": "Bhai kal movie dekhne chalein?",
+    "category": "benign_hinglish_chat",
+    "expected_is_phishing": false,
+    "raw_margin": -1.766527,
+    "calibrated_probability": 0.042119,
+    "predicted_is_phishing": false
+  }
+]

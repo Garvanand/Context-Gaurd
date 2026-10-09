@@ -34,10 +34,14 @@ fun HomeScreen(
     onNavigateToDemo: () -> Unit,
     onNavigateToSupervisor: () -> Unit,
     onNavigateToPrivacy: () -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToConsent: () -> Unit = {}
 ) {
     val state by viewModel.appState.collectAsState()
     val scrollState = rememberScrollState()
+
+    val isServiceConnected by com.contextguard.app.core.accessibility.ScreenGuardStateManager.isServiceConnected.collectAsState()
+    val isMonitoringPaused by com.contextguard.app.core.accessibility.ScreenGuardStateManager.isMonitoringPaused.collectAsState()
 
     Column(
         modifier = Modifier
@@ -101,6 +105,93 @@ fun HomeScreen(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Settings",
                         tint = TextSecondary
+                    )
+                }
+            }
+        }
+
+        // PERSISTENT LIVE MONITORING STATUS BAR
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(
+                    1.dp,
+                    if (isServiceConnected && !isMonitoringPaused) ActGreen.copy(alpha = 0.5f) else SurfaceBorder,
+                    RoundedCornerShape(16.dp)
+                )
+                .clickable { onNavigateToConsent() },
+            colors = CardDefaults.cardColors(containerColor = SurfaceDark),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val statusColor = when {
+                    isServiceConnected && !isMonitoringPaused -> ActGreen
+                    isServiceConnected && isMonitoringPaused -> WarnOrange
+                    else -> CyanAccent
+                }
+
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .clip(CircleShape)
+                            .background(statusColor)
+                    )
+                    Column {
+                        Text(
+                            text = when {
+                                isServiceConnected && !isMonitoringPaused -> "Screen Protection Active"
+                                isServiceConnected && isMonitoringPaused -> "Screen Protection Paused"
+                                else -> "Screen Protection: Setup Required"
+                            },
+                            color = TextPrimary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = when {
+                                isServiceConnected && !isMonitoringPaused -> "Monitoring allowlisted apps in real time"
+                                isServiceConnected && isMonitoringPaused -> "Kill-switch engaged (tap to resume)"
+                                else -> "Tap to review consent & enable service"
+                            },
+                            color = TextTertiary,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+
+                if (isServiceConnected) {
+                    Button(
+                        onClick = { com.contextguard.app.core.accessibility.ScreenGuardStateManager.toggleMonitoring() },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isMonitoringPaused) ActGreen else WarnOrange
+                        ),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = if (isMonitoringPaused) "Resume" else "Pause",
+                            color = BackgroundDark,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Setup",
+                        tint = TextTertiary,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

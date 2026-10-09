@@ -3,6 +3,39 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!-- Package visibility declarations for platform visibility rules (Android 11+) -->
+    <queries>
+        <!-- Web Browsers -->
+        <package android:name="com.android.chrome" />
+        <package android:name="org.mozilla.firefox" />
+        <package android:name="com.sec.android.app.sbrowser" />
+        <package android:name="com.microsoft.emmx" />
+
+        <!-- Messaging & Communication -->
+        <package android:name="com.whatsapp" />
+        <package android:name="org.telegram.messenger" />
+        <package android:name="com.google.android.apps.messaging" />
+        <package android:name="org.thoughtcrime.securesms" />
+
+        <!-- Email -->
+        <package android:name="com.google.android.gm" />
+        <package android:name="com.microsoft.office.outlook" />
+
+        <!-- Social Media Platforms -->
+        <package android:name="com.twitter.android" />
+        <package android:name="com.reddit.frontpage" />
+
+        <!-- Generic browser intent query -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+    </queries>
 
     <application
         android:name=".ContextGuardApp"
@@ -61,6 +94,42 @@
                 <data android:mimeType="*/*" />
             </intent-filter>
         </activity>
+
+        <!-- Ingestion Path A: Real Android Screen-Context Accessibility Service -->
+        <service
+            android:name=".core.service.ScreenGuardAccessibilityService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/screenguard_accessibility_service_config" />
+        </service>
+
+        <!-- Ingestion Path B: Real Android Notification Listener Service -->
+        <service
+            android:name=".core.service.NotificationGuardService"
+            android:label="ContextGuard Notification Threat Triage"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- Optional User-Controlled Extension: Domain-Filtering Network Protection -->
+        <service
+            android:name=".core.network.DomainFilteringVpnService"
+            android:label="ContextGuard Domain Protection Extension"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
     </application>
+
 
 </manifest>

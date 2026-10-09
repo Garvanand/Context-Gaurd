@@ -44,8 +44,8 @@ data class SafetyResult(
     val artifactTitle: String,
     val intendedAction: String,
     val destination: String,
-    val latencyMs: Long = 142L,
-    val hashSha256: String = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    val latencyMs: Long = 0L,
+    val hashSha256: String = "",
     val canOverride: Boolean = true,
     val alternativeAction: String = "Save to encrypted personal storage instead.",
     val intentSource: String = "USER CONFIRMED"
@@ -78,10 +78,10 @@ data class AppState(
     val selectedDestination: String = "Personal Encrypted Drive",
     val isRedactionEnabled: Boolean = true,
     val redactionStyle: RedactionStyle = RedactionStyle.BLACKOUT,
-    val maskedPiiCount: Int = 4,
+    val maskedPiiCount: Int = 0,
     val detectedFacesCount: Int = 0,
     val backendConfig: BackendConfig = BackendConfig(),
-    val healthState: SystemHealthState = SystemHealthState(),
+    val healthState: SystemHealthState = com.contextguard.app.core.health.ModelHealthManager.getLiveHealthState(),
     val lastResult: SafetyResult? = null,
     val lastPerceptionResult: LocalPerceptionResult? = null,
     val lastRedactionResult: RedactionResult? = null,
@@ -404,14 +404,8 @@ class MainViewModel : ViewModel() {
                 val initialAction = if (isUrl) "OPEN" else "SEND"
                 val initialDest = payload.detectedUrl ?: "Unverified Contact"
                 val urlScore = if (isUrl) {
-                    val lowerUrl = payload.detectedUrl!!.lowercase()
-                    if (lowerUrl.contains("kyc") || lowerUrl.contains("support-desk") || lowerUrl.contains("phish") || lowerUrl.contains("verify-portal")) {
-                        0.974f
-                    } else if (lowerUrl.contains("reuters") || lowerUrl.contains("google") || lowerUrl.contains("wikipedia")) {
-                        0.008f
-                    } else {
-                        0.45f
-                    }
+                    val rawUrl = payload.detectedUrl!!
+                    com.contextguard.app.core.engine.UrlTreeInferenceEngine.getInstanceOrNull()?.predictUrl(rawUrl)?.probability
                 } else null
 
                 _appState.update {
@@ -475,6 +469,7 @@ class MainViewModel : ViewModel() {
         onComplete: (SafetyResult) -> Unit = {}
     ) {
         viewModelScope.launch {
+            val analysisStartTime = System.currentTimeMillis()
             _analysisState.value = UiState.Loading("1/6 Context: Ingesting artifact and channel metadata...")
             delay(150)
             _analysisState.value = UiState.Loading("2/6 Intent: Evaluating action chip taxonomy...")
@@ -556,7 +551,7 @@ class MainViewModel : ViewModel() {
                 artifactTitle = state.currentArtifactTitle,
                 intendedAction = state.selectedAction,
                 destination = state.selectedDestination,
-                latencyMs = (120L..180L).random(),
+                latencyMs = System.currentTimeMillis() - analysisStartTime,
                 alternativeAction = altAction,
                 intentSource = customIntentSource ?: "USER CONFIRMED"
             )
@@ -616,5 +611,48 @@ class MainViewModel : ViewModel() {
             customRationale = action.rationale,
             onComplete = onComplete
         )
+    }
+
+    fun prepareRiskReview(
+        targetPackage: String,
+        rationale: String,
+        riskScore: Float,
+        intervention: String,
+        candidateAction: String
+    ) {
+        val interType = try {
+            InterventionType.valueOf(intervention)
+        } catch (e: Exception) {
+            InterventionType.WARN
+        }
+        val result = SafetyResult(
+            intervention = interType,
+            riskScore = riskScore,
+            severity = (riskScore / (1f + 0.75f * 0.8f)).coerceIn(0.1f, 1.0f),
+            irreversibility = 0.8f,
+            confidence = 0.90f,
+            evidence = listOf(
+                "Screen context inspected via ScreenGuard Accessibility Service",
+                "Target application: $targetPackage",
+                "Action candidate: $candidateAction",
+                rationale
+            ),
+            rationale = rationale,
+            artifactTitle = "Live Screen Context ($targetPackage)",
+            intendedAction = candidateAction,
+            destination = targetPackage,
+            alternativeAction = if (interType == InterventionType.STOP) "Abort this action to prevent potential loss." else "Verify target before proceeding."
+        )
+        _appState.update {
+            it.copy(
+                currentArtifactTitle = "Live Screen Context ($targetPackage)",
+                currentSourceApp = targetPackage,
+                selectedAction = candidateAction,
+                selectedDestination = targetPackage,
+                lastResult = result
+            )
+        }
+        _analysisState.value = UiState.Success(result)
+        triggerNavigation("result")
     }
 }

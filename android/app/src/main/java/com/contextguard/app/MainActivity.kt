@@ -74,6 +74,20 @@ class MainActivity : ComponentActivity() {
                 val payload = SharesheetPayloadResolver.resolve(applicationContext, intent)
                 viewModel.processSharesheetPayload(payload)
             }
+        } else if (intent.getBooleanExtra("EXTRA_REVIEW_RISK", false) || action == "com.contextguard.app.ACTION_REVIEW_RISK") {
+            val targetPkg = intent.getStringExtra("EXTRA_TARGET_PACKAGE") ?: ""
+            val rationale = intent.getStringExtra("EXTRA_RATIONALE") ?: ""
+            val riskScore = intent.getFloatExtra("EXTRA_RISK_SCORE", 0.75f)
+            val intervention = intent.getStringExtra("EXTRA_INTERVENTION") ?: "WARN"
+            val candidateAction = intent.getStringExtra("EXTRA_CANDIDATE_ACTION") ?: "ACTION"
+            AppLogger.i("Handling JIT overlay risk review for $targetPkg [$intervention]")
+            viewModel.prepareRiskReview(
+                targetPackage = targetPkg,
+                rationale = rationale,
+                riskScore = riskScore,
+                intervention = intervention,
+                candidateAction = candidateAction
+            )
         }
     }
 }

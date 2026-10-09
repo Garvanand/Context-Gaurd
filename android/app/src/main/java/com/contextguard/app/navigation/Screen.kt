@@ -9,6 +9,7 @@ sealed class Screen(val route: String, val title: String) {
     object Settings : Screen("settings", "System Settings")
     object Demo : Screen("demo", "Central Demonstration")
     object Supervisor : Screen("supervisor", "Supervisor Viva Mode")
+    object Consent : Screen("consent", "Screen Protection Consent")
 
     companion object {
         val bottomNavItems = listOf(

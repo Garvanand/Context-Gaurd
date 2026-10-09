@@ -9,4 +9,17 @@
     <string name="nav_settings">Settings</string>
     <string name="nav_demo">Demo</string>
     <string name="nav_supervisor">Supervisor</string>
+    <string name="nav_consent">Screen Protection Consent</string>
+
+    <!-- ScreenGuard Accessibility Strings -->
+    <string name="accessibility_service_name">ContextGuard Screen Protection</string>
+    <string name="accessibility_service_description">ContextGuard uses Android Accessibility APIs strictly as a pre-action digital safety assistant to inspect allowlisted app screens for phishing links, credential hazards, and data leakage before actions are committed. This service is an AI security monitor, not an assistive tool for users with disabilities.</string>
+
+    <!-- Domain Network Protection Extension Strings -->
+    <string name="vpn_protection_title">Domain Network Protection (Experimental)</string>
+    <string name="vpn_protection_desc">User-controlled on-device domain evaluation. Only visible destination hostnames are evaluated locally; HTTPS web pages, passwords, and encrypted payloads are never decrypted or inspected.</string>
+    <string name="vpn_disclosure_text">ContextGuard evaluates destination hostnames on-device to flag known phishing domains. Requires Android VPN authorization. This is completely separate from offline analysis mode. ContextGuard never forwards traffic to external servers or breaks device connectivity.</string>
+    <string name="vpn_stop_button">Stop Network Protection</string>
+    <string name="vpn_start_button">Enable Domain Protection</string>
 </resources>
+

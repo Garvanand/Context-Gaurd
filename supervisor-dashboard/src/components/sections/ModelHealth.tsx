@@ -31,45 +31,48 @@ export const ModelHealth: React.FC<ModelHealthProps> = ({ initialData }) => {
   const components = data?.components || {
     qwen_vlm: {
       name: 'Qwen 2.5-VL 3B Reasoner',
-      status: 'HEALTHY',
-      probe_result: 'PASS',
+      status: 'AWAITING_PROBE',
+      probe_result: 'Not evaluated',
       endpoint: 'http://localhost:11434',
-      latency_ms: 2.4,
     },
     xgboost_url: {
       name: 'XGBoost URL Phishing Classifier',
-      status: 'HEALTHY',
-      probe_result: 'PASS',
-      sample_score: 0.0012,
-      latency_ms: 0.0035,
+      status: 'AWAITING_PROBE',
+      probe_result: 'Not evaluated',
     },
     pii_engine: {
       name: 'PII & Masking Engine',
-      status: 'HEALTHY',
-      probe_result: 'PASS',
+      status: 'AWAITING_PROBE',
+      probe_result: 'Not evaluated',
       capabilities: ['Aadhaar Verhoeff', 'Luhn Card', 'PAN', 'UPI VPA', 'OTP'],
-      latency_ms: 0.28,
     },
     policy_engine: {
       name: 'Adaptive Action-Conditioned Policy Engine',
-      status: 'HEALTHY',
-      probe_result: 'PASS',
+      status: 'AWAITING_PROBE',
+      probe_result: 'Not evaluated',
       formula: 'R_eff = BaseRisk * (1 + lambda * ReversibilityLoss)',
     },
     memory_guard: {
       name: 'Zero Raw Disk Persistence Guard',
-      status: 'ENFORCED',
-      probe_result: 'PASS',
+      status: 'AWAITING_PROBE',
+      probe_result: 'Not evaluated',
       storage_mode: 'memory_only',
     },
   };
 
   const getStatusBadge = (status: string, probe: string) => {
+    if (probe === 'Not evaluated' || status === 'AWAITING_PROBE') {
+      return (
+        <span className="badge badge-not-eval">
+          Not evaluated
+        </span>
+      );
+    }
     if (probe === 'PASS' || status === 'HEALTHY' || status === 'ENFORCED') {
       return (
         <span className="badge badge-operational">
           <CheckCircle2 size={11} style={{ marginRight: '4px' }} />
-          HEALTHY (PASS)
+          {status} (PASS)
         </span>
       );
     }

@@ -36,7 +36,8 @@ fun ContextGuardNavGraph(
                 onNavigateToDemo = { navController.navigate(Screen.Demo.route) },
                 onNavigateToSupervisor = { navController.navigate(Screen.Supervisor.route) },
                 onNavigateToPrivacy = { navController.navigate(Screen.Privacy.route) },
-                onNavigateToSettings = { navController.navigate(Screen.Settings.route) }
+                onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                onNavigateToConsent = { navController.navigate(Screen.Consent.route) }
             )
         }
 
@@ -80,6 +81,12 @@ fun ContextGuardNavGraph(
         composable(Screen.Supervisor.route) {
             SupervisorScreen(
                 viewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.Consent.route) {
+            ConsentScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

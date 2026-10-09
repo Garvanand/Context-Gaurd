@@ -61,6 +61,169 @@ fun SettingsScreen(
             )
         }
 
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val isNotificationAccessGranted = remember {
+            com.contextguard.app.core.notification.NotificationGuardStateManager.isNotificationAccessGranted(context)
+        }
+        val isListenerConnected by com.contextguard.app.core.notification.NotificationGuardStateManager.isListenerConnected.collectAsState()
+        val isProtectionPaused by com.contextguard.app.core.notification.NotificationGuardStateManager.isProtectionPaused.collectAsState()
+        val targetApps by com.contextguard.app.core.accessibility.AllowlistManager.targetApps.collectAsState()
+        val communicationApps = targetApps.filter {
+            it.category == com.contextguard.app.core.accessibility.AppCategory.MESSAGING ||
+            it.category == com.contextguard.app.core.accessibility.AppCategory.EMAIL ||
+            it.category == com.contextguard.app.core.accessibility.AppCategory.SOCIAL
+        }
+
+        // Notification Threat Triage Card
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SurfaceDark, RoundedCornerShape(16.dp))
+                .border(1.dp, SurfaceBorder, RoundedCornerShape(16.dp))
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "NOTIFICATION THREAT TRIAGE",
+                    color = CyanAccent,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Surface(
+                    color = if (isNotificationAccessGranted && isListenerConnected) ActGreen.copy(alpha = 0.15f) else WarnOrange.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(
+                        text = if (isNotificationAccessGranted && isListenerConnected) "ACTIVE" else if (isNotificationAccessGranted) "ENABLED (CONNECTING)" else "PERMISSION REQUIRED",
+                        color = if (isNotificationAccessGranted && isListenerConnected) ActGreen else WarnOrange,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Text(
+                text = "ContextGuard inspects notifications from selected messaging and email apps in real-time, detecting phishing links, credential harvesting, and impersonation attempts before you tap them.",
+                color = TextSecondary,
+                fontSize = 13.sp,
+                lineHeight = 18.sp
+            )
+
+            Surface(
+                color = BackgroundDark.copy(alpha = 0.6f),
+                shape = RoundedCornerShape(10.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceBorder)
+            ) {
+                Text(
+                    text = "🛡️ Privacy Guarantee: 100% on-device triage. Zero SMS or Contacts permissions requested or needed. Raw notification text is never stored or transmitted.",
+                    color = TextPrimary,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(12.dp),
+                    lineHeight = 16.sp
+                )
+            }
+
+            // Pause / Resume Toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Notification Monitoring",
+                        color = TextPrimary,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = if (isProtectionPaused) "Monitoring currently paused" else "Monitoring active for allowlisted apps",
+                        color = TextSecondary,
+                        fontSize = 11.sp
+                    )
+                }
+                Switch(
+                    checked = !isProtectionPaused,
+                    onCheckedChange = { com.contextguard.app.core.notification.NotificationGuardStateManager.toggleProtection() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = CyanAccent,
+                        checkedTrackColor = CyanAccent.copy(alpha = 0.4f),
+                        uncheckedThumbColor = TextSecondary,
+                        uncheckedTrackColor = SurfaceBorder
+                    )
+                )
+            }
+
+            // Open Android Notification Access Settings Button
+            Button(
+                onClick = {
+                    val intent = android.content.Intent(android.provider.Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                    try {
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        val generalIntent = android.content.Intent(android.provider.Settings.ACTION_SETTINGS)
+                        context.startActivity(generalIntent)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().height(46.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = if (isNotificationAccessGranted) SurfaceBorder else WarnOrange),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text(
+                    text = if (isNotificationAccessGranted) "Manage Android Notification Access" else "Enable Notification Access in Settings",
+                    color = if (isNotificationAccessGranted) TextPrimary else BackgroundDark,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            // Package Selection Section
+            Text(
+                text = "PERMITTED COMMUNICATION APPS",
+                color = TextSecondary,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.5.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+
+            communicationApps.forEach { app ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = app.appName,
+                            color = TextPrimary,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = app.packageName,
+                            color = TextSecondary,
+                            fontSize = 11.sp
+                        )
+                    }
+                    Checkbox(
+                        checked = app.isEnabled,
+                        onCheckedChange = { enabled ->
+                            com.contextguard.app.core.accessibility.AllowlistManager.toggleApp(app.packageName, enabled)
+                        },
+                        colors = CheckboxDefaults.colors(checkedColor = CyanAccent)
+                    )
+                }
+            }
+        }
+
         // Backend Endpoint Configuration Card
         Column(
             modifier = Modifier
@@ -154,7 +317,145 @@ fun SettingsScreen(
             }
         }
 
+        // Domain Network Protection (Experimental Extension) Card
+        val vpnStatus by com.contextguard.app.core.network.DomainProtectionManager.status.collectAsState()
+        val vpnTelemetry by com.contextguard.app.core.network.DomainProtectionManager.telemetry.collectAsState()
+        var showVpnDisclosureDialog by remember { mutableStateOf(false) }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SurfaceDark, RoundedCornerShape(16.dp))
+                .border(1.dp, SurfaceBorder, RoundedCornerShape(16.dp))
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "DOMAIN NETWORK PROTECTION",
+                    color = CyanAccent,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+                Surface(
+                    color = when (vpnStatus) {
+                        com.contextguard.app.core.network.ProtectionStatus.ACTIVE -> ActGreen.copy(alpha = 0.15f)
+                        com.contextguard.app.core.network.ProtectionStatus.FALLBACK_INACTIVE -> CyanAccent.copy(alpha = 0.15f)
+                        com.contextguard.app.core.network.ProtectionStatus.REVOKED -> WarnOrange.copy(alpha = 0.15f)
+                        else -> TextSecondary.copy(alpha = 0.15f)
+                    },
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(
+                        text = when (vpnStatus) {
+                            com.contextguard.app.core.network.ProtectionStatus.ACTIVE -> "ACTIVE"
+                            com.contextguard.app.core.network.ProtectionStatus.FALLBACK_INACTIVE -> "DIAGNOSTIC (SAFE)"
+                            com.contextguard.app.core.network.ProtectionStatus.REVOKED -> "REVOKED"
+                            com.contextguard.app.core.network.ProtectionStatus.STOPPED -> "STOPPED"
+                            else -> "OFF"
+                        },
+                        color = when (vpnStatus) {
+                            com.contextguard.app.core.network.ProtectionStatus.ACTIVE -> ActGreen
+                            com.contextguard.app.core.network.ProtectionStatus.FALLBACK_INACTIVE -> CyanAccent
+                            com.contextguard.app.core.network.ProtectionStatus.REVOKED -> WarnOrange
+                            else -> TextSecondary
+                        },
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Text(
+                text = "Opt-in on-device destination domain evaluation. Only visible hostnames are evaluated; HTTPS web pages, passwords, and encrypted payloads are NEVER decrypted or inspected. Never drops network packets.",
+                color = TextSecondary,
+                fontSize = 12.sp,
+                lineHeight = 16.sp
+            )
+
+            if (vpnStatus == com.contextguard.app.core.network.ProtectionStatus.ACTIVE ||
+                vpnStatus == com.contextguard.app.core.network.ProtectionStatus.FALLBACK_INACTIVE) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Inspections: ${vpnTelemetry.totalInspections} (${vpnTelemetry.threatsDetected} flagged)",
+                        color = TextPrimary,
+                        fontSize = 12.sp
+                    )
+                    Button(
+                        onClick = {
+                            com.contextguard.app.core.network.DomainProtectionManager.stopProtection()
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = StopRed.copy(alpha = 0.2f)),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text("Stop Protection", color = StopRed, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            } else {
+                OutlinedButton(
+                    onClick = { showVpnDisclosureDialog = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = CyanAccent),
+                    shape = RoundedCornerShape(10.dp)
+                ) {
+                    Text("Enable Domain Protection (Opt-In)", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
+
+        if (showVpnDisclosureDialog) {
+            AlertDialog(
+                onDismissRequest = { showVpnDisclosureDialog = false },
+                title = { Text("Network Protection Consent", color = TextPrimary, fontWeight = FontWeight.Bold) },
+                text = {
+                    Text(
+                        "ContextGuard evaluates destination hostnames locally on-device to flag known phishing domains.\n\n" +
+                        "• Does NOT decrypt HTTPS traffic\n" +
+                        "• Does NOT install CA certificates\n" +
+                        "• Does NOT inspect web pages or passwords\n" +
+                        "• Does NOT forward data to external servers\n" +
+                        "• Completely separate from offline mode\n\n" +
+                        "Would you like to enable on-device domain protection?",
+                        color = TextSecondary,
+                        fontSize = 13.sp
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showVpnDisclosureDialog = false
+                            com.contextguard.app.core.network.DomainProtectionManager.setStatus(
+                                com.contextguard.app.core.network.ProtectionStatus.FALLBACK_INACTIVE
+                            )
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = CyanAccent)
+                    ) {
+                        Text("Enable Diagnostic Mode", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showVpnDisclosureDialog = false }) {
+                        Text("Cancel", color = TextSecondary)
+                    }
+                },
+                containerColor = SurfaceDark,
+                shape = RoundedCornerShape(16.dp)
+            )
+        }
+
         // Save Button
+
         Button(
             onClick = {
                 val parsedPort = portInput.toIntOrNull() ?: 8000

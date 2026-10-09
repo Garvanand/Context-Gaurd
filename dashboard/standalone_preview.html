@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ContextGuard - Presentation UI Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090D14;
+      --bg-obsidian: #05080E;
+      --surface-dark: #121824;
+      --surface-glass: rgba(18, 24, 36, 0.72);
+      --surface-glass-high: rgba(30, 41, 59, 0.82);
+      --surface-border: #1E293B;
+      --surface-border-subtle: #334155;
+      --cyan-accent: #00F5FF;
+      --indigo-accent: #6366F1;
+      --violet-accent: #A855F7;
+      --act-green: #10B981;
+      --ask-yellow: #F59E0B;
+      --warn-orange: #F97316;
+      --stop-red: #EF4444;
+      --text-primary: #F1F5F9;
+      --text-secondary: #94A3B8;
+      --text-tertiary: #64748B;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-obsidian);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      overflow-x: hidden;
+    }
+
+    .app-header {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 0 4px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-full);
+      background: rgba(0, 245, 255, 0.12);
+      border: 1.5px solid var(--cyan-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan-accent);
+      font-size: 18px;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .screen-tabs {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .screen-tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      background: var(--surface-dark);
+      border: 1px solid var(--surface-border);
+      color: var(--text-secondary);
+      padding: 8px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--surface-border-subtle);
+      color: var(--text-primary);
+    }
+
+    .tab-btn.active {
+      background: rgba(0, 245, 255, 0.14);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+    }
+
+    /* Mobile Device Frame Container */
+    .device-frame {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-dark);
+      border: 1px solid var(--surface-border-subtle);
+      border-radius: 36px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 245, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+      min-height: 820px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Screen Views */
+    .screen {
+      display: none;
+      padding: 24px 20px 32px;
+      flex-direction: column;
+      gap: 18px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .screen.active {
+      display: flex;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Glass Cards */
+    .glass-card {
+      background: var(--surface-glass);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    /* Home Screen Styles */
+    .defense-active-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      width: fit-content;
+      color: var(--act-green);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--act-green);
+      box-shadow: 0 0 8px var(--act-green);
+    }
+
+    .hero-title {
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.25;
+      color: var(--text-primary);
+    }
+
+    .hero-subtitle {
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+
+    .cta-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn-primary {
+      background: var(--cyan-accent);
+      color: var(--bg-dark);
+      border: none;
+      padding: 15px;
+      border-radius: var(--radius-md);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(0, 245, 255, 0.25);
+      transition: all 0.2s ease;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 25px rgba(0, 245, 255, 0.35);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(0, 245, 255, 0.4);
+      color: var(--text-primary);
+      padding: 13px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(0, 245, 255, 0.08);
+      border-color: var(--cyan-accent);
+    }
+
+    .btn-tertiary {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+    .btn-tertiary:hover { color: var(--text-primary); }
+
+    /* Step Headers */
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .step-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(0, 245, 255, 0.15);
+      border: 1px solid var(--cyan-accent);
+      color: var(--cyan-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .step-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Redaction Preview */
+    .redaction-toggle {
+      display: flex;
+      background: var(--bg-dark);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      padding: 2px;
+      width: fit-content;
+      margin-left: auto;
+    }
+
+    .toggle-pill {
+      padding: 4px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .toggle-pill.active-after {
+      background: var(--surface-glass-high);
+      color: var(--act-green);
+    }
+
+    .toggle-pill.active-before {
+      background: var(--surface-glass-high);
+      color: var(--warn-orange);
+    }
+
+    .ocr-preview-box {
+      background: var(--bg-dark);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      min-height: 80px;
+    }
+
+    /* Action Chips */
+    .chips-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .chip-btn {
+      background: var(--surface-dark);
+      border: 1px solid var(--surface-border);
+      color: var(--text-secondary);
+      padding: 12px 6px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .chip-btn:hover {
+      border-color: var(--surface-border-subtle);
+      color: var(--text-primary);
+    }
+
+    .chip-btn.selected {
+      background: rgba(0, 245, 255, 0.15);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+      box-shadow: 0 0 12px rgba(0, 245, 255, 0.2);
+    }
+
+    /* Context Inputs */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .input-field {
+      background: var(--bg-dark);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-field:focus { border-color: var(--cyan-accent); }
+
+    .pills-row {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .pills-row::-webkit-scrollbar { display: none; }
+
+    .quick-pill {
+      background: var(--bg-dark);
+      border: 1px solid var(--surface-border);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .quick-pill:hover { color: var(--text-primary); border-color: var(--surface-border-subtle); }
+
+    /* Result Dominant Card */
+    .dominant-card {
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      border: 2px solid;
+    }
+
+    .dominant-stop {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: var(--stop-red);
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.15);
+    }
+
+    .dominant-warn {
+      background: rgba(249, 115, 22, 0.08);
+      border-color: var(--warn-orange);
+    }
+
+    .dominant-ask {
+      background: rgba(245, 158, 11, 0.08);
+      border-color: var(--ask-yellow);
+    }
+
+    .dominant-act {
+      background: rgba(16, 185, 129, 0.08);
+      border-color: var(--act-green);
+    }
+
+    .dominant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dominant-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .dominant-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      border: 2px solid;
+    }
+
+    .dominant-badge {
+      font-family: 'JetBrains Mono', monospace;
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid;
+    }
+
+    .dominant-copy {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.35;
+      color: var(--text-primary);
+    }
+
+    /* Metric Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      text-align: center;
+    }
+
+    .metric-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .metric-name {
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+
+    .metric-val {
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Decision Trace Pipeline */
+    .pipeline-nodes {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .node-item {
+      background: var(--bg-dark);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .node-item:hover { border-color: var(--cyan-accent); }
+
+    .node-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .node-summary {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    /* Six Stage Progress Overlay */
+    .progress-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(5, 8, 14, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .progress-modal {
+      width: 100%;
+      background: var(--surface-dark);
+      border: 1.5px solid var(--cyan-accent);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 0 40px rgba(0, 245, 255, 0.2);
+    }
+
+    .stage-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 8px;
+      border-radius: var(--radius-sm);
+    }
+
+    .stage-item.active {
+      background: rgba(0, 245, 255, 0.1);
+    }
+
+    .stage-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      border: 1px solid var(--surface-border);
+      color: var(--text-tertiary);
+    }
+
+    .stage-item.done .stage-num {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--act-green);
+      color: var(--act-green);
+    }
+
+    .stage-item.active .stage-num {
+      background: rgba(0, 245, 255, 0.2);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+    }
+
+    /* Demo Cards */
+    .demo-card-item {
+      background: var(--surface-glass);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .demo-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .badge-pill {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+    }
+    .badge-stop { background: rgba(239, 68, 68, 0.2); color: var(--stop-red); border: 1px solid var(--stop-red); }
+    .badge-warn { background: rgba(249, 115, 22, 0.2); color: var(--warn-orange); border: 1px solid var(--warn-orange); }
+    .badge-ask { background: rgba(245, 158, 11, 0.2); color: var(--ask-yellow); border: 1px solid var(--ask-yellow); }
+    .badge-act { background: rgba(16, 185, 129, 0.2); color: var(--act-green); border: 1px solid var(--act-green); }
+
+    .btn-run {
+      background: var(--cyan-accent);
+      color: var(--bg-dark);
+      border: none;
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: fit-content;
+      margin-left: auto;
+    }
+    .btn-run:hover { opacity: 0.9; }
+
+    /* Supervisor HUD */
+    .hud-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      background: var(--surface-dark);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+
+    .hud-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      text-align: center;
+    }
+
+    .hud-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .field-k { color: var(--text-secondary); }
+    .field-v { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--text-primary); }
+
+    /* Three Experimental Modes Selector (Phase 7 Privacy-Utility) */
+    .mode-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .mode-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--surface-border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      padding: 10px 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      align-items: center;
+    }
+    .mode-pill:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .mode-pill.active {
+      background: rgba(0, 240, 255, 0.15);
+      border-color: var(--cyan-accent);
+      color: var(--cyan-accent);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+    }
+    .mode-pill.mode-raw {
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .mode-pill.mode-raw.active {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: var(--stop-red);
+      color: var(--stop-red);
+      box-shadow: 0 0 14px rgba(239, 68, 68, 0.35);
+    }
+    .hazard-banner {
+      background: rgba(239, 68, 68, 0.14);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-top: 10px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .hazard-title {
+      color: var(--stop-red);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hazard-desc {
+      color: #fca5a5;
+      font-size: 11px;
+      margin-top: 5px;
+      line-height: 1.45;
+    }
+    .benchmark-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+    .benchmark-table th {
+      text-align: left;
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--cyan-accent);
+      border-bottom: 1px solid var(--surface-border);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+    }
+    .benchmark-table td {
+      padding: 6px 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .benchmark-table tr.highlight-redacted td {
+      background: rgba(46, 204, 113, 0.08);
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Simulation Control Bar -->
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">🛡️</div>
+      <div>
+        <div class="brand-title">ContextGuard</div>
+        <div class="brand-subtitle">Pre-Action Digital Safety</div>
+      </div>
+    </div>
+    <div style="font-family: 'JetBrains Mono'; font-size: 11px; color: var(--cyan-accent); font-weight: 700;">
+      API 34 • ML Kit
+    </div>
+  </header>
+
+  <!-- Screen Navigation Tabs -->
+  <nav class="screen-tabs">
+    <button class="tab-btn active" id="tab-home" onclick="showScreen('screen-home')">Home</button>
+    <button class="tab-btn" id="tab-analyze" onclick="showScreen('screen-analyze')">Analyze Flow</button>
+    <button class="tab-btn" id="tab-result" onclick="showScreen('screen-result')">Result (STOP)</button>
+    <button class="tab-btn" id="tab-demo" onclick="showScreen('screen-demo')">Demo Mode (8)</button>
+    <button class="tab-btn" id="tab-supervisor" onclick="showScreen('screen-supervisor')">Supervisor Viva</button>
+  </nav>
+
+  <!-- Phone Container Device Frame -->
+  <main class="device-frame">
+
+    <!-- ============================================== -->
+    <!-- SCREEN 1: HOME SCREEN -->
+    <!-- ============================================== -->
+    <section class="screen active" id="screen-home">
+      <div class="glass-card">
+        <div class="defense-active-pill">
+          <div class="pulse-dot"></div>
+          PRE-ACTION DEFENSE ACTIVE
+        </div>
+
+        <h1 class="hero-title">Before you act, ContextGuard.</h1>
+        <p class="hero-subtitle">Understand the risk before you send, upload, post, sign, or approve.</p>
+
+        <div class="cta-group">
+          <button class="btn-primary" id="btn-home-analyze" onclick="showScreen('screen-analyze')">
+            <span>Analyze something</span> 🔍
+          </button>
+          <button class="btn-secondary" id="btn-home-demo" onclick="showScreen('screen-demo')">
+            <span>Demo scenarios</span> ▶
+          </button>
+          <button class="btn-tertiary" id="btn-home-privacy" onclick="alert('ContextGuard Privacy Center: Local Canvas Masking, Ephemeral RAM Invariant, Zero Raw Disk Persistence.')">
+            <span>Privacy center</span> 🔒
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 11px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">SYSTEM ARCHITECTURE STATE</span>
+          <span style="font-size: 10px; font-family: 'JetBrains Mono'; color: var(--text-tertiary);">ONLINE</span>
+        </div>
+        <div class="field-row"><span class="field-k">Perception Engine</span><span class="field-v">Google ML Kit OCR + Face Landmark</span></div>
+        <div class="field-row"><span class="field-k">Sensitive PII Masking</span><span class="field-v">4 entities masked locally</span></div>
+        <div class="field-row"><span class="field-k">Inference Mode</span><span class="field-v">LOCAL_BACKEND (Redacted)</span></div>
+        <div class="field-row"><span class="field-k">Zero-Disk Invariant</span><span class="field-v" style="color: var(--act-green);">Enforced (RAM buffers)</span></div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SCREEN 2: 4-STEP ANALYSIS FLOW -->
+    <!-- ============================================== -->
+    <section class="screen" id="screen-analyze">
+      <!-- Step 1: Artifact Preview -->
+      <div class="step-header">
+        <div class="step-badge">1</div>
+        <div class="step-title">Artifact Preview</div>
+      </div>
+
+      <div class="glass-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);" id="artifact-title-preview">HDFC_Bank_Statement_Oct2026.pdf</div>
+            <div style="font-size: 11px; color: var(--text-secondary);">Origin: HDFC Mobile Banking</div>
+          </div>
+          <div class="redaction-toggle">
+            <button class="toggle-pill" id="pill-before" onclick="toggleRedactionView('BEFORE')">BEFORE</button>
+            <button class="toggle-pill active-after" id="pill-after" onclick="toggleRedactionView('AFTER')">AFTER REDACTION</button>
+          </div>
+        </div>
+
+        <div class="ocr-preview-box" id="ocr-preview-text">
+HDFC BANK LIMITED - MONTHLY STATEMENT
+Account: [REDACTED_ACCOUNT] ending in 5671
+IFSC: [REDACTED_IFSC]
+Balance: INR 1,48,290.40
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+          <span style="color: var(--act-green); font-weight: 700;">✓ 4 PII entities masked on-device</span>
+          <span style="color: var(--text-secondary);">Style: Blackout (Canvas)</span>
+        </div>
+      </div>
+
+      <!-- Step 2: What are you about to do? -->
+      <div class="step-header">
+        <div class="step-badge">2</div>
+        <div class="step-title">What are you about to do?</div>
+      </div>
+
+      <div class="glass-card">
+        <div class="chips-grid">
+          <button class="chip-btn" onclick="selectAction('SAVE', this)">SAVE</button>
+          <button class="chip-btn" onclick="selectAction('SEND', this)">SEND</button>
+          <button class="chip-btn" onclick="selectAction('UPLOAD', this)">UPLOAD</button>
+          <button class="chip-btn selected" onclick="selectAction('POST', this)">POST</button>
+          <button class="chip-btn" onclick="selectAction('SIGN', this)">SIGN</button>
+          <button class="chip-btn" onclick="selectAction('LOGIN', this)">LOGIN</button>
+          <button class="chip-btn" onclick="selectAction('APPROVE', this)">APPROVE</button>
+          <button class="chip-btn" onclick="selectAction('OPEN', this)">OPEN</button>
+        </div>
+        <div style="font-size: 11px; color: var(--text-secondary);" id="action-summary-note">
+          Selected: <strong style="color: var(--cyan-accent);" id="active-action-name">POST</strong> • Risk assessment evaluates irrevocable public broadcast hazard.
+        </div>
+      </div>
+
+      <!-- Step 3: Context -->
+      <div class="step-header">
+        <div class="step-badge">3</div>
+        <div class="step-title">Context</div>
+      </div>
+
+      <div class="glass-card">
+        <div class="field-group">
+          <label class="field-label" for="inp-recipient">Recipient</label>
+          <input type="text" class="input-field" id="inp-recipient" value="Public Twitter/X Feed" />
+          <div class="pills-row">
+            <span class="quick-pill" onclick="setRecipient('Personal Vault')">Self / Vault</span>
+            <span class="quick-pill" onclick="setRecipient('Telegram Contact')">Telegram Contact</span>
+            <span class="quick-pill" onclick="setRecipient('Public Twitter/X Feed')">Public Feed</span>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="inp-destination">Destination</label>
+          <input type="text" class="input-field" id="inp-destination" value="Public Twitter/X Feed" />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="inp-source">Source app</label>
+          <input type="text" class="input-field" id="inp-source" value="HDFC Mobile Banking" />
+        </div>
+      </div>
+
+      <!-- Step 4: Analyze -->
+      <div class="step-header">
+        <div class="step-badge">4</div>
+        <div class="step-title">Analyze</div>
+      </div>
+
+      <button class="btn-primary" id="btn-run-analysis" onclick="triggerSixStageAnalysis()">
+        <span>Analyze Pre-Action Risk</span> 🛡️
+      </button>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SCREEN 3: RESULT SCREEN (DOMINANT INTERVENTION) -->
+    <!-- ============================================== -->
+    <section class="screen" id="screen-result">
+      <!-- Dominant Intervention Card -->
+      <div class="dominant-card dominant-stop" id="dominant-banner">
+        <div class="dominant-header">
+          <div class="dominant-title-wrap">
+            <div class="dominant-icon" style="color: var(--stop-red); border-color: var(--stop-red); background: rgba(239, 68, 68, 0.2);">🛑</div>
+            <div>
+              <div style="font-size: 32px; font-weight: 900; color: var(--stop-red);" id="res-int-name">STOP</div>
+              <div style="font-size: 10px; font-weight: 800; color: var(--stop-red); letter-spacing: 1px;">INTERVENTION PROTOCOL</div>
+            </div>
+          </div>
+          <div class="dominant-badge" style="color: var(--stop-red); border-color: var(--stop-red);" id="res-rho-badge">
+            rho = 1.575
+          </div>
+        </div>
+        <hr style="border: none; border-top: 1px solid rgba(239, 68, 68, 0.3);">
+        <div class="dominant-copy" id="res-int-copy">
+          "We strongly recommend not proceeding."
+        </div>
+      </div>
+
+      <!-- Metrics Grid -->
+      <div class="glass-card">
+        <div style="font-size: 11px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">SAFETY METRICS</div>
+        <div class="metrics-grid">
+          <div class="metric-item">
+            <span class="metric-name">Risk score</span>
+            <span class="metric-val" style="color: var(--stop-red);" id="m-risk">1.575</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-name">Confidence</span>
+            <span class="metric-val" style="color: var(--cyan-accent);" id="m-conf">95%</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-name">Severity</span>
+            <span class="metric-val" style="color: var(--text-primary);" id="m-sev">0.90</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-name">Reversibility</span>
+            <span class="metric-val" style="color: var(--text-primary);" id="m-irrev">1.00</span>
+          </div>
+        </div>
+        <div style="font-size: 11px; font-family: 'JetBrains Mono'; color: var(--text-secondary); margin-top: 4px;">
+          rho = s * (1 + 0.75 * r) = 0.90 * (1 + 0.75 * 1.00) = 1.575 (STOP threshold &gt;= 0.65)
+        </div>
+      </div>
+
+      <!-- Alternative Action Card -->
+      <div class="glass-card" style="border-color: rgba(0, 245, 255, 0.4);">
+        <div style="display: flex; align-items: center; gap: 8px; color: var(--cyan-accent); font-size: 11px; font-weight: 800; letter-spacing: 1px;">
+          <span>⇄ ALTERNATIVE ACTION</span>
+        </div>
+        <div style="font-size: 14px; font-weight: 700; color: var(--text-primary); line-height: 1.4;" id="res-alt-action">
+          Mask account numbers and save to encrypted personal vault instead.
+        </div>
+      </div>
+
+      <!-- Expandable 8-Node Decision Trace -->
+      <div class="glass-card">
+        <div style="font-size: 11px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">VISUAL DECISION TRACE (8 STAGES)</div>
+        <div class="pipeline-nodes">
+          <div class="node-item" onclick="toggleNodeDetail(this)"><span class="node-name">1. Artifact</span><span class="node-summary">HDFC_Bank_Statement.pdf (In-Memory RAM)</span></div>
+          <div class="node-item" onclick="toggleNodeDetail(this)"><span class="node-name">2. Context</span><span class="node-summary">Public Twitter/X Feed (Irrevocable)</span></div>
+          <div class="node-item" onclick="toggleNodeDetail(this)"><span class="node-name">3. Intent</span><span class="node-summary">POST (Global Broadcast)</span></div>
+          <div class="node-item" onclick="toggleNodeDetail(this)"><span class="node-name">4. Evidence</span><span class="node-summary">Account No &amp; Transaction Tables Detected</span></div>
+          <div class="node-item" onclick="toggleNodeDetail(this)"><span class="node-name">5. Consequence</span><span class="node-summary">s = 0.90, r = 1.00 (Catastrophic Exposure)</span></div>
+          <div class="node-item" onclick="toggleNodeDetail(this)"><span class="node-name">6. Uncertainty</span><span class="node-summary">Confidence c = 95% (High Calibrated Confidence)</span></div>
+          <div class="node-item" onclick="toggleNodeDetail(this)"><span class="node-name">7. Policy</span><span class="node-summary">rho = 1.575 &gt;= 0.65 threshold</span></div>
+          <div class="node-item" onclick="toggleNodeDetail(this)" style="border-color: var(--stop-red);"><span class="node-name" style="color: var(--stop-red);">8. Intervention</span><span class="node-summary" style="color: var(--stop-red);">STOP (Action Blocked)</span></div>
+        </div>
+      </div>
+
+      <!-- Buttons for STOP State -->
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;">
+        <button class="btn-primary" style="background: var(--stop-red); color: white;" onclick="confirmOverride()">
+          <span>Continue anyway</span> ⚠️
+        </button>
+        <button class="btn-secondary" onclick="alert('Reviewing Evidence:\n• ML Kit detected Account No: 4532 0150 1234 5671\n• Target destination is publicly indexed\n• Policy evaluated rho = 1.575 >= 0.65')">
+          <span>Review evidence</span> 🔍
+        </button>
+        <button class="btn-tertiary" onclick="showScreen('screen-analyze')">
+          <span>Change action</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SCREEN 4: DEMO MODE (8 READY-TO-RUN CARDS) -->
+    <!-- ============================================== -->
+    <section class="screen" id="screen-demo">
+      <div class="glass-card" style="border-color: rgba(0, 245, 255, 0.4);">
+        <div style="font-size: 11px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">RESEARCH HYPOTHESIS VALIDATION</div>
+        <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">Risk is not an intrinsic property of the artifact alone.</div>
+        <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.4;">
+          Tap "Run Scenario" on any ready-to-run card below to simulate the full six-stage action-conditioned evaluation.
+        </div>
+      </div>
+
+      <!-- Card 1 -->
+      <div class="demo-card-item">
+        <div class="demo-card-header">
+          <span style="font-weight: 700; font-size: 14px;">1. Bank statement</span>
+          <span class="badge-pill badge-stop">STOP</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">POST to Public Twitter/X feed. PII disclosure hazard.</div>
+        <button class="btn-run" onclick="runDemo(1)"><span>Run Scenario</span> ▶</button>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="demo-card-item">
+        <div class="demo-card-header">
+          <span style="font-weight: 700; font-size: 14px;">2. Fake KYC link</span>
+          <span class="badge-pill badge-stop">STOP</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">LOGIN on spoofed portal. XGBoost P(phish) = 0.974.</div>
+        <button class="btn-run" onclick="runDemo(2)"><span>Run Scenario</span> ▶</button>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="demo-card-item">
+        <div class="demo-card-header">
+          <span style="font-weight: 700; font-size: 14px;">3. OTP screenshot</span>
+          <span class="badge-pill badge-stop">STOP</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">SEND 6-digit Aadhaar OTP to Telegram support bot.</div>
+        <button class="btn-run" onclick="runDemo(3)"><span>Run Scenario</span> ▶</button>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="demo-card-item">
+        <div class="demo-card-header">
+          <span style="font-weight: 700; font-size: 14px;">4. Unknown recipient document</span>
+          <span class="badge-pill badge-ask">ASK</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">SEND to disposable mail. Epistemic uncertainty c = 0.55.</div>
+        <button class="btn-run" onclick="runDemo(4)"><span>Run Scenario</span> ▶</button>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="demo-card-item">
+        <div class="demo-card-header">
+          <span style="font-weight: 700; font-size: 14px;">5. Routine family photo</span>
+          <span class="badge-pill badge-act">ACT</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">POST personal photo to Instagram feed. Zero PII.</div>
+        <button class="btn-run" onclick="runDemo(5)"><span>Run Scenario</span> ▶</button>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="demo-card-item">
+        <div class="demo-card-header">
+          <span style="font-weight: 700; font-size: 14px;">6. Routine news URL</span>
+          <span class="badge-pill badge-act">ACT</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">OPEN legitimate Reuters article. XGBoost P(phish) = 0.008.</div>
+        <button class="btn-run" onclick="runDemo(6)"><span>Run Scenario</span> ▶</button>
+      </div>
+
+      <!-- Card 7 -->
+      <div class="demo-card-item">
+        <div class="demo-card-header">
+          <span style="font-weight: 700; font-size: 14px;">7. Contract lock-in</span>
+          <span class="badge-pill badge-warn">WARN</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">SIGN 36-month enterprise SaaS contract with auto-renewal clause.</div>
+        <button class="btn-run" onclick="runDemo(7)"><span>Run Scenario</span> ▶</button>
+      </div>
+
+      <!-- Card 8 -->
+      <div class="demo-card-item">
+        <div class="demo-card-header">
+          <span style="font-weight: 700; font-size: 14px;">8. Payment request</span>
+          <span class="badge-pill badge-warn">WARN</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">APPROVE urgent transfer to recently modified bank account.</div>
+        <button class="btn-run" onclick="runDemo(8)"><span>Run Scenario</span> ▶</button>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SCREEN 5: SUPERVISOR VIVA MODE -->
+    <!-- ============================================== -->
+    <section class="screen" id="screen-supervisor">
+      <div class="glass-card" style="border-color: rgba(245, 158, 11, 0.4);">
+        <div style="display: flex; align-items: center; gap: 8px; color: var(--ask-yellow); font-size: 11px; font-weight: 800; letter-spacing: 0.5px;">
+          <span>⚡ EXAMINER LIVE TELEMETRY STREAM</span>
+        </div>
+        <div style="font-size: 12px; color: var(--text-secondary);">
+          Real-time telemetry, intermediate ML activations, and deterministic equations.
+        </div>
+      </div>
+
+      <!-- THREE EXPLICIT EXPERIMENTAL MODES (PHASE 7 PRIVACY-UTILITY) -->
+      <div class="glass-card" style="border-color: rgba(0, 240, 255, 0.4);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 11px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">
+            OPERATIONAL EXPERIMENT MODES
+          </div>
+          <span class="badge-pill badge-act" id="mode-status-badge">PRODUCTION</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+          Evaluate the measurable tradeoff between privacy redaction, network payload, and model utility.
+        </div>
+
+        <div class="mode-selector-grid">
+          <button class="mode-pill" id="pill-ondevice" onclick="setSupervisorMode('ON_DEVICE')">
+            <span>⚡ ON-DEVICE</span>
+            <span style="font-size: 9px; opacity: 0.8; font-weight: 500;">0 B egress</span>
+          </button>
+          <button class="mode-pill active" id="pill-redacted" onclick="setSupervisorMode('REDACTED')">
+            <span>🛡️ REDACTED</span>
+            <span style="font-size: 9px; opacity: 0.8; font-weight: 500;">ContextGuard</span>
+          </button>
+          <button class="mode-pill mode-raw" id="pill-raw" onclick="setSupervisorMode('RAW')">
+            <span>⚠️ RAW EVALUATION</span>
+            <span style="font-size: 9px; opacity: 0.8; font-weight: 500;">Benchmark Only</span>
+          </button>
+        </div>
+
+        <!-- HAZARD BANNER FOR RAW EVALUATION -->
+        <div class="hazard-banner" id="raw-hazard-box">
+          <div class="hazard-title">
+            <span>⚠️ EXPERIMENTAL BENCHMARK EVALUATION ONLY</span>
+          </div>
+          <div class="hazard-desc">
+            <strong>STRICTLY FORBIDDEN IN PRODUCTION:</strong> Mode 3 transmits unredacted raw image bytes, cleartext biometric face contours, and raw PII tokens over the network. Permitted exclusively on synthetic EARB benchmark artifacts with explicit researcher consent. Real user data is cryptographically prohibited from raw cloud egress.
+          </div>
+        </div>
+
+        <!-- MODE SPECIFICATION DESCRIPTION -->
+        <div id="mode-desc-box" style="font-size: 11px; color: var(--text-tertiary); margin-top: 8px; line-height: 1.4;">
+          <strong>Mode 2 (Proposed ContextGuard):</strong> On-device ML Kit detection + canvas blackout. Zero sensitive tokens or facial biometrics leave the device (100% masked).
+        </div>
+      </div>
+
+      <!-- Telemetry HUD -->
+      <div class="hud-grid">
+        <div class="hud-stat">
+          <span style="font-size: 10px; color: var(--text-tertiary);">Latency</span>
+          <span class="hud-val" id="hud-latency" style="color: var(--act-green);">135 ms</span>
+        </div>
+        <div class="hud-stat">
+          <span style="font-size: 10px; color: var(--text-tertiary);">Confidence</span>
+          <span class="hud-val" id="hud-confidence" style="color: var(--cyan-accent);">82%</span>
+        </div>
+        <div class="hud-stat">
+          <span style="font-size: 10px; color: var(--text-tertiary);">Risk (rho)</span>
+          <span class="hud-val" id="hud-risk" style="color: var(--stop-red);">1.58</span>
+        </div>
+        <div class="hud-stat">
+          <span style="font-size: 10px; color: var(--text-tertiary);">Transmitted Sensitive</span>
+          <span class="hud-val" id="hud-sensitive" style="color: var(--act-green);">0 leaked</span>
+        </div>
+        <div class="hud-stat">
+          <span style="font-size: 10px; color: var(--text-tertiary);">Redactions</span>
+          <span class="hud-val" id="hud-redactions" style="color: var(--act-green);">117 masked</span>
+        </div>
+        <div class="hud-stat">
+          <span style="font-size: 10px; color: var(--text-tertiary);">Payload Size</span>
+          <span class="hud-val" id="hud-payload" style="color: var(--ask-yellow); font-size: 13px;">11.5 KB (-59%)</span>
+        </div>
+      </div>
+
+      <!-- 1. MODEL -->
+      <div class="glass-card">
+        <div style="font-size: 12px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">1. MODEL</div>
+        <div class="field-row"><span class="field-k">Architecture</span><span class="field-v" id="field-model-arch">Hybrid Edge Perception + Local VLM</span></div>
+        <div class="field-row"><span class="field-k">Execution Mode</span><span class="field-v" id="field-model-mode">REDACTED_LOCAL_BACKEND</span></div>
+        <div class="field-row"><span class="field-k">Memory Invariant</span><span class="field-v" id="field-model-invariant">Zero plaintext raw disk persistence</span></div>
+        <div class="field-row"><span class="field-k">Hash Digest</span><span class="field-v">SHA-256: e3b0c44298fc1c14...</span></div>
+      </div>
+
+      <!-- 2. PERCEPTION -->
+      <div class="glass-card">
+        <div style="font-size: 12px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">2. PERCEPTION</div>
+        <div class="field-row"><span class="field-k">OCR Engine</span><span class="field-v">Google ML Kit Text Recognition v16.0.1</span></div>
+        <div class="field-row"><span class="field-k">Facial Biometrics</span><span class="field-v" id="field-faces">ML Kit Face Contours: Obscured on-device</span></div>
+        <div class="field-row"><span class="field-k">PII Parser</span><span class="field-v">Aadhaar, Luhn Card, IFSC, OTP</span></div>
+        <div class="field-row"><span class="field-k">Redaction Ratio</span><span class="field-v" id="field-redaction-ratio" style="color: var(--act-green);">100.0% (Zero sensitive leakage)</span></div>
+      </div>
+
+      <!-- 3. VLM -->
+      <div class="glass-card">
+        <div style="font-size: 12px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">3. VLM</div>
+        <div class="field-row"><span class="field-k">Model</span><span class="field-v">Qwen2.5-VL-3B-Instruct</span></div>
+        <div class="field-row"><span class="field-k">Runtime</span><span class="field-v" id="field-vlm-runtime">Ollama Local Daemon (:11434)</span></div>
+        <div class="field-row"><span class="field-k">Visual Grounding</span><span class="field-v">Action-conditioned JSON Schema</span></div>
+      </div>
+
+      <!-- 4. URL MODEL -->
+      <div class="glass-card">
+        <div style="font-size: 12px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">4. URL MODEL</div>
+        <div class="field-row"><span class="field-k">Classifier</span><span class="field-v">XGBoost v1.7 (Gradient Boosted Tree)</span></div>
+        <div class="field-row"><span class="field-k">Training Dataset</span><span class="field-v">PhiUSIIL Phishing Dataset (UCI ID: 967)</span></div>
+        <div class="field-row"><span class="field-k">Features Extracted</span><span class="field-v">35 live structural/lexical features</span></div>
+      </div>
+
+      <!-- 5. POLICY -->
+      <div class="glass-card">
+        <div style="font-size: 12px; font-weight: 800; color: var(--cyan-accent); letter-spacing: 1px;">5. POLICY</div>
+        <div class="field-row"><span class="field-k">Formula</span><span class="field-v">rho = s * (1 + lambda * r)</span></div>
+        <div class="field-row"><span class="field-k">Calculation</span><span class="field-v">0.90 * (1 + 0.75 * 1.00) = 1.575</span></div>
+        <div class="field-row"><span class="field-k">Decision Boundary</span><span class="field-v" style="color: var(--stop-red);">STOP (rho &gt;= 0.65)</span></div>
+      </div>
+
+      <!-- 6. PRIVACY-UTILITY EMPIRICAL BENCHMARK RESULTS -->
+      <div class="glass-card" style="border-color: rgba(46, 204, 113, 0.4);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 12px; font-weight: 800; color: var(--act-green); letter-spacing: 1px;">
+            6. PRIVACY-UTILITY TRADEOFF (EARB BENCHMARK)
+          </div>
+          <span class="badge-pill badge-act">N = 60 PAIRS</span>
+        </div>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">
+          Empirical comparison of the 3 modes across all 60 EARB evaluation pairs.
+        </div>
+
+        <div style="overflow-x: auto; margin-top: 8px;">
+          <table class="benchmark-table">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th>Acc</th>
+                <th>Macro F1</th>
+                <th>STOP Rec</th>
+                <th>Payload</th>
+                <th>Leaked</th>
+                <th>Latency</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>ON-DEVICE</td>
+                <td>63.3%</td>
+                <td>0.5389</td>
+                <td>70.0%</td>
+                <td>0.0 KB</td>
+                <td style="color: var(--act-green);">0</td>
+                <td>18.8 ms</td>
+              </tr>
+              <tr class="highlight-redacted">
+                <td>REDACTED</td>
+                <td>65.0%</td>
+                <td>0.5044</td>
+                <td>90.0%</td>
+                <td>11.5 KB</td>
+                <td style="color: var(--act-green);">0</td>
+                <td>135.5 ms</td>
+              </tr>
+              <tr>
+                <td style="color: #f87171;">RAW EVAL</td>
+                <td>68.3%</td>
+                <td>0.5455</td>
+                <td>95.0%</td>
+                <td>28.4 KB</td>
+                <td style="color: var(--stop-red); font-weight: 800;">117</td>
+                <td>375.4 ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SCIENTIFIC FINDING REPORT -->
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 8px 10px; margin-top: 10px;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--ask-yellow);">
+            🔬 SCIENTIFIC FINDING: MEASURED UTILITY COST OF REDACTION
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4;">
+            Client-side redaction incurs a measurable utility cost of <strong>-3.3% Accuracy (-0.0411 Macro-F1)</strong> due to information loss from masking sensitive entities (PII tokens, clinical parameters, financial amounts). However, it achieves <strong>100% elimination of outbound sensitive data leakage (117 sensitive regions reduced to 0)</strong> and reduces payload size by <strong>59.3%</strong>.
+          </div>
+        </div>
+
+        <!-- PLOTS DIRECTORY REFERENCE -->
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 10px; font-size: 11px; color: var(--text-tertiary);">
+          <div>📊 <strong>Generated Plots:</strong></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--cyan-accent);">
+            • results/figures/accuracy_vs_redaction.png<br/>
+            • results/figures/f1_vs_payload_size.png<br/>
+            • results/figures/latency_vs_accuracy.png
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SIX-STAGE PROGRESS MODAL OVERLAY -->
+    <!-- ============================================== -->
+    <div class="progress-overlay" id="progress-modal">
+      <div class="progress-modal">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">🛡️</span>
+          <div>
+            <div style="font-size: 16px; font-weight: 800; color: var(--text-primary);">Evaluating Pre-Action Safety</div>
+            <div style="font-size: 11px; color: var(--text-secondary);">Six-Stage Reasoning Pipeline</div>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div class="stage-item" id="stage-1"><span class="stage-num">1</span><div><div style="font-size: 12px; font-weight: 700;">Context</div><div style="font-size: 10px; color: var(--text-tertiary);">Artifact &amp; routing parameters</div></div></div>
+          <div class="stage-item" id="stage-2"><span class="stage-num">2</span><div><div style="font-size: 12px; font-weight: 700;">Intent</div><div style="font-size: 10px; color: var(--text-tertiary);">Action chip mapping &amp; taxonomy</div></div></div>
+          <div class="stage-item" id="stage-3"><span class="stage-num">3</span><div><div style="font-size: 12px; font-weight: 700;">Evidence</div><div style="font-size: 10px; color: var(--text-tertiary);">ML Kit OCR &amp; XGBoost signals</div></div></div>
+          <div class="stage-item" id="stage-4"><span class="stage-num">4</span><div><div style="font-size: 12px; font-weight: 700;">Consequence</div><div style="font-size: 10px; color: var(--text-tertiary);">Severity (s) &amp; Irreversibility (r)</div></div></div>
+          <div class="stage-item" id="stage-5"><span class="stage-num">5</span><div><div style="font-size: 12px; font-weight: 700;">Uncertainty</div><div style="font-size: 10px; color: var(--text-tertiary);">Epistemic confidence calibration</div></div></div>
+          <div class="stage-item" id="stage-6"><span class="stage-num">6</span><div><div style="font-size: 12px; font-weight: 700;">Intervention</div><div style="font-size: 10px; color: var(--text-tertiary);">Deterministic policy gating</div></div></div>
+        </div>
+
+        <div style="font-size: 11px; color: var(--cyan-accent); font-weight: 600;" id="progress-live-status">
+          Starting on-device perception...
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let selectedActionName = "POST";
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+      const targetScreen = document.getElementById(screenId);
+      if (targetScreen) targetScreen.classList.add('active');
+
+      const tabMap = {
+        'screen-home': 'tab-home',
+        'screen-analyze': 'tab-analyze',
+        'screen-result': 'tab-result',
+        'screen-demo': 'tab-demo',
+        'screen-supervisor': 'tab-supervisor'
+      };
+      const activeTab = document.getElementById(tabMap[screenId]);
+      if (activeTab) activeTab.classList.add('active');
+    }
+
+    function toggleRedactionView(mode) {
+      const pBefore = document.getElementById('pill-before');
+      const pAfter = document.getElementById('pill-after');
+      const text = document.getElementById('ocr-preview-text');
+
+      if (mode === 'BEFORE') {
+        pBefore.className = 'toggle-pill active-before';
+        pAfter.className = 'toggle-pill';
+        text.innerText = "HDFC BANK LIMITED - MONTHLY STATEMENT\nAccount: 4532 0150 1234 5671\nIFSC: HDFC0000128\nBalance: INR 1,48,290.40\nPhone: +91 9876543210";
+        text.style.color = "var(--warn-orange)";
+      } else {
+        pBefore.className = 'toggle-pill';
+        pAfter.className = 'toggle-pill active-after';
+        text.innerText = "HDFC BANK LIMITED - MONTHLY STATEMENT\nAccount: [REDACTED_ACCOUNT] ending in 5671\nIFSC: [REDACTED_IFSC]\nBalance: INR 1,48,290.40";
+        text.style.color = "var(--act-green)";
+      }
+    }
+
+    function selectAction(action, btn) {
+      document.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedActionName = action;
+      document.getElementById('active-action-name').innerText = action;
+
+      const summaries = {
+        'SAVE': 'Risk assessment evaluates private encrypted local vault archiving (Safe bound).',
+        'SEND': 'Risk assessment evaluates transmission to direct messaging contact.',
+        'UPLOAD': 'Risk assessment evaluates cloud / web server repository transmission.',
+        'POST': 'Risk assessment evaluates irrevocable public broadcast hazard.',
+        'SIGN': 'Risk assessment evaluates binding legal contractual obligation lock-in.',
+        'LOGIN': 'Risk assessment evaluates credential entry on remote host.',
+        'APPROVE': 'Risk assessment evaluates financial transfer / payment authorisation.',
+        'OPEN': 'Risk assessment evaluates link navigation & browser execution safety.'
+      };
+      document.getElementById('action-summary-note').innerHTML = `Selected: <strong style="color: var(--cyan-accent);">${action}</strong> • ${summaries[action] || 'Action evaluated.'}`;
+    }
+
+    function setRecipient(val) {
+      document.getElementById('inp-recipient').value = val;
+      document.getElementById('inp-destination').value = val;
+    }
+
+    function triggerSixStageAnalysis(onFinish) {
+      const overlay = document.getElementById('progress-modal');
+      const statusText = document.getElementById('progress-live-status');
+      overlay.style.display = 'flex';
+
+      const stages = [
+        { id: 'stage-1', text: '1/6 Context: Ingesting artifact and channel metadata...' },
+        { id: 'stage-2', text: '2/6 Intent: Evaluating action chip taxonomy...' },
+        { id: 'stage-3', text: '3/6 Evidence: Extracting on-device OCR & ML Kit perception...' },
+        { id: 'stage-4', text: '4/6 Consequence: Projecting severity and irreversibility bounds...' },
+        { id: 'stage-5', text: '5/6 Uncertainty: Calibrating epistemic confidence...' },
+        { id: 'stage-6', text: '6/6 Intervention: Applying deterministic policy gating...' }
+      ];
+
+      stages.forEach(s => {
+        const el = document.getElementById(s.id);
+        el.className = 'stage-item';
+      });
+
+      let current = 0;
+      function nextStep() {
+        if (current > 0) {
+          document.getElementById(stages[current - 1].id).className = 'stage-item done';
+        }
+        if (current < stages.length) {
+          const s = stages[current];
+          document.getElementById(s.id).className = 'stage-item active';
+          statusText.innerText = s.text;
+          current++;
+          setTimeout(nextStep, 200);
+        } else {
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            if (onFinish) onFinish();
+            else showScreen('screen-result');
+          }, 300);
+        }
+      }
+      nextStep();
+    }
+
+    function runDemo(index) {
+      const demos = {
+        1: {
+          title: "Bank statement",
+          action: "POST",
+          dest: "Public Twitter/X Feed",
+          intervention: "STOP",
+          copy: "We strongly recommend not proceeding.",
+          risk: "1.575",
+          conf: "95%",
+          sev: "0.90",
+          irrev: "1.00",
+          alt: "Mask account numbers and save to encrypted personal vault instead."
+        },
+        2: {
+          title: "Fake KYC link",
+          action: "LOGIN",
+          dest: "support-desk91.net (Spoofed)",
+          intervention: "STOP",
+          copy: "We strongly recommend not proceeding.",
+          risk: "1.591",
+          conf: "98%",
+          sev: "0.95",
+          irrev: "0.90",
+          alt: "Discard message and navigate to official banking app directly."
+        },
+        3: {
+          title: "OTP screenshot",
+          action: "SEND",
+          dest: "Telegram @support_bot",
+          intervention: "STOP",
+          copy: "We strongly recommend not proceeding.",
+          risk: "1.662",
+          conf: "99%",
+          sev: "0.95",
+          irrev: "1.00",
+          alt: "Never share OTP with anyone. ContextGuard has blacked out the OTP code."
+        },
+        4: {
+          title: "Unknown recipient document",
+          action: "SEND",
+          dest: "external-auditor-99@temp-mail.org",
+          intervention: "ASK",
+          copy: "Before you continue, we need to clarify something.",
+          risk: "0.915",
+          conf: "55%",
+          sev: "0.60",
+          irrev: "0.70",
+          alt: "Verify recipient email address through official corporate directory before sending."
+        },
+        5: {
+          title: "Routine family photo",
+          action: "POST",
+          dest: "Instagram Feed",
+          intervention: "ACT",
+          copy: "Looks safe to proceed.",
+          risk: "0.115",
+          conf: "95%",
+          sev: "0.10",
+          irrev: "0.20",
+          alt: "None required. Safe to proceed."
+        },
+        6: {
+          title: "Routine news URL",
+          action: "OPEN",
+          dest: "Colleague Group Chat",
+          intervention: "ACT",
+          copy: "Looks safe to proceed.",
+          risk: "0.050",
+          conf: "98%",
+          sev: "0.05",
+          irrev: "0.00",
+          alt: "None required. Safe to proceed."
+        },
+        7: {
+          title: "Contract lock-in",
+          action: "SIGN",
+          dest: "Vendor DocuSign Envelope",
+          intervention: "WARN",
+          copy: "This action carries a meaningful risk.",
+          risk: "0.901",
+          conf: "88%",
+          sev: "0.55",
+          irrev: "0.85",
+          alt: "Request removal of auto-renewal clause 14.2 or reduce term length prior to signing."
+        },
+        8: {
+          title: "Payment request",
+          action: "APPROVE",
+          dest: "New Bank Beneficiary Account",
+          intervention: "WARN",
+          copy: "This action carries a meaningful risk.",
+          risk: "1.172",
+          conf: "65%",
+          sev: "0.70",
+          irrev: "0.90",
+          alt: "Initiate out-of-band telephone verification with vendor accounting team before approval."
+        }
+      };
+
+      const d = demos[index];
+      if (!d) return;
+
+      triggerSixStageAnalysis(() => {
+        applyResultData(d);
+        showScreen('screen-result');
+      });
+    }
+
+    function applyResultData(d) {
+      document.getElementById('res-int-name').innerText = d.intervention;
+      document.getElementById('res-int-copy').innerText = `"${d.copy}"`;
+      document.getElementById('res-rho-badge').innerText = `rho = ${d.risk}`;
+      document.getElementById('m-risk').innerText = d.risk;
+      document.getElementById('m-conf').innerText = d.conf;
+      document.getElementById('m-sev').innerText = d.sev;
+      document.getElementById('m-irrev').innerText = d.irrev;
+      document.getElementById('res-alt-action').innerText = d.alt;
+
+      const banner = document.getElementById('dominant-banner');
+      banner.className = `dominant-card dominant-${d.intervention.toLowerCase()}`;
+      const colorMap = {
+        'STOP': 'var(--stop-red)',
+        'WARN': 'var(--warn-orange)',
+        'ASK': 'var(--ask-yellow)',
+        'ACT': 'var(--act-green)'
+      };
+      const col = colorMap[d.intervention];
+      document.getElementById('res-int-name').style.color = col;
+      document.getElementById('res-rho-badge').style.color = col;
+      document.getElementById('res-rho-badge').style.borderColor = col;
+      document.getElementById('m-risk').style.color = col;
+    }
+
+    function confirmOverride() {
+      const ok = confirm("Engage Intentional User Override?\n\nContextGuard identified this action as irreversible exposure (rho >= 0.65).\n\nOverriding will bypass safety protections and proceed with action.\n\nDo you confirm this action?");
+      if (ok) {
+        alert("Deliberate User Override Active: Safety intervention bypassed by user consent. Event recorded in tamper-resistant audit ledger.");
+        showScreen('screen-home');
+      }
+    }
+
+    function setSupervisorMode(mode) {
+      const pOndevice = document.getElementById('pill-ondevice');
+      const pRedacted = document.getElementById('pill-redacted');
+      const pRaw = document.getElementById('pill-raw');
+      const hazard = document.getElementById('raw-hazard-box');
+      const statusBadge = document.getElementById('mode-status-badge');
+      const descBox = document.getElementById('mode-desc-box');
+
+      const hudLat = document.getElementById('hud-latency');
+      const hudConf = document.getElementById('hud-confidence');
+      const hudRisk = document.getElementById('hud-risk');
+      const hudSens = document.getElementById('hud-sensitive');
+      const hudRed = document.getElementById('hud-redactions');
+      const hudPay = document.getElementById('hud-payload');
+
+      const fArch = document.getElementById('field-model-arch');
+      const fMode = document.getElementById('field-model-mode');
+      const fInvar = document.getElementById('field-model-invariant');
+      const fFaces = document.getElementById('field-faces');
+      const fRatio = document.getElementById('field-redaction-ratio');
+      const fVlm = document.getElementById('field-vlm-runtime');
+
+      if (!pOndevice || !pRedacted || !pRaw) return;
+
+      pOndevice.classList.remove('active');
+      pRedacted.classList.remove('active');
+      pRaw.classList.remove('active');
+
+      if (mode === 'ON_DEVICE') {
+        pOndevice.classList.add('active');
+        if (hazard) hazard.style.display = 'none';
+        if (statusBadge) { statusBadge.className = 'badge-pill badge-act'; statusBadge.innerText = 'EDGE ISOLATION'; }
+        if (descBox) descBox.innerHTML = '<strong>Mode 1 (ON-DEVICE):</strong> Zero network transmission (0 outbound bytes). Purely local ML Kit text recognition + regex. Does not invoke remote VLM.';
+
+        if (hudLat) { hudLat.innerText = '18.8 ms'; hudLat.style.color = 'var(--act-green)'; }
+        if (hudConf) hudConf.innerText = '80%';
+        if (hudRisk) hudRisk.innerText = '0.35';
+        if (hudSens) { hudSens.innerText = '0 leaked'; hudSens.style.color = 'var(--act-green)'; }
+        if (hudRed) hudRed.innerText = '0 (Local)';
+        if (hudPay) hudPay.innerText = '0.0 KB (100% red.)';
+
+        if (fArch) fArch.innerText = 'Edge Mobile ML Kit Perception Only';
+        if (fMode) fMode.innerText = 'ON_DEVICE (No egress)';
+        if (fInvar) fInvar.innerText = 'Absolute zero outbound bytes egress';
+        if (fFaces) fFaces.innerText = 'Contour detection only; 0 bytes transmitted';
+        if (fRatio) { fRatio.innerText = '100.0% (Zero outbound leakage)'; fRatio.style.color = 'var(--act-green)'; }
+        if (fVlm) fVlm.innerText = 'Offline (Edge rule engine active)';
+      } else if (mode === 'RAW') {
+        pRaw.classList.add('active');
+        if (hazard) hazard.style.display = 'block';
+        if (statusBadge) { statusBadge.className = 'badge-pill badge-stop'; statusBadge.innerText = 'BENCHMARK ONLY'; }
+        if (descBox) descBox.innerHTML = '<strong style="color:var(--stop-red);">Mode 3 (RAW EVALUATION):</strong> Academic benchmark ablation ONLY. Unredacted artifacts dispatched to cloud. Never permitted for production user data.';
+
+        if (hudLat) { hudLat.innerText = '375.4 ms'; hudLat.style.color = 'var(--stop-red)'; }
+        if (hudConf) hudConf.innerText = '93%';
+        if (hudRisk) hudRisk.innerText = '1.65';
+        if (hudSens) { hudSens.innerText = '117 leaked'; hudSens.style.color = 'var(--stop-red)'; }
+        if (hudRed) hudRed.innerText = '0 (0.0%)';
+        if (hudPay) hudPay.innerText = '28.35 KB (Raw)';
+
+        if (fArch) fArch.innerText = 'Cloud Multi-Modal VLM + Cleartext Egress';
+        if (fMode) fMode.innerText = 'RAW_CLOUD_EVALUATION (BENCHMARK ONLY)';
+        if (fInvar) fInvar.innerText = 'WARNING: Unredacted raw artifact egress';
+        if (fFaces) fFaces.innerText = 'Raw facial contours transmitted over WAN';
+        if (fRatio) { fRatio.innerText = '0.0% (CRITICAL: 117 regions leaked)'; fRatio.style.color = 'var(--stop-red)'; }
+        if (fVlm) fVlm.innerText = 'Remote Cloud API Endpoint (:8000)';
+      } else {
+        // REDACTED (Default)
+        pRedacted.classList.add('active');
+        if (hazard) hazard.style.display = 'none';
+        if (statusBadge) { statusBadge.className = 'badge-pill badge-act'; statusBadge.innerText = 'PRODUCTION'; }
+        if (descBox) descBox.innerHTML = '<strong>Mode 2 (Proposed ContextGuard):</strong> On-device ML Kit detection + canvas blackout. Zero sensitive tokens or facial biometrics leave the device (100% masked).';
+
+        if (hudLat) { hudLat.innerText = '135.5 ms'; hudLat.style.color = 'var(--act-green)'; }
+        if (hudConf) hudConf.innerText = '82%';
+        if (hudRisk) hudRisk.innerText = '1.58';
+        if (hudSens) { hudSens.innerText = '0 leaked'; hudSens.style.color = 'var(--act-green)'; }
+        if (hudRed) hudRed.innerText = '117 masked';
+        if (hudPay) hudPay.innerText = '11.5 KB (-59%)';
+
+        if (fArch) fArch.innerText = 'Hybrid Edge Perception + Local VLM';
+        if (fMode) fMode.innerText = 'REDACTED_LOCAL_BACKEND (Standard)';
+        if (fInvar) fInvar.innerText = 'Zero plaintext raw disk persistence';
+        if (fFaces) fFaces.innerText = 'ML Kit Face Contours: Obscured on-device';
+        if (fRatio) { fRatio.innerText = '100.0% (Zero sensitive leakage)'; fRatio.style.color = 'var(--act-green)'; }
+        if (fVlm) fVlm.innerText = 'Ollama Local Daemon (:11434)';
+      }
+    }
+  </script>
+</body>
+</html>

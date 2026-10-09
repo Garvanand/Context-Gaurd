@@ -133,6 +133,11 @@ class AnalysisResponse(BaseModel):
     latency_ms: Optional[float] = Field(None, description="Pipeline latency in milliseconds")
     model_path: Optional[str] = Field("Qwen 2.5-VL 3B + XGBoost Hybrid", description="Active model path")
     network_mode: Optional[str] = Field("REDACTED_LOCAL_BACKEND", description="Network privacy transmission mode")
+    policy_version: Optional[str] = Field("2.1.0-action-cascade", description="Pre-action policy engine version")
+    canonical_evidence: Optional[List[Dict[str, Any]]] = Field(default_factory=list, description="Typed canonical evidence records with full provenance")
+    action_state: Optional[Dict[str, Any]] = Field(None, description="Explicit action-conditioned state feature representation")
+    conformal_set: Optional[List[str]] = Field(None, description="Split conformal prediction set C(x)")
+    abstention_applied: bool = Field(False, description="True if selective prediction abstention triggered ASK")
 
     @field_validator("severity", "reversibility", "confidence", mode="before")
     @classmethod

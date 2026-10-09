@@ -62,14 +62,14 @@ def test_twenty_deterministic_urls_count():
 
 
 def test_feature_extraction_vector_length_and_types():
-    """Every URL must extract exactly 36 finite float features."""
+    """Every URL must extract exactly 37 finite float features (Schema v1.1.0)."""
     for url, _, _ in DETERMINISTIC_TEST_URLS:
         features = URLFeatureExtractor.extract(url)
-        assert len(features) == 36
-        assert len(URLFeatureExtractor.FEATURE_NAMES) == 36
+        assert len(features) == 37
+        assert len(URLFeatureExtractor.FEATURE_NAMES) == 37
 
         vector = URLFeatureExtractor.extract_vector(url)
-        assert len(vector) == 36
+        assert len(vector) == 37
         assert all(isinstance(v, (int, float)) for v in vector)
         assert all(not (v != v) for v in vector)  # Check not NaN
 
@@ -91,9 +91,9 @@ def test_malformed_urls_do_not_crash_extractor():
     for bad_url in malformed_cases:
         feats = URLFeatureExtractor.extract(bad_url)
         assert isinstance(feats, dict)
-        assert len(feats) == 36
+        assert len(feats) == 37
         vec = URLFeatureExtractor.extract_vector(bad_url)
-        assert len(vec) == 36
+        assert len(vec) == 37
 
 
 def test_ip_host_detection():
@@ -104,6 +104,12 @@ def test_ip_host_detection():
     domain_url = "http://www.google.com/login"
     feats_domain = URLFeatureExtractor.extract(domain_url)
     assert feats_domain["is_ip_host"] == 0.0
+
+
+def test_shortener_detection():
+    assert URLFeatureExtractor.extract("https://bit.ly/3xY7z9Q")["is_shortened_url"] == 1.0
+    assert URLFeatureExtractor.extract("http://tinyurl.com/bank-security")["is_shortened_url"] == 1.0
+    assert URLFeatureExtractor.extract("https://reuters.com/news")["is_shortened_url"] == 0.0
 
 
 def test_https_indicator():
@@ -129,10 +135,11 @@ def test_model_artifact_and_metadata_exist():
         meta = json.load(f)
 
     assert meta["model_name"] in ["XGBoost", "RandomForest", "LogisticRegression"]
-    assert meta["feature_count"] == 36
-    assert "test_metrics" in meta
-    assert meta["test_metrics"]["accuracy"] > 0.90
-    assert meta["test_metrics"]["roc_auc"] > 0.90
+    assert meta["feature_count"] == 37
+    assert "experiments" in meta
+    strat_test = meta["experiments"]["experiment_1_stratified_split"]["XGBoost"]
+    assert strat_test["accuracy"] > 0.90
+    assert strat_test["roc_auc"] > 0.90
 
 
 def test_inference_service_output_schema():
@@ -157,7 +164,7 @@ def test_inference_service_output_schema():
     assert 0.0 <= output["confidence"] <= 1.0
     assert output["risk_level"] in ["LOW", "MODERATE", "HIGH", "CRITICAL"]
     assert output["model"] == "xgboost-phiusiil-url-v1"
-    assert len(output["features_used"]) == 36
+    assert len(output["features_used"]) == 37
 
 
 def test_inference_classification_accuracy_on_known_urls():

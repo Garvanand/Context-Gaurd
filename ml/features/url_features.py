@@ -1,8 +1,8 @@
 """
-Deterministic URL Lexical and Structural Feature Extractor.
+Deterministic URL Lexical and Structural Feature Extractor (Schema v1.1.0).
 
-Extracts reproducible features directly from raw URLs for training and live inference.
-Strict feature parity is maintained across both training and production serving.
+Extracts reproducible features directly from raw URLs for training and on-device inference.
+Strict feature parity is maintained across Python and Android Kotlin runtimes.
 """
 
 import math
@@ -11,11 +11,20 @@ from typing import Dict, List, Any
 from urllib.parse import urlparse
 import ipaddress
 
+SCHEMA_VERSION = "1.1.0"
+
 # Known high-risk phishing / abuse TLDs
 SUSPICIOUS_TLDS = {
     "xyz", "top", "club", "work", "gq", "cf", "tk", "ml", "ga",
     "buzz", "icu", "fit", "rest", "kim", "info", "monster", "live",
     "surf", "cam", "bid", "racing", "win", "stream", "download"
+}
+
+# Known URL shortening services
+SHORTENER_DOMAINS = {
+    "bit.ly", "tinyurl.com", "t.co", "goo.gl", "ow.ly", "is.gd",
+    "buff.ly", "adf.ly", "bitly.com", "cutt.ly", "rb.gy", "shorturl.at",
+    "tiny.cc", "lnkd.in", "t.ly", "cli.gs", "rebrand.ly", "s.id"
 }
 
 # Common targeted / deceptive keywords in phishing URLs
@@ -34,6 +43,7 @@ IP_V4_PATTERN = re.compile(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$")
 def calculate_entropy(text: str) -> float:
     """
     Computes Shannon entropy H = -sum(p * log2(p)) for character distribution.
+    Deterministic to 4 decimal places.
     """
     if not text:
         return 0.0
@@ -64,10 +74,41 @@ def max_consecutive_run(text: str, predicate) -> int:
     return max_run
 
 
+def extract_registered_domain(hostname: str) -> str:
+    """
+    Extracts registered root domain for domain-grouping evaluation to prevent leakage.
+    Handles standard and common ccTLD structures (e.g., .co.uk, .com.au).
+    """
+    if not hostname:
+        return ""
+    host = hostname.lower().strip()
+    # Check IP
+    try:
+        ipaddress.ip_address(host)
+        return host
+    except ValueError:
+        pass
+
+    parts = host.split(".")
+    if len(parts) <= 2:
+        return host
+    
+    # Common 2-level TLD suffixes
+    two_level_tlds = {"co.uk", "com.au", "co.in", "net.au", "org.uk", "gov.in", "ac.uk", "co.jp"}
+    joined_last_two = f"{parts[-2]}.{parts[-1]}"
+    if joined_last_two in two_level_tlds and len(parts) >= 3:
+        return f"{parts[-3]}.{joined_last_two}"
+    
+    return f"{parts[-2]}.{parts[-1]}"
+
+
 class URLFeatureExtractor:
     """
-    Deterministic feature extractor producing 36 lexical/structural features.
+    Deterministic feature extractor producing 37 pre-navigation lexical/structural features.
+    Schema Version: 1.1.0
     """
+
+    SCHEMA_VERSION: str = SCHEMA_VERSION
 
     FEATURE_NAMES: List[str] = [
         "url_length",
@@ -106,6 +147,7 @@ class URLFeatureExtractor:
         "has_port",
         "has_hex_char",
         "vowel_consonant_ratio",
+        "is_shortened_url",
     ]
 
     @classmethod
@@ -215,6 +257,13 @@ class URLFeatureExtractor:
         consonants = len(host_alpha) - vowels
         vowel_consonant_ratio = round(vowels / max(1, consonants), 4)
 
+        # Shortener check
+        hostname_lower = hostname.lower()
+        is_shortened = 1.0 if any(
+            hostname_lower == s or hostname_lower.endswith("." + s)
+            for s in SHORTENER_DOMAINS
+        ) else 0.0
+
         return {
             "url_length": float(url_len),
             "hostname_length": float(host_len),
@@ -252,6 +301,7 @@ class URLFeatureExtractor:
             "has_port": float(has_port),
             "has_hex_char": float(has_hex_char),
             "vowel_consonant_ratio": float(vowel_consonant_ratio),
+            "is_shortened_url": float(is_shortened),
         }
 
     @classmethod

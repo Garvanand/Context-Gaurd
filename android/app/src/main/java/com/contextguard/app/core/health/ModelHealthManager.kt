@@ -23,7 +23,7 @@ data class SystemHealthState(
         type = "Trained Classifier (PhiUSIIL)",
         status = "Standby",
         isReady = true,
-        detail = "35-feature extractor pipeline loaded"
+        detail = "37-feature extractor pipeline (Schema v1.1.0) loaded"
     ),
     val vlmStatus: LayerHealth = LayerHealth(
         name = "Qwen2.5-VL-3B Reasoner",
@@ -41,3 +41,22 @@ data class SystemHealthState(
     ),
     val lastCheckedMillis: Long = System.currentTimeMillis()
 )
+
+object ModelHealthManager {
+    fun getLiveHealthState(isBackendConnected: Boolean = false): SystemHealthState {
+        val urlEngineLoaded = com.contextguard.app.core.engine.UrlTreeInferenceEngine.getInstanceOrNull() != null
+
+        return SystemHealthState(
+            isBackendConnected = isBackendConnected,
+            overallStatus = if (urlEngineLoaded) "Fully Operational (On-Device)" else "Core Perception Active",
+            urlModelStatus = LayerHealth(
+                name = "XGBoost Phishing Model",
+                type = "On-Device Tree Interpreter",
+                status = if (urlEngineLoaded) "Active (On-Device)" else "Standby",
+                isReady = urlEngineLoaded,
+                detail = if (urlEngineLoaded) "120 trees | 37 features (Schema v1.1.0) loaded in RAM" else "37-feature extractor pipeline loaded"
+            ),
+            lastCheckedMillis = System.currentTimeMillis()
+        )
+    }
+}

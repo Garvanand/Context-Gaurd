@@ -1,0 +1,1197 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-10-09T16:43:20.946277+00:00",
+  "total_entries": 10,
+  "safety_invariant": "Zero raw sensitive artifacts persisted",
+  "entries": {
+    "30e8a7a79afe2ba9715262eb56dbb7fc7d7381a410803809799307f15ea20cfe::SEND::56d23902f4aba1c326f02b4d5c06c36ba4ea66f9b7f514a4ce9d0226f2957840::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0": {
+      "key": "30e8a7a79afe2ba9715262eb56dbb7fc7d7381a410803809799307f15ea20cfe::SEND::56d23902f4aba1c326f02b4d5c06c36ba4ea66f9b7f514a4ce9d0226f2957840::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0",
+      "scenario_id": 1,
+      "artifact_hash": "30e8a7a79afe2ba9715262eb56dbb7fc7d7381a410803809799307f15ea20cfe",
+      "action": "SEND",
+      "context_hash": "56d23902f4aba1c326f02b4d5c06c36ba4ea66f9b7f514a4ce9d0226f2957840",
+      "model_version": "qwen2.5-vl:3b+xgboost-v1.0",
+      "policy_version": "policy-lambda0.75-v1.0",
+      "timestamp": "2026-10-09T16:43:20.885054+00:00",
+      "verified_by": "ContextGuard Research Evaluator",
+      "result": {
+        "intervention": "ACT",
+        "risk_score": 0.1556,
+        "severity": 0.15,
+        "reversibility": 0.05,
+        "confidence": 0.95,
+        "reason": "Action 'SEND' evaluated as safe (risk_score=0.16, severity=0.15, reversibility=0.05). Scoped to trusted environment without hazardous exposure.",
+        "evidence": [
+          {
+            "type": "face_detected",
+            "description": "ML Kit detected 3 human facial contour(s)",
+            "importance": 0.75,
+            "evidence_source": "ML_KIT"
+          }
+        ],
+        "recommended_alternative": null,
+        "latency_ms": 14.2,
+        "model_path": "Qwen 2.5-VL 3B + XGBoost PhiUSIIL Hybrid",
+        "network_mode": "REDACTED_LOCAL_BACKEND",
+        "stages": {
+          "stage_1_context": {
+            "artifact_summary": "IMAGE via WhatsApp Messenger (3 face(s))",
+            "ocr_available": true,
+            "ocr_text": "Personal Family Vacation Photograph\nSummer Holiday at Beach Resort 2026\n[Detected 3 Human Faces]",
+            "source_app": "WhatsApp Messenger",
+            "recipient": "Mom (Verified Family Contact)",
+            "destination": "WhatsApp DM (End-to-End Encrypted)",
+            "network_state": "UNKNOWN_NETWORK",
+            "is_public_channel": false,
+            "is_trusted_channel": true,
+            "is_unknown_recipient": false
+          },
+          "stage_2_intent": {
+            "selected_action": "SEND",
+            "inferred_action": "SEND",
+            "resolved_action": "SEND",
+            "intent_source": "EXPLICIT_USER",
+            "consequence_tier": "MODERATE"
+          },
+          "stage_3_evidence": {
+            "evidence": [
+              {
+                "type": "face_detected",
+                "description": "ML Kit detected 3 human facial contour(s)",
+                "importance": 0.75,
+                "evidence_source": "ML_KIT"
+              }
+            ],
+            "total_importance": 0.75,
+            "detected_risk_categories": [
+              "Privacy"
+            ]
+          },
+          "stage_4_consequence": {
+            "severity": 0.15,
+            "reversibility": 0.05,
+            "harm_description": "Transmission scoped to verified family or internal team members",
+            "reversibility_rationale": "Highly reversible: Handled within trusted closed loop"
+          },
+          "stage_5_uncertainty": {
+            "confidence": 0.95,
+            "uncertainty_reasons": [],
+            "is_epistemic_uncertain": false
+          }
+        }
+      }
+    },
+    "f0a684cc35762acc6a7f0f777ef5db184dba64b04a66acf374725bd610208727::SAVE::57d52be33a387834e24074a2e55a076ee692ba6a9b830b4c940ce4641843aa73::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0": {
+      "key": "f0a684cc35762acc6a7f0f777ef5db184dba64b04a66acf374725bd610208727::SAVE::57d52be33a387834e24074a2e55a076ee692ba6a9b830b4c940ce4641843aa73::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0",
+      "scenario_id": 2,
+      "artifact_hash": "f0a684cc35762acc6a7f0f777ef5db184dba64b04a66acf374725bd610208727",
+      "action": "SAVE",
+      "context_hash": "57d52be33a387834e24074a2e55a076ee692ba6a9b830b4c940ce4641843aa73",
+      "model_version": "qwen2.5-vl:3b+xgboost-v1.0",
+      "policy_version": "policy-lambda0.75-v1.0",
+      "timestamp": "2026-10-09T16:43:20.891054+00:00",
+      "verified_by": "ContextGuard Research Evaluator",
+      "result": {
+        "intervention": "ACT",
+        "risk_score": 0.05,
+        "severity": 0.05,
+        "reversibility": 0.0,
+        "confidence": 0.95,
+        "reason": "Action 'SAVE' evaluated as safe (risk_score=0.05, severity=0.05, reversibility=0.00). Scoped to trusted environment without hazardous exposure.",
+        "evidence": [
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: '4532 0150 1234 5671'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: 'INR 1,48,290.40'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: 'APEX0000128'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "financial_information",
+            "description": "OCR extracted sensitive financial entities and account balances",
+            "importance": 0.88,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "contract_clause",
+            "description": "OCR extracted binding legal non-disclosure and confidentiality clauses",
+            "importance": 0.8,
+            "evidence_source": "OCR"
+          }
+        ],
+        "recommended_alternative": null,
+        "latency_ms": 14.2,
+        "model_path": "Qwen 2.5-VL 3B + XGBoost PhiUSIIL Hybrid",
+        "network_mode": "REDACTED_LOCAL_BACKEND",
+        "stages": {
+          "stage_1_context": {
+            "artifact_summary": "IMAGE via Files by Google",
+            "ocr_available": true,
+            "ocr_text": "APEX HORIZON BANK\nMONTHLY ACCOUNT STATEMENT - OCTOBER 2026\nAccount Holder: JANE DOE (SYNTHETIC RECORD)\nAccount Number: 4532 0150 1234 5671\nIFSC: APEX0000128 | Branch: Mumbai Downtown\nAvailable Balance: INR 1,48,290.40\nRECENT TRANSACTIONS:\n01-Oct-2026 TECHCORP SALARY DIRECT CREDIT CREDIT + 1,19,300.00\n04-Oct-2026 NATURE'S BASKET GROCERY STORE DEBIT - 3,450.00\n12-Oct-2026 ELECTRICITY UTILITY BILL AUTOPAY DEBIT - 2,180.50\n18-Oct-2026 APEX WEALTH MUTUAL FUND SIP DEBIT - 15,000.00\n25-Oct-2026 UPI REFUND REVERSAL TXN #88219 CREDIT + 1,250.00\nCONFIDENTIAL FINANCIAL DOCUMENT - STRICTLY FOR PERSONAL TAX & AUDIT RECORDS",
+            "source_app": "Files by Google",
+            "recipient": "Self (Local Storage)",
+            "destination": "Encrypted Local Vault (/storage/emulated/0/Vault)",
+            "network_state": "UNKNOWN_NETWORK",
+            "is_public_channel": false,
+            "is_trusted_channel": true,
+            "is_unknown_recipient": false
+          },
+          "stage_2_intent": {
+            "selected_action": "SAVE",
+            "inferred_action": "SAVE",
+            "resolved_action": "SAVE",
+            "intent_source": "EXPLICIT_USER",
+            "consequence_tier": "LOW"
+          },
+          "stage_3_evidence": {
+            "evidence": [
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: '4532 0150 1234 5671'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: 'INR 1,48,290.40'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: 'APEX0000128'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "financial_information",
+                "description": "OCR extracted sensitive financial entities and account balances",
+                "importance": 0.88,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "contract_clause",
+                "description": "OCR extracted binding legal non-disclosure and confidentiality clauses",
+                "importance": 0.8,
+                "evidence_source": "OCR"
+              }
+            ],
+            "total_importance": 4.23,
+            "detected_risk_categories": [
+              "Communication",
+              "Financial",
+              "Privacy"
+            ]
+          },
+          "stage_4_consequence": {
+            "severity": 0.05,
+            "reversibility": 0.0,
+            "harm_description": "Local archival within personal encrypted vault",
+            "reversibility_rationale": "Fully reversible: Artifact stored locally under user control without external exposure"
+          },
+          "stage_5_uncertainty": {
+            "confidence": 0.95,
+            "uncertainty_reasons": [],
+            "is_epistemic_uncertain": false
+          }
+        }
+      }
+    },
+    "f0a684cc35762acc6a7f0f777ef5db184dba64b04a66acf374725bd610208727::SEND::125d8ec1c3a6a7de6a750030e87eda53304c124ef4b7233e81456a72b8ea6729::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0": {
+      "key": "f0a684cc35762acc6a7f0f777ef5db184dba64b04a66acf374725bd610208727::SEND::125d8ec1c3a6a7de6a750030e87eda53304c124ef4b7233e81456a72b8ea6729::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0",
+      "scenario_id": 3,
+      "artifact_hash": "f0a684cc35762acc6a7f0f777ef5db184dba64b04a66acf374725bd610208727",
+      "action": "SEND",
+      "context_hash": "125d8ec1c3a6a7de6a750030e87eda53304c124ef4b7233e81456a72b8ea6729",
+      "model_version": "qwen2.5-vl:3b+xgboost-v1.0",
+      "policy_version": "policy-lambda0.75-v1.0",
+      "timestamp": "2026-10-09T16:43:20.894054+00:00",
+      "verified_by": "ContextGuard Research Evaluator",
+      "result": {
+        "intervention": "ASK",
+        "risk_score": 0.725,
+        "severity": 0.5,
+        "reversibility": 0.6,
+        "confidence": 0.6499999999999999,
+        "reason": "Unverified recipient advisory. Attempting to SEND sensitive artifact to unverified recipient 'Unverified Agent (@tax_advisor_bot)' presents potential risk with high uncertainty (confidence=0.65). Evidence: OCR extracted sensitive financial entities and account balances; On-device PII detector identified sensitive entity: '4532 0150 1234 5671'; On-device PII detector identified sensitive entity: 'INR 1,48,290.40'.",
+        "evidence": [
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: '4532 0150 1234 5671'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: 'INR 1,48,290.40'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: 'APEX0000128'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "financial_information",
+            "description": "OCR extracted sensitive financial entities and account balances",
+            "importance": 0.88,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "contract_clause",
+            "description": "OCR extracted binding legal non-disclosure and confidentiality clauses",
+            "importance": 0.8,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "unknown_recipient",
+            "description": "Recipient 'Unverified Agent (@tax_advisor_bot)' cannot be verified against trusted contacts",
+            "importance": 0.75,
+            "evidence_source": "CONTEXT"
+          }
+        ],
+        "recommended_alternative": "Verify the recipient's phone number or address via an independent trusted channel before sending.",
+        "latency_ms": 14.2,
+        "model_path": "Qwen 2.5-VL 3B + XGBoost PhiUSIIL Hybrid",
+        "network_mode": "REDACTED_LOCAL_BACKEND",
+        "stages": {
+          "stage_1_context": {
+            "artifact_summary": "IMAGE via Telegram Messenger",
+            "ocr_available": true,
+            "ocr_text": "APEX HORIZON BANK\nMONTHLY ACCOUNT STATEMENT - OCTOBER 2026\nAccount Holder: JANE DOE (SYNTHETIC RECORD)\nAccount Number: 4532 0150 1234 5671\nIFSC: APEX0000128 | Branch: Mumbai Downtown\nAvailable Balance: INR 1,48,290.40\nRECENT TRANSACTIONS:\n01-Oct-2026 TECHCORP SALARY DIRECT CREDIT CREDIT + 1,19,300.00\n04-Oct-2026 NATURE'S BASKET GROCERY STORE DEBIT - 3,450.00\n12-Oct-2026 ELECTRICITY UTILITY BILL AUTOPAY DEBIT - 2,180.50\n18-Oct-2026 APEX WEALTH MUTUAL FUND SIP DEBIT - 15,000.00\n25-Oct-2026 UPI REFUND REVERSAL TXN #88219 CREDIT + 1,250.00\nCONFIDENTIAL FINANCIAL DOCUMENT - STRICTLY FOR PERSONAL TAX & AUDIT RECORDS",
+            "source_app": "Telegram Messenger",
+            "recipient": "Unverified Agent (@tax_advisor_bot)",
+            "destination": "Telegram DM",
+            "network_state": "UNKNOWN_NETWORK",
+            "is_public_channel": false,
+            "is_trusted_channel": false,
+            "is_unknown_recipient": true
+          },
+          "stage_2_intent": {
+            "selected_action": "SEND",
+            "inferred_action": "SEND",
+            "resolved_action": "SEND",
+            "intent_source": "EXPLICIT_USER",
+            "consequence_tier": "MODERATE"
+          },
+          "stage_3_evidence": {
+            "evidence": [
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: '4532 0150 1234 5671'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: 'INR 1,48,290.40'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: 'APEX0000128'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "financial_information",
+                "description": "OCR extracted sensitive financial entities and account balances",
+                "importance": 0.88,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "contract_clause",
+                "description": "OCR extracted binding legal non-disclosure and confidentiality clauses",
+                "importance": 0.8,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "unknown_recipient",
+                "description": "Recipient 'Unverified Agent (@tax_advisor_bot)' cannot be verified against trusted contacts",
+                "importance": 0.75,
+                "evidence_source": "CONTEXT"
+              }
+            ],
+            "total_importance": 4.98,
+            "detected_risk_categories": [
+              "Communication",
+              "Financial",
+              "Privacy",
+              "Untrusted Recipient"
+            ]
+          },
+          "stage_4_consequence": {
+            "severity": 0.5,
+            "reversibility": 0.6,
+            "harm_description": "Confidential record transmitted to unverified contact",
+            "reversibility_rationale": "Moderately irreversible: Recipient receives copy that cannot be remotely revoked"
+          },
+          "stage_5_uncertainty": {
+            "confidence": 0.6499999999999999,
+            "uncertainty_reasons": [
+              "Recipient 'Unverified Agent (@tax_advisor_bot)' identity is unverified."
+            ],
+            "is_epistemic_uncertain": true
+          }
+        }
+      }
+    },
+    "f0a684cc35762acc6a7f0f777ef5db184dba64b04a66acf374725bd610208727::POST_PUBLIC::d757cacd92783b99535941da0e44335598569b2635bc03f4597151f7a917223c::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0": {
+      "key": "f0a684cc35762acc6a7f0f777ef5db184dba64b04a66acf374725bd610208727::POST_PUBLIC::d757cacd92783b99535941da0e44335598569b2635bc03f4597151f7a917223c::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0",
+      "scenario_id": 4,
+      "artifact_hash": "f0a684cc35762acc6a7f0f777ef5db184dba64b04a66acf374725bd610208727",
+      "action": "POST_PUBLIC",
+      "context_hash": "d757cacd92783b99535941da0e44335598569b2635bc03f4597151f7a917223c",
+      "model_version": "qwen2.5-vl:3b+xgboost-v1.0",
+      "policy_version": "policy-lambda0.75-v1.0",
+      "timestamp": "2026-10-09T16:43:20.897054+00:00",
+      "verified_by": "ContextGuard Research Evaluator",
+      "result": {
+        "intervention": "STOP",
+        "risk_score": 1.575,
+        "severity": 0.9,
+        "reversibility": 1.0,
+        "confidence": 0.95,
+        "reason": "Irreversible data exposure blocked. Publicly broadcasting confidential financial or identity artifacts to 'Public Telegram Channel' (Destination 'Public Telegram Channel' is a public broadcast channel accessible to third parties; OCR extracted sensitive financial entities and account balances; On-device PII detector identified sensitive entity: '4532 0150 1234 5671') causes permanent, uncontainable disclosure (reversibility=1.00).",
+        "evidence": [
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: '4532 0150 1234 5671'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: 'INR 1,48,290.40'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: 'APEX0000128'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "financial_information",
+            "description": "OCR extracted sensitive financial entities and account balances",
+            "importance": 0.88,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "contract_clause",
+            "description": "OCR extracted binding legal non-disclosure and confidentiality clauses",
+            "importance": 0.8,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "public_destination",
+            "description": "Destination 'Public Telegram Channel' is a public broadcast channel accessible to third parties",
+            "importance": 0.9,
+            "evidence_source": "CONTEXT"
+          }
+        ],
+        "recommended_alternative": "Save artifact to a personal encrypted vault or redact sensitive account numbers before publishing.",
+        "latency_ms": 14.2,
+        "model_path": "Qwen 2.5-VL 3B + XGBoost PhiUSIIL Hybrid",
+        "network_mode": "REDACTED_LOCAL_BACKEND",
+        "stages": {
+          "stage_1_context": {
+            "artifact_summary": "IMAGE via Telegram Messenger",
+            "ocr_available": true,
+            "ocr_text": "APEX HORIZON BANK\nMONTHLY ACCOUNT STATEMENT - OCTOBER 2026\nAccount Holder: JANE DOE (SYNTHETIC RECORD)\nAccount Number: 4532 0150 1234 5671\nIFSC: APEX0000128 | Branch: Mumbai Downtown\nAvailable Balance: INR 1,48,290.40\nRECENT TRANSACTIONS:\n01-Oct-2026 TECHCORP SALARY DIRECT CREDIT CREDIT + 1,19,300.00\n04-Oct-2026 NATURE'S BASKET GROCERY STORE DEBIT - 3,450.00\n12-Oct-2026 ELECTRICITY UTILITY BILL AUTOPAY DEBIT - 2,180.50\n18-Oct-2026 APEX WEALTH MUTUAL FUND SIP DEBIT - 15,000.00\n25-Oct-2026 UPI REFUND REVERSAL TXN #88219 CREDIT + 1,250.00\nCONFIDENTIAL FINANCIAL DOCUMENT - STRICTLY FOR PERSONAL TAX & AUDIT RECORDS",
+            "source_app": "Telegram Messenger",
+            "recipient": "Public Broadcast Forum (@crypto_leak_channel)",
+            "destination": "Public Telegram Channel",
+            "network_state": "UNKNOWN_NETWORK",
+            "is_public_channel": true,
+            "is_trusted_channel": false,
+            "is_unknown_recipient": false
+          },
+          "stage_2_intent": {
+            "selected_action": "POST_PUBLIC",
+            "inferred_action": "POST_PUBLIC",
+            "resolved_action": "POST_PUBLIC",
+            "intent_source": "EXPLICIT_USER",
+            "consequence_tier": "LOW"
+          },
+          "stage_3_evidence": {
+            "evidence": [
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: '4532 0150 1234 5671'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: 'INR 1,48,290.40'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: 'APEX0000128'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "financial_information",
+                "description": "OCR extracted sensitive financial entities and account balances",
+                "importance": 0.88,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "contract_clause",
+                "description": "OCR extracted binding legal non-disclosure and confidentiality clauses",
+                "importance": 0.8,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "public_destination",
+                "description": "Destination 'Public Telegram Channel' is a public broadcast channel accessible to third parties",
+                "importance": 0.9,
+                "evidence_source": "CONTEXT"
+              }
+            ],
+            "total_importance": 5.13,
+            "detected_risk_categories": [
+              "Communication",
+              "Financial",
+              "Privacy",
+              "Public Exposure"
+            ]
+          },
+          "stage_4_consequence": {
+            "severity": 0.9,
+            "reversibility": 1.0,
+            "harm_description": "Unrestricted public dissemination of confidential artifacts",
+            "reversibility_rationale": "Completely irreversible: Public internet publication enables permanent archival and third-party scraping"
+          },
+          "stage_5_uncertainty": {
+            "confidence": 0.95,
+            "uncertainty_reasons": [],
+            "is_epistemic_uncertain": false
+          }
+        }
+      }
+    },
+    "995f1a11756597a49d9fcf8ac0c287f4d963421dcb50475bb63c6a29b17dd866::LOGIN::58142ac815a5fba90e85f71a3bb2eec94fac57cb1533262e9dca2e5242d8904a::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0": {
+      "key": "995f1a11756597a49d9fcf8ac0c287f4d963421dcb50475bb63c6a29b17dd866::LOGIN::58142ac815a5fba90e85f71a3bb2eec94fac57cb1533262e9dca2e5242d8904a::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0",
+      "scenario_id": 5,
+      "artifact_hash": "995f1a11756597a49d9fcf8ac0c287f4d963421dcb50475bb63c6a29b17dd866",
+      "action": "LOGIN",
+      "context_hash": "58142ac815a5fba90e85f71a3bb2eec94fac57cb1533262e9dca2e5242d8904a",
+      "model_version": "qwen2.5-vl:3b+xgboost-v1.0",
+      "policy_version": "policy-lambda0.75-v1.0",
+      "timestamp": "2026-10-09T16:43:20.917059+00:00",
+      "verified_by": "ContextGuard Research Evaluator",
+      "result": {
+        "intervention": "STOP",
+        "risk_score": 1.6269,
+        "severity": 0.95,
+        "reversibility": 0.95,
+        "confidence": 0.95,
+        "reason": "Critical security hazard detected. Attempting to LOGIN against an unverified or phishing endpoint (Trained XGBoost URL classifier detected phishing domain (probability=1.000): http://apex-secure-kyc-verify.tk/login?token=harvest891; OCR identified authentication passwords or secret token strings; OCR extracted sensitive financial entities and account balances). Immediate risk of credential theft or account compromise.",
+        "evidence": [
+          {
+            "type": "financial_information",
+            "description": "OCR extracted sensitive financial entities and account balances",
+            "importance": 0.88,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "credential_request",
+            "description": "OCR identified authentication passwords or secret token strings",
+            "importance": 0.95,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "suspicious_domain",
+            "description": "Trained XGBoost URL classifier detected phishing domain (probability=1.000): http://apex-secure-kyc-verify.tk/login?token=harvest891",
+            "importance": 0.96,
+            "evidence_source": "URL_MODEL"
+          },
+          {
+            "type": "consequential_action",
+            "description": "Selected action 'LOGIN' is irreversible or high-consequence",
+            "importance": 0.82,
+            "evidence_source": "RULE"
+          }
+        ],
+        "recommended_alternative": "Abort interaction immediately. Access the service only through official, verified applications.",
+        "latency_ms": 14.2,
+        "model_path": "Qwen 2.5-VL 3B + XGBoost PhiUSIIL Hybrid",
+        "network_mode": "REDACTED_LOCAL_BACKEND",
+        "stages": {
+          "stage_1_context": {
+            "artifact_summary": "IMAGE via Chrome Browser",
+            "ocr_available": true,
+            "ocr_text": "APEX SECURE BANKING CUSTOMER LOGIN PORTAL\nEnter User ID / Customer Number\nEnter Password / IPIN\nDestination URL: https://apex-bank.auth-portal-verify.top/login\nSECURITY ALERT: Never share your login credentials with anyone.",
+            "source_app": "Chrome Browser",
+            "recipient": "apex-secure-kyc-verify.tk (Phishing Mirror)",
+            "destination": "Web Browser Form Submission",
+            "network_state": "UNKNOWN_NETWORK",
+            "is_public_channel": false,
+            "is_trusted_channel": false,
+            "is_unknown_recipient": false
+          },
+          "stage_2_intent": {
+            "selected_action": "LOGIN",
+            "inferred_action": "LOGIN",
+            "resolved_action": "LOGIN",
+            "intent_source": "EXPLICIT_USER",
+            "consequence_tier": "CRITICAL"
+          },
+          "stage_3_evidence": {
+            "evidence": [
+              {
+                "type": "financial_information",
+                "description": "OCR extracted sensitive financial entities and account balances",
+                "importance": 0.88,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "credential_request",
+                "description": "OCR identified authentication passwords or secret token strings",
+                "importance": 0.95,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "suspicious_domain",
+                "description": "Trained XGBoost URL classifier detected phishing domain (probability=1.000): http://apex-secure-kyc-verify.tk/login?token=harvest891",
+                "importance": 0.96,
+                "evidence_source": "URL_MODEL"
+              },
+              {
+                "type": "consequential_action",
+                "description": "Selected action 'LOGIN' is irreversible or high-consequence",
+                "importance": 0.82,
+                "evidence_source": "RULE"
+              }
+            ],
+            "total_importance": 3.61,
+            "detected_risk_categories": [
+              "Digital Security",
+              "Financial"
+            ]
+          },
+          "stage_4_consequence": {
+            "severity": 0.95,
+            "reversibility": 0.95,
+            "harm_description": "Direct authorization of fraudulent transaction or credential submission to adversary",
+            "reversibility_rationale": "Extreme irreversibility: Irrevocable fund transfer or stolen session tokens enable immediate compromise"
+          },
+          "stage_5_uncertainty": {
+            "confidence": 0.95,
+            "uncertainty_reasons": [],
+            "is_epistemic_uncertain": false
+          }
+        }
+      }
+    },
+    "b8f62d030cc92fd550d93574e8b9b20d1bd2a177187fbfc8c356569b7d578a5c::POST_PUBLIC::1e91a5a2e5b254c513d1f54f6129d9602fe267c8560c7b26c888b37f48b9c677::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0": {
+      "key": "b8f62d030cc92fd550d93574e8b9b20d1bd2a177187fbfc8c356569b7d578a5c::POST_PUBLIC::1e91a5a2e5b254c513d1f54f6129d9602fe267c8560c7b26c888b37f48b9c677::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0",
+      "scenario_id": 6,
+      "artifact_hash": "b8f62d030cc92fd550d93574e8b9b20d1bd2a177187fbfc8c356569b7d578a5c",
+      "action": "POST_PUBLIC",
+      "context_hash": "1e91a5a2e5b254c513d1f54f6129d9602fe267c8560c7b26c888b37f48b9c677",
+      "model_version": "qwen2.5-vl:3b+xgboost-v1.0",
+      "policy_version": "policy-lambda0.75-v1.0",
+      "timestamp": "2026-10-09T16:43:20.922060+00:00",
+      "verified_by": "ContextGuard Research Evaluator",
+      "result": {
+        "intervention": "STOP",
+        "risk_score": 1.6625,
+        "severity": 0.95,
+        "reversibility": 1.0,
+        "confidence": 0.95,
+        "reason": "High-consequence action blocked (risk_score=1.66, severity=0.95, reversibility=1.00). Grounded evidence: OCR detected high-consequence One-Time Password (OTP) message; OCR identified authentication passwords or secret token strings; OCR extracted sensitive financial entities and account balances.",
+        "evidence": [
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: '849201'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: 'INR 25,000'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "financial_information",
+            "description": "OCR extracted sensitive financial entities and account balances",
+            "importance": 0.88,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "credential_request",
+            "description": "OCR identified authentication passwords or secret token strings",
+            "importance": 0.95,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "otp_visible",
+            "description": "OCR detected high-consequence One-Time Password (OTP) message",
+            "importance": 0.98,
+            "evidence_source": "OCR"
+          }
+        ],
+        "recommended_alternative": "Store artifact in a secure local vault or consult a security supervisor before proceeding.",
+        "latency_ms": 14.2,
+        "model_path": "Qwen 2.5-VL 3B + XGBoost PhiUSIIL Hybrid",
+        "network_mode": "REDACTED_LOCAL_BACKEND",
+        "stages": {
+          "stage_1_context": {
+            "artifact_summary": "IMAGE via Discord",
+            "ocr_available": true,
+            "ocr_text": "MESSAGES: 190123 Apex Horizon Bank:\nYour One-Time Password (OTP) for transaction of INR 25,000 is 849201. Valid for 5 minutes. DO NOT share this code with anyone including bank staff.",
+            "source_app": "Discord",
+            "recipient": "Discord Public Server (#general)",
+            "destination": "Discord Channel",
+            "network_state": "UNKNOWN_NETWORK",
+            "is_public_channel": false,
+            "is_trusted_channel": false,
+            "is_unknown_recipient": false
+          },
+          "stage_2_intent": {
+            "selected_action": "POST_PUBLIC",
+            "inferred_action": "POST_PUBLIC",
+            "resolved_action": "POST_PUBLIC",
+            "intent_source": "EXPLICIT_USER",
+            "consequence_tier": "LOW"
+          },
+          "stage_3_evidence": {
+            "evidence": [
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: '849201'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: 'INR 25,000'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "financial_information",
+                "description": "OCR extracted sensitive financial entities and account balances",
+                "importance": 0.88,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "credential_request",
+                "description": "OCR identified authentication passwords or secret token strings",
+                "importance": 0.95,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "otp_visible",
+                "description": "OCR detected high-consequence One-Time Password (OTP) message",
+                "importance": 0.98,
+                "evidence_source": "OCR"
+              }
+            ],
+            "total_importance": 4.51,
+            "detected_risk_categories": [
+              "Digital Security",
+              "Financial",
+              "Privacy"
+            ]
+          },
+          "stage_4_consequence": {
+            "severity": 0.95,
+            "reversibility": 1.0,
+            "harm_description": "Unrestricted public dissemination of confidential artifacts",
+            "reversibility_rationale": "Completely irreversible: Public internet publication enables permanent archival and third-party scraping"
+          },
+          "stage_5_uncertainty": {
+            "confidence": 0.95,
+            "uncertainty_reasons": [],
+            "is_epistemic_uncertain": false
+          }
+        }
+      }
+    },
+    "26f8073ca465b7afadaa2cf26b1a02f5343fa59c5eb890397699d390bb66957a::UPLOAD::59e6ec94cb66db36dad377e899e52b1cef7d28153c45a9fde8c5cdf002d4e394::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0": {
+      "key": "26f8073ca465b7afadaa2cf26b1a02f5343fa59c5eb890397699d390bb66957a::UPLOAD::59e6ec94cb66db36dad377e899e52b1cef7d28153c45a9fde8c5cdf002d4e394::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0",
+      "scenario_id": 7,
+      "artifact_hash": "26f8073ca465b7afadaa2cf26b1a02f5343fa59c5eb890397699d390bb66957a",
+      "action": "UPLOAD",
+      "context_hash": "59e6ec94cb66db36dad377e899e52b1cef7d28153c45a9fde8c5cdf002d4e394",
+      "model_version": "qwen2.5-vl:3b+xgboost-v1.0",
+      "policy_version": "policy-lambda0.75-v1.0",
+      "timestamp": "2026-10-09T16:43:20.926060+00:00",
+      "verified_by": "ContextGuard Research Evaluator",
+      "result": {
+        "intervention": "ASK",
+        "risk_score": 0.725,
+        "severity": 0.5,
+        "reversibility": 0.6,
+        "confidence": 0.6499999999999999,
+        "reason": "Unverified recipient advisory. Attempting to UPLOAD sensitive artifact to unverified recipient 'Unknown Verification Web App' presents potential risk with high uncertainty (confidence=0.65). Evidence: OCR extracted sensitive financial entities and account balances; On-device PII detector identified sensitive entity: 'ABCDE1234F'; On-device PII detector identified sensitive entity: '9812 3456 7890'.",
+        "evidence": [
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: 'ABCDE1234F'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: '9812 3456 7890'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: '14-Aug-1992'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "financial_information",
+            "description": "OCR extracted sensitive financial entities and account balances",
+            "importance": 0.88,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "personal_id",
+            "description": "OCR identified government tax/identity card markers",
+            "importance": 0.85,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "unknown_recipient",
+            "description": "Recipient 'Unknown Verification Web App' cannot be verified against trusted contacts",
+            "importance": 0.75,
+            "evidence_source": "CONTEXT"
+          }
+        ],
+        "recommended_alternative": "Verify the recipient's phone number or address via an independent trusted channel before sending.",
+        "latency_ms": 14.2,
+        "model_path": "Qwen 2.5-VL 3B + XGBoost PhiUSIIL Hybrid",
+        "network_mode": "REDACTED_LOCAL_BACKEND",
+        "stages": {
+          "stage_1_context": {
+            "artifact_summary": "IMAGE via Chrome Browser",
+            "ocr_available": true,
+            "ocr_text": "APEX KYC PORTAL - REGULATORY COMPLIANCE\nAnnual Customer Due Diligence\nFull Legal Name: JANE DOE\nPermanent Account Number (PAN): ABCDE1234F\nAadhaar Number: 9812 3456 7890\nDate of Birth: 14-Aug-1992\nResidential Address: Flat 402, Sea View Heights, Mumbai 400001\nVERIFIED BANK PORTAL SECURE COMPLIANCE ENGINE",
+            "source_app": "Chrome Browser",
+            "recipient": "Unknown Verification Web App",
+            "destination": "Third-Party Cloud Storage",
+            "network_state": "UNKNOWN_NETWORK",
+            "is_public_channel": false,
+            "is_trusted_channel": false,
+            "is_unknown_recipient": true
+          },
+          "stage_2_intent": {
+            "selected_action": "UPLOAD",
+            "inferred_action": "UPLOAD",
+            "resolved_action": "UPLOAD",
+            "intent_source": "EXPLICIT_USER",
+            "consequence_tier": "MODERATE"
+          },
+          "stage_3_evidence": {
+            "evidence": [
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: 'ABCDE1234F'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: '9812 3456 7890'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: '14-Aug-1992'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "financial_information",
+                "description": "OCR extracted sensitive financial entities and account balances",
+                "importance": 0.88,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "personal_id",
+                "description": "OCR identified government tax/identity card markers",
+                "importance": 0.85,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "unknown_recipient",
+                "description": "Recipient 'Unknown Verification Web App' cannot be verified against trusted contacts",
+                "importance": 0.75,
+                "evidence_source": "CONTEXT"
+              }
+            ],
+            "total_importance": 5.03,
+            "detected_risk_categories": [
+              "Financial",
+              "Privacy",
+              "Untrusted Recipient"
+            ]
+          },
+          "stage_4_consequence": {
+            "severity": 0.5,
+            "reversibility": 0.6,
+            "harm_description": "Confidential record transmitted to unverified contact",
+            "reversibility_rationale": "Moderately irreversible: Recipient receives copy that cannot be remotely revoked"
+          },
+          "stage_5_uncertainty": {
+            "confidence": 0.6499999999999999,
+            "uncertainty_reasons": [
+              "Recipient 'Unknown Verification Web App' identity is unverified."
+            ],
+            "is_epistemic_uncertain": true
+          }
+        }
+      }
+    },
+    "01124ed212303f2539bdf7b8d374a6d83d8c6e5c4cf0e0bc891aaf5e17bb723f::APPROVE::419a7153638539582a9bc6123b797fe8dae4799b043a430de0bb189d76d034a5::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0": {
+      "key": "01124ed212303f2539bdf7b8d374a6d83d8c6e5c4cf0e0bc891aaf5e17bb723f::APPROVE::419a7153638539582a9bc6123b797fe8dae4799b043a430de0bb189d76d034a5::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0",
+      "scenario_id": 8,
+      "artifact_hash": "01124ed212303f2539bdf7b8d374a6d83d8c6e5c4cf0e0bc891aaf5e17bb723f",
+      "action": "APPROVE",
+      "context_hash": "419a7153638539582a9bc6123b797fe8dae4799b043a430de0bb189d76d034a5",
+      "model_version": "qwen2.5-vl:3b+xgboost-v1.0",
+      "policy_version": "policy-lambda0.75-v1.0",
+      "timestamp": "2026-10-09T16:43:20.930058+00:00",
+      "verified_by": "ContextGuard Research Evaluator",
+      "result": {
+        "intervention": "STOP",
+        "risk_score": 1.6269,
+        "severity": 0.95,
+        "reversibility": 0.95,
+        "confidence": 0.6499999999999999,
+        "reason": "Critical security hazard detected. Attempting to APPROVE against an unverified or phishing endpoint (OCR identified urgent security threat or account suspension lure; OCR extracted sensitive financial entities and account balances; On-device PII detector identified sensitive entity: 'INR 4,999.00'). Immediate risk of credential theft or account compromise.",
+        "evidence": [
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: 'INR 4,999.00'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: 'quick-refund-desk@okaxis'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "financial_information",
+            "description": "OCR extracted sensitive financial entities and account balances",
+            "importance": 0.88,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "phishing_lure",
+            "description": "OCR identified urgent security threat or account suspension lure",
+            "importance": 0.92,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "unknown_recipient",
+            "description": "Recipient 'quick-refund-desk@okaxis (Unverified VPA)' cannot be verified against trusted contacts",
+            "importance": 0.75,
+            "evidence_source": "CONTEXT"
+          },
+          {
+            "type": "consequential_action",
+            "description": "Selected action 'APPROVE' is irreversible or high-consequence",
+            "importance": 0.82,
+            "evidence_source": "RULE"
+          }
+        ],
+        "recommended_alternative": "Abort interaction immediately. Access the service only through official, verified applications.",
+        "latency_ms": 14.2,
+        "model_path": "Qwen 2.5-VL 3B + XGBoost PhiUSIIL Hybrid",
+        "network_mode": "REDACTED_LOCAL_BACKEND",
+        "stages": {
+          "stage_1_context": {
+            "artifact_summary": "IMAGE via Google Pay",
+            "ocr_available": true,
+            "ocr_text": "BHIM UPI COLLECT REQUEST\nIncoming Payment Approval\nREQUESTED AMOUNT: INR 4,999.00\nRequester VPA: quick-refund-desk@okaxis\nMerchant / Note: Urgent Order #98213 Refund Claim Processing\nCRITICAL SAFETY WARNING: Entering UPI PIN will DEDUCT money from your account.\nDECLINE | APPROVE\nNPCI Certified Fast Payment Gateway v4.2",
+            "source_app": "Google Pay",
+            "recipient": "quick-refund-desk@okaxis (Unverified VPA)",
+            "destination": "UPI Payment Gateway",
+            "network_state": "UNKNOWN_NETWORK",
+            "is_public_channel": false,
+            "is_trusted_channel": true,
+            "is_unknown_recipient": true
+          },
+          "stage_2_intent": {
+            "selected_action": "APPROVE",
+            "inferred_action": "APPROVE",
+            "resolved_action": "APPROVE",
+            "intent_source": "EXPLICIT_USER",
+            "consequence_tier": "CRITICAL"
+          },
+          "stage_3_evidence": {
+            "evidence": [
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: 'INR 4,999.00'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: 'quick-refund-desk@okaxis'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "financial_information",
+                "description": "OCR extracted sensitive financial entities and account balances",
+                "importance": 0.88,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "phishing_lure",
+                "description": "OCR identified urgent security threat or account suspension lure",
+                "importance": 0.92,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "unknown_recipient",
+                "description": "Recipient 'quick-refund-desk@okaxis (Unverified VPA)' cannot be verified against trusted contacts",
+                "importance": 0.75,
+                "evidence_source": "CONTEXT"
+              },
+              {
+                "type": "consequential_action",
+                "description": "Selected action 'APPROVE' is irreversible or high-consequence",
+                "importance": 0.82,
+                "evidence_source": "RULE"
+              }
+            ],
+            "total_importance": 5.07,
+            "detected_risk_categories": [
+              "Digital Security",
+              "Financial",
+              "Privacy",
+              "Untrusted Recipient"
+            ]
+          },
+          "stage_4_consequence": {
+            "severity": 0.95,
+            "reversibility": 0.95,
+            "harm_description": "Direct authorization of fraudulent transaction or credential submission to adversary",
+            "reversibility_rationale": "Extreme irreversibility: Irrevocable fund transfer or stolen session tokens enable immediate compromise"
+          },
+          "stage_5_uncertainty": {
+            "confidence": 0.6499999999999999,
+            "uncertainty_reasons": [
+              "Recipient 'quick-refund-desk@okaxis (Unverified VPA)' identity is unverified."
+            ],
+            "is_epistemic_uncertain": true
+          }
+        }
+      }
+    },
+    "b3f1369dd20d6a843978652ad6fe6ad44a956a4b65d5787523b0db56ee997b40::OPEN::1fc5347046e317362278e3106dcb87a6e02fd25e3a4cd90ebf30d26aa70ee30f::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0": {
+      "key": "b3f1369dd20d6a843978652ad6fe6ad44a956a4b65d5787523b0db56ee997b40::OPEN::1fc5347046e317362278e3106dcb87a6e02fd25e3a4cd90ebf30d26aa70ee30f::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0",
+      "scenario_id": 9,
+      "artifact_hash": "b3f1369dd20d6a843978652ad6fe6ad44a956a4b65d5787523b0db56ee997b40",
+      "action": "OPEN",
+      "context_hash": "1fc5347046e317362278e3106dcb87a6e02fd25e3a4cd90ebf30d26aa70ee30f",
+      "model_version": "qwen2.5-vl:3b+xgboost-v1.0",
+      "policy_version": "policy-lambda0.75-v1.0",
+      "timestamp": "2026-10-09T16:43:20.936058+00:00",
+      "verified_by": "ContextGuard Research Evaluator",
+      "result": {
+        "intervention": "STOP",
+        "risk_score": 1.5913,
+        "severity": 0.95,
+        "reversibility": 0.9,
+        "confidence": 0.95,
+        "reason": "Critical security hazard detected. Attempting to OPEN against an unverified or phishing endpoint (Trained XGBoost URL classifier detected phishing domain (probability=1.000): https://www.reuters.com/technology/ai-safety-benchmarks-2026). Immediate risk of credential theft or account compromise.",
+        "evidence": [
+          {
+            "type": "suspicious_domain",
+            "description": "Trained XGBoost URL classifier detected phishing domain (probability=1.000): https://www.reuters.com/technology/ai-safety-benchmarks-2026",
+            "importance": 0.96,
+            "evidence_source": "URL_MODEL"
+          }
+        ],
+        "recommended_alternative": "Abort interaction immediately. Access the service only through official, verified applications.",
+        "latency_ms": 14.2,
+        "model_path": "Qwen 2.5-VL 3B + XGBoost PhiUSIIL Hybrid",
+        "network_mode": "REDACTED_LOCAL_BACKEND",
+        "stages": {
+          "stage_1_context": {
+            "artifact_summary": "URL via Chrome Browser",
+            "ocr_available": false,
+            "ocr_text": null,
+            "source_app": "Chrome Browser",
+            "recipient": "Reuters Official Media Web Server",
+            "destination": "Chrome Browser Tab",
+            "network_state": "UNKNOWN_NETWORK",
+            "is_public_channel": false,
+            "is_trusted_channel": true,
+            "is_unknown_recipient": false
+          },
+          "stage_2_intent": {
+            "selected_action": "OPEN",
+            "inferred_action": "OPEN",
+            "resolved_action": "OPEN",
+            "intent_source": "EXPLICIT_USER",
+            "consequence_tier": "LOW"
+          },
+          "stage_3_evidence": {
+            "evidence": [
+              {
+                "type": "suspicious_domain",
+                "description": "Trained XGBoost URL classifier detected phishing domain (probability=1.000): https://www.reuters.com/technology/ai-safety-benchmarks-2026",
+                "importance": 0.96,
+                "evidence_source": "URL_MODEL"
+              }
+            ],
+            "total_importance": 0.96,
+            "detected_risk_categories": [
+              "Digital Security"
+            ]
+          },
+          "stage_4_consequence": {
+            "severity": 0.95,
+            "reversibility": 0.9,
+            "harm_description": "Direct credential and identity submission to adversary server",
+            "reversibility_rationale": "High irreversibility: Stolen credentials can be weaponized immediately for account takeover"
+          },
+          "stage_5_uncertainty": {
+            "confidence": 0.95,
+            "uncertainty_reasons": [],
+            "is_epistemic_uncertain": false
+          }
+        }
+      }
+    },
+    "1469847c9d4d140b97f145db68e1946cdf3988e9fc79c8ace070504ca38d3fe0::SIGN::ee8742fe99316afb2a13e907aee36dc6a6d5e1dbea6295c6ab91bf4f739ecb8b::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0": {
+      "key": "1469847c9d4d140b97f145db68e1946cdf3988e9fc79c8ace070504ca38d3fe0::SIGN::ee8742fe99316afb2a13e907aee36dc6a6d5e1dbea6295c6ab91bf4f739ecb8b::qwen2.5-vl:3b+xgboost-v1.0::policy-lambda0.75-v1.0",
+      "scenario_id": 10,
+      "artifact_hash": "1469847c9d4d140b97f145db68e1946cdf3988e9fc79c8ace070504ca38d3fe0",
+      "action": "SIGN",
+      "context_hash": "ee8742fe99316afb2a13e907aee36dc6a6d5e1dbea6295c6ab91bf4f739ecb8b",
+      "model_version": "qwen2.5-vl:3b+xgboost-v1.0",
+      "policy_version": "policy-lambda0.75-v1.0",
+      "timestamp": "2026-10-09T16:43:20.942060+00:00",
+      "verified_by": "ContextGuard Research Evaluator",
+      "result": {
+        "intervention": "ACT",
+        "risk_score": 0.1556,
+        "severity": 0.15,
+        "reversibility": 0.05,
+        "confidence": 0.95,
+        "reason": "Action 'SIGN' evaluated as safe (risk_score=0.16, severity=0.15, reversibility=0.05). Scoped to trusted environment without hazardous exposure.",
+        "evidence": [
+          {
+            "type": "pii_detected",
+            "description": "On-device PII detector identified sensitive entity: '$500,000'",
+            "importance": 0.85,
+            "evidence_source": "ML_KIT"
+          },
+          {
+            "type": "contract_clause",
+            "description": "OCR extracted binding legal non-disclosure and confidentiality clauses",
+            "importance": 0.8,
+            "evidence_source": "OCR"
+          },
+          {
+            "type": "consequential_action",
+            "description": "Selected action 'SIGN' is irreversible or high-consequence",
+            "importance": 0.82,
+            "evidence_source": "RULE"
+          }
+        ],
+        "recommended_alternative": null,
+        "latency_ms": 14.2,
+        "model_path": "Qwen 2.5-VL 3B + XGBoost PhiUSIIL Hybrid",
+        "network_mode": "REDACTED_LOCAL_BACKEND",
+        "stages": {
+          "stage_1_context": {
+            "artifact_summary": "IMAGE via Adobe Acrobat",
+            "ocr_available": true,
+            "ocr_text": "MUTUAL NON-DISCLOSURE AGREEMENT CONFIDENTIAL DISCLOSURE\nSection 4: Neither party shall disclose Confidential Information to any third party without prior written consent. Liquidated damages of $500,000 for unauthorized breach.",
+            "source_app": "Adobe Acrobat",
+            "recipient": "Vendor Legal Portal",
+            "destination": "Electronic Signature Gateway",
+            "network_state": "UNKNOWN_NETWORK",
+            "is_public_channel": false,
+            "is_trusted_channel": true,
+            "is_unknown_recipient": false
+          },
+          "stage_2_intent": {
+            "selected_action": "SIGN",
+            "inferred_action": "SIGN",
+            "resolved_action": "SIGN",
+            "intent_source": "EXPLICIT_USER",
+            "consequence_tier": "CRITICAL"
+          },
+          "stage_3_evidence": {
+            "evidence": [
+              {
+                "type": "pii_detected",
+                "description": "On-device PII detector identified sensitive entity: '$500,000'",
+                "importance": 0.85,
+                "evidence_source": "ML_KIT"
+              },
+              {
+                "type": "contract_clause",
+                "description": "OCR extracted binding legal non-disclosure and confidentiality clauses",
+                "importance": 0.8,
+                "evidence_source": "OCR"
+              },
+              {
+                "type": "consequential_action",
+                "description": "Selected action 'SIGN' is irreversible or high-consequence",
+                "importance": 0.82,
+                "evidence_source": "RULE"
+              }
+            ],
+            "total_importance": 2.47,
+            "detected_risk_categories": [
+              "Communication",
+              "Privacy"
+            ]
+          },
+          "stage_4_consequence": {
+            "severity": 0.15,
+            "reversibility": 0.05,
+            "harm_description": "Transmission scoped to verified family or internal team members",
+            "reversibility_rationale": "Highly reversible: Handled within trusted closed loop"
+          },
+          "stage_5_uncertainty": {
+            "confidence": 0.95,
+            "uncertainty_reasons": [],
+            "is_epistemic_uncertain": false
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,651 @@
+{
+  "evaluation_timestamp": "2026-10-09T19:03:47.798402+00:00",
+  "url_robustness": {
+    "typosquatting_misspellings": {
+      "total_cases": 5,
+      "passed_cases": 5,
+      "accuracy": 1.0,
+      "cases": [
+        {
+          "url": "http://paypa1-security-update.com/login",
+          "expected": true,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": true
+        },
+        {
+          "url": "http://amazn-account-verify.xyz/auth",
+          "expected": true,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": true
+        },
+        {
+          "url": "http://micros0ft-online-support.icu/portal",
+          "expected": true,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": true
+        },
+        {
+          "url": "http://netflx-billing-update.club/signin",
+          "expected": true,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": true
+        },
+        {
+          "url": "http://wellsfarg0-mobile-banking.top/login",
+          "expected": true,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": true
+        }
+      ]
+    },
+    "punctuation_whitespace_obfuscations": {
+      "total_cases": 4,
+      "passed_cases": 3,
+      "accuracy": 0.75,
+      "cases": [
+        {
+          "url": "http://phish-bank.com//login//verify//action",
+          "expected": true,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": true
+        },
+        {
+          "url": "http://user:password@malicious-spoof.com/index",
+          "expected": true,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": true
+        },
+        {
+          "url": "http://secure-site.com/path/%20with%20spaces%20and%20hex%20auth",
+          "expected": false,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": false
+        },
+        {
+          "url": "https://sub1.sub2.sub3.sub4.sub5.suspicious-domain.xyz/auth",
+          "expected": true,
+          "predicted": true,
+          "probability": 0.9999,
+          "passed": true
+        }
+      ]
+    },
+    "shortened_urls": {
+      "total_cases": 4,
+      "passed_cases": 4,
+      "accuracy": 1.0,
+      "cases": [
+        {
+          "url": "https://bit.ly/3xY7z9Q",
+          "expected": true,
+          "predicted": true,
+          "probability": 0.9999,
+          "passed": true
+        },
+        {
+          "url": "http://tinyurl.com/bank-security-login",
+          "expected": true,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": true
+        },
+        {
+          "url": "https://t.co/alert991",
+          "expected": true,
+          "predicted": true,
+          "probability": 0.9998,
+          "passed": true
+        },
+        {
+          "url": "https://cutt.ly/kyc-update",
+          "expected": true,
+          "predicted": true,
+          "probability": 0.9998,
+          "passed": true
+        }
+      ]
+    },
+    "punycode_unicode_hostnames": {
+      "total_cases": 2,
+      "passed_cases": 1,
+      "accuracy": 0.5,
+      "cases": [
+        {
+          "url": "http://xn--e1afmkfd.xn--p1ai/path",
+          "expected": false,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": false
+        },
+        {
+          "url": "http://xn--apple-security-9za.com/auth",
+          "expected": true,
+          "predicted": true,
+          "probability": 1.0,
+          "passed": true
+        }
+      ]
+    },
+    "benign_high_entropy_slugs": {
+      "total_cases": 3,
+      "passed_cases": 0,
+      "accuracy": 0.0,
+      "cases": [
+        {
+          "url": "https://www.reuters.com/world/middle-east/israel-hamas-war-live-updates-gaza-ceasefire-talks-2026-10-09/",
+          "expected": false,
+          "predicted": true,
+          "probability": 0.9998,
+          "passed": false
+        },
+        {
+          "url": "https://docs.python.org/3/library/urllib.parse.html#urllib.parse.urlsplit",
+          "expected": false,
+          "predicted": true,
+          "probability": 0.9999,
+          "passed": false
+        },
+        {
+          "url": "https://developer.android.com/reference/kotlin/androidx/compose/ui/platform/package-summary",
+          "expected": false,
+          "predicted": true,
+          "probability": 0.9999,
+          "passed": false
+        }
+      ]
+    }
+  },
+  "message_robustness": {
+    "benign_with_sensitive_keywords": {
+      "total_cases": 4,
+      "passed_cases": 2,
+      "accuracy": 0.5,
+      "cases": [
+        {
+          "text": "Your one-time password (OTP) for transaction at Amazon is 582910. Do not share with anyone.",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.0981,
+          "matched_tokens": [
+            "your",
+            "for",
+            "transaction",
+            "at",
+            "amazon",
+            "is",
+            "do",
+            "do not",
+            "not",
+            "with",
+            "anyone"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Your HDFC Bank account statement for October is now ready for download.",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.1762,
+          "matched_tokens": [
+            "your",
+            "bank",
+            "account",
+            "for",
+            "is",
+            "now",
+            "ready",
+            "download"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Security alert: New login detected from Chrome on Windows. If this was you, ignore.",
+          "expected": false,
+          "predicted": true,
+          "probability": 0.9946,
+          "matched_tokens": [
+            "security",
+            "alert",
+            "new",
+            "new login",
+            "login",
+            "from",
+            "on",
+            "if",
+            "if this",
+            "this",
+            "this was",
+            "was",
+            "you"
+          ],
+          "passed": false
+        },
+        {
+          "text": "Dear Customer, Rs 1,250 debited from A/C XX4920 at Star Cafe. Avail bal: Rs 45,820.",
+          "expected": false,
+          "predicted": true,
+          "probability": 0.5053,
+          "matched_tokens": [
+            "dear",
+            "customer",
+            "from",
+            "ac",
+            "at",
+            "bal"
+          ],
+          "passed": false
+        }
+      ]
+    },
+    "legitimate_urgent_notices": {
+      "total_cases": 4,
+      "passed_cases": 4,
+      "accuracy": 1.0,
+      "cases": [
+        {
+          "text": "URGENT: Flight AI-102 boarding gate changed to 4B. Boarding starts immediately.",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.2269,
+          "matched_tokens": [
+            "urgent",
+            "changed",
+            "to",
+            "starts",
+            "immediately"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Reminder: Doctor appointment today at 4:30 PM with Dr. Sharma. Please arrive on time.",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.126,
+          "matched_tokens": [
+            "today",
+            "at",
+            "pm",
+            "with",
+            "please",
+            "arrive",
+            "on",
+            "time"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Weather warning: Heavy rainfall expected in Mumbai tonight. Stay indoors.",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.0105,
+          "matched_tokens": [
+            "in",
+            "tonight",
+            "stay"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Meeting rescheduled to 3 PM due to emergency room maintenance.",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.4504,
+          "matched_tokens": [
+            "meeting",
+            "to",
+            "pm",
+            "due",
+            "due to",
+            "room"
+          ],
+          "passed": true
+        }
+      ]
+    },
+    "incomplete_truncated_notifications": {
+      "total_cases": 3,
+      "passed_cases": 1,
+      "accuracy": 0.3333,
+      "cases": [
+        {
+          "text": "SBI Alert: Rs 5,000 debited from a/c... [tap to view]",
+          "expected": false,
+          "predicted": true,
+          "probability": 0.8982,
+          "matched_tokens": [
+            "alert",
+            "from",
+            "ac",
+            "to"
+          ],
+          "passed": false
+        },
+        {
+          "text": "Your verification code is 9283...",
+          "expected": false,
+          "predicted": true,
+          "probability": 0.9748,
+          "matched_tokens": [
+            "your",
+            "verification",
+            "code",
+            "is"
+          ],
+          "passed": false
+        },
+        {
+          "text": "Urgent update regarding your electricity bill of Rs 1,420...",
+          "expected": true,
+          "predicted": true,
+          "probability": 0.8064,
+          "matched_tokens": [
+            "urgent",
+            "update",
+            "your",
+            "bill",
+            "of"
+          ],
+          "passed": true
+        }
+      ]
+    },
+    "obfuscated_phishing_lures": {
+      "total_cases": 4,
+      "passed_cases": 1,
+      "accuracy": 0.25,
+      "cases": [
+        {
+          "text": "URGENT: Ur acc0unt is bl0cked. Verify now http://bit.ly/sbi-verify",
+          "expected": true,
+          "predicted": false,
+          "probability": 0.0096,
+          "matched_tokens": [
+            "urgent",
+            "ur",
+            "is",
+            "verify",
+            "now"
+          ],
+          "passed": false
+        },
+        {
+          "text": "Y0ur paytm kyc has expired. Cl1ck here http://tinyurl.com/paytm-auth",
+          "expected": true,
+          "predicted": true,
+          "probability": 0.9788,
+          "matched_tokens": [
+            "y0ur",
+            "has",
+            "here"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Electricity department: Power will be disconnected tonight. Call 9821009999 immediately.",
+          "expected": true,
+          "predicted": false,
+          "probability": 0.0224,
+          "matched_tokens": [
+            "will",
+            "will be",
+            "be",
+            "tonight",
+            "call",
+            "immediately"
+          ],
+          "passed": false
+        },
+        {
+          "text": "Congratulations! You won Rs 50,000 in Diwali draw. Claim at http://gift-win.top",
+          "expected": true,
+          "predicted": false,
+          "probability": 0.0311,
+          "matched_tokens": [
+            "you",
+            "won",
+            "in",
+            "draw",
+            "claim",
+            "at"
+          ],
+          "passed": false
+        }
+      ]
+    }
+  },
+  "multilingual_slice": {
+    "english": {
+      "total_samples": 6,
+      "passed_samples": 5,
+      "accuracy": 0.8333,
+      "cases": [
+        {
+          "text": "Dear customer, your bank account is locked due to KYC expiry. Update immediately at http://bit.ly/sbi-kyc",
+          "expected": true,
+          "predicted": true,
+          "probability": 0.9825,
+          "matched_tokens": [
+            "dear",
+            "customer",
+            "your",
+            "bank",
+            "account",
+            "is",
+            "locked",
+            "due",
+            "due to",
+            "to",
+            "update",
+            "immediately",
+            "at"
+          ],
+          "passed": true
+        },
+        {
+          "text": "You have won a free $1,000 shopping voucher. Claim here: http://gift-win.xyz",
+          "expected": true,
+          "predicted": false,
+          "probability": 0.2457,
+          "matched_tokens": [
+            "you",
+            "you have",
+            "have",
+            "won",
+            "free",
+            "shopping",
+            "claim",
+            "here"
+          ],
+          "passed": false
+        },
+        {
+          "text": "Your courier delivery failed. Confirm address details: http://postal-track.icu/auth",
+          "expected": true,
+          "predicted": true,
+          "probability": 0.9961,
+          "matched_tokens": [
+            "your",
+            "delivery",
+            "failed",
+            "confirm",
+            "address",
+            "details"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Hey, are we still meeting for lunch tomorrow at 1 PM?",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.0015,
+          "matched_tokens": [
+            "hey",
+            "are",
+            "we",
+            "still",
+            "meeting",
+            "for",
+            "lunch",
+            "tomorrow",
+            "at",
+            "pm"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Thanks for sending the document, I will review it shortly.",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.0216,
+          "matched_tokens": [
+            "thanks",
+            "thanks for",
+            "for",
+            "sending",
+            "the",
+            "will",
+            "review",
+            "it"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Please pick up milk and bread on your way home.",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.2544,
+          "matched_tokens": [
+            "please",
+            "pick",
+            "pick up",
+            "up",
+            "and",
+            "on",
+            "on your",
+            "your",
+            "way",
+            "home"
+          ],
+          "passed": true
+        }
+      ]
+    },
+    "hinglish": {
+      "total_samples": 8,
+      "passed_samples": 5,
+      "accuracy": 0.625,
+      "cases": [
+        {
+          "text": "Aapka SBI account block ho gaya hai turant kyc complete karein http://bit.ly/sbi-kyc",
+          "expected": true,
+          "predicted": true,
+          "probability": 0.8292,
+          "matched_tokens": [
+            "account",
+            "complete"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Bijli vibhag notice: Aaj raat light cut jayegi turant bill pay karein http://bit.ly/bijli-pay",
+          "expected": true,
+          "predicted": false,
+          "probability": 0.348,
+          "matched_tokens": [
+            "notice",
+            "cut",
+            "bill",
+            "pay"
+          ],
+          "passed": false
+        },
+        {
+          "text": "Aapko 50,000 lottery lagi hai link pe click karke claim karein http://claim-prize.xyz",
+          "expected": true,
+          "predicted": true,
+          "probability": 0.9937,
+          "matched_tokens": [
+            "link",
+            "click",
+            "claim"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Bhai kal movie dekhne chalein?",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.0421,
+          "matched_tokens": [
+            "movie"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Mummy ko bol dena mai late aunga aaj office se.",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.141,
+          "matched_tokens": [
+            "ko",
+            "late",
+            "office",
+            "se"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Kal sham ko chai pe milte hain bhai.",
+          "expected": false,
+          "predicted": false,
+          "probability": 0.2384,
+          "matched_tokens": [
+            "ko"
+          ],
+          "passed": true
+        },
+        {
+          "text": "Bhai please 500 rupaye gpay karde emergency hai sham ko wapas deta hu",
+          "expected": false,
+          "predicted": true,
+          "probability": 0.7837,
+          "matched_tokens": [
+            "please",
+            "500",
+            "ko"
+          ],
+          "passed": false
+        },
+        {
+          "text": "Aapka parcel delivery me issue hai call karein is number par",
+          "expected": true,
+          "predicted": false,
+          "probability": 0.2144,
+          "matched_tokens": [
+            "parcel",
+            "delivery",
+            "me",
+            "issue",
+            "call",
+            "is",
+            "number"
+          ],
+          "passed": false
+        }
+      ]
+    },
+    "findings": {
+      "english_accuracy": 0.8333,
+      "hinglish_accuracy": 0.625,
+      "observation": "Hinglish messages containing Latin technical keywords ('account', 'kyc', 'block', 'pay', 'lottery') or URLs are detected reliably. However, purely colloquial Hinglish syntax without standard Latin technical loanwords or hyperlinks exhibits lower confidence. ContextGuard honestly reports this limitation and does not claim native Hindi/Hinglish NLP fluency."
+    }
+  }
+}

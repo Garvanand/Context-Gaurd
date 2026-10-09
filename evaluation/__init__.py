@@ -7,4 +7,11 @@ Provides rigorous, reproducible benchmarking across:
 - Metrics: Multi-class accuracy, Macro F1, STOP Recall, ACT False Alarm Rate, ECE, Clustered Bootstrap 95% CIs.
 """
 
-__version__ = "1.0.0"
+from evaluation.metrics_cac import compute_cac_metrics, CACMetricsResult
+
+__version__ = "1.1.0"
+
+__all__ = [
+    "compute_cac_metrics",
+    "CACMetricsResult",
+]
