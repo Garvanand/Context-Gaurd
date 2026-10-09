@@ -153,3 +153,30 @@ This checklist tracks the end-to-end execution of the ContextGuard research caps
   - [x] `results/figures/latency_vs_accuracy.png`
 - [x] Update UI Supervisor dashboards (Android `SupervisorScreen.kt` and web `index.html`) with explicit 3-mode selector and prominent hazard warning on RAW mode.
 
+---
+
+## 8. Phase 8: Supervisor Control Room (AI Safety Console)
+- [x] Architect and implement Supervisor Control Room (`supervisor-dashboard/`):
+  - [x] Tech stack: React 19 + TypeScript + Vite v5.4 (pure CSS design system, zero unnecessary frameworks).
+  - [x] Dark defense-grade AI evaluation console aesthetic (Inter & JetBrains Mono typography, status badges, neon telemetry accents).
+- [x] Implement all 11 dedicated console panels:
+  - [x] 1. System Overview (8 real-time status cards: ContextGuard, Android Connection, Backend Status, Ollama, Qwen VLM, XGBoost URL, ML Kit, EARB Size).
+  - [x] 2. Live Analysis (Interactive selector: 20 synthetic base artifacts, pre-action candidates, recipient, destination channel -> executes live 6-stage pipeline).
+  - [x] 3. Pipeline Trace (Interactive 6-stage flow diagram: Context -> Intent -> Evidence -> Consequence -> Uncertainty -> Intervention with JSON inspector).
+  - [x] 4. EARB Benchmark (60 pairs, 20 base artifacts, 4 categories, intervention and ambiguity distributions, search/filter table).
+  - [x] 5. Model Performance (Qwen 2.5-VL 3B, XGBoost PhiUSIIL model, ML Kit, calibrated policy parameters).
+  - [x] 6. Baseline Comparison (Strict empirical baseline matrix B1-B6; missing variants strictly display "Not evaluated").
+  - [x] 7. Ablation Results (Component ablations A1-A5; missing variants strictly display "Not evaluated").
+  - [x] 8. Privacy-Utility (3 modes: On-Device, Redacted Local Backend, Raw Cloud Benchmark with leakage & payload reduction metrics).
+  - [x] 9. Failure Analysis (False STOP, False ACT/Hazard, False WARN, False ASK, tail latency outliers > P90).
+  - [x] 10. Network Activity (Cryptographic wire audit ledger with SHA-256 fingerprints, wire size, network mode).
+  - [x] 11. Model Health (Active health check probes with roundtrip latency, watchdog status, and "Ping Live Probes" trigger).
+- [x] Backend Integration (`backend/app/api/v1/supervisor.py` & `backend/services/pii_detector.py`):
+  - [x] Fast, memory-efficient endpoints consuming real result files and live ML pipeline.
+  - [x] Zero raw persistence guard enforced.
+- [x] Browser Verification & Documentation:
+  - [x] Verified via browser tooling across all 11 panels, live execution, and probe triggers.
+  - [x] Screenshots captured: `section1_overview`, `section2_live_analysis`, `section4_earb_benchmark`, `section5_model_performance`, `model_health_panel`, `live_analysis_panel`, `full_view_mode`.
+  - [x] Browser session recording saved: `supervisor_room_final_verify_1791563258486.webp`.
+
+
