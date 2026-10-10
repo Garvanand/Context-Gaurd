@@ -1,9 +1,12 @@
 package com.contextguard.app.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.res.painterResource
+import com.contextguard.app.R
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -90,11 +93,10 @@ fun PrivacyScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Security,
-                        contentDescription = "Shield",
-                        tint = ActGreen,
-                        modifier = Modifier.size(28.dp)
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_aperture_signal_symbol),
+                        contentDescription = "ContextGuard Aperture Signal",
+                        modifier = Modifier.size(26.dp)
                     )
                     Text(
                         text = "ON-DEVICE FIRST PRINCIPLE",

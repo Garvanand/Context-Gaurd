@@ -81,39 +81,53 @@ export const EarbBenchmark: React.FC<EarbBenchmarkProps> = ({ data, loading }) =
 
   return (
     <section id="section-earb" style={{ marginBottom: '32px' }}>
+      {/* Editorial Section Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '16px'
+        marginBottom: '20px',
+        borderBottom: '1px solid var(--contour-border)',
+        paddingBottom: '12px'
       }}>
         <div>
+          <div style={{
+            fontSize: '11px',
+            fontFamily: 'var(--font-mono)',
+            color: 'var(--ion-cyan)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: '4px'
+          }}>
+            Benchmark Registry & Ground Truth
+          </div>
           <h2 style={{
-            fontSize: '18px',
+            fontSize: '20px',
+            fontFamily: 'var(--font-display)',
             fontWeight: 700,
-            color: '#f8fafc',
+            color: 'var(--text-main)',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '10px',
             margin: 0
           }}>
-            <Database size={18} color="#38bdf8" />
-            4. Everyday Action Risk Benchmark (EARB)
+            <Database size={20} color="var(--ion-cyan)" />
+            Everyday Action Risk Benchmark (EARB v1.0)
           </h2>
-          <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0' }}>
+          <p style={{ fontSize: '13px', color: 'var(--muted-text)', margin: '4px 0 0 0' }}>
             60 paired action-artifact evaluations across 20 synthetic base artifacts and 4 sensitive domains.
           </p>
         </div>
         <div style={{
           fontSize: '11px',
-          color: '#38bdf8',
-          fontFamily: 'monospace',
-          backgroundColor: '#0c121e',
-          padding: '4px 10px',
+          color: 'var(--ion-cyan)',
+          fontFamily: 'var(--font-mono)',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          padding: '6px 12px',
           borderRadius: '4px',
-          border: '1px solid #1a253a'
+          border: '1px solid var(--contour-border)'
         }}>
-          DATASET V1.0 // NO SENSITIVE DATA
+          DATASET V1.0 // 60 PAIRS VALIDATED
         </div>
       </div>
 

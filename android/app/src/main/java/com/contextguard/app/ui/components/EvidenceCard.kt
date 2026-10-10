@@ -1,7 +1,10 @@
 package com.contextguard.app.ui.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -9,6 +12,10 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,13 +33,18 @@ fun EvidenceCard(
     perceptionResult: LocalPerceptionResult? = null,
     artifactType: String = "IMAGE",
     urlRiskScore: Float? = null,
+    selectedEvidenceIndex: Int? = null,
+    onEvidenceSelected: ((Int?) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
+    var internalSelectedIndex by remember { mutableStateOf<Int?>(null) }
+    val effectiveSelectedIndex = selectedEvidenceIndex ?: internalSelectedIndex
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(SurfaceDark, RoundedCornerShape(16.dp))
-            .border(1.dp, SurfaceBorder, RoundedCornerShape(16.dp))
+            .background(DeepSurface, RoundedCornerShape(18.dp))
+            .border(1.dp, ContourBorder, RoundedCornerShape(18.dp))
             .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
@@ -44,21 +56,23 @@ fun EvidenceCard(
             Column {
                 Text(
                     text = "GROUNDED EVIDENCE",
-                    color = CyanAccent,
+                    color = IonCyan,
                     fontSize = 11.sp,
+                    fontFamily = TechnicalMono,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
+                    letterSpacing = 1.2.sp
                 )
                 Text(
                     text = "${evidenceItems.size} verified perceptual & contextual signals",
-                    color = TextSecondary,
-                    fontSize = 12.sp
+                    color = MutedText,
+                    fontSize = 11.sp,
+                    fontFamily = TechnicalMono
                 )
             }
             Icon(
                 imageVector = Icons.Default.FactCheck,
                 contentDescription = "Evidence",
-                tint = CyanAccent,
+                tint = IonCyan,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -70,8 +84,8 @@ fun EvidenceCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(BackgroundDark, RoundedCornerShape(12.dp))
-                    .border(1.dp, if (isPhishing) StopRed.copy(alpha = 0.6f) else ActGreen.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+                    .background(ElevatedSurface, RoundedCornerShape(12.dp))
+                    .border(1.dp, if (isPhishing) StopCoral.copy(alpha = 0.6f) else ActLime.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
                     .padding(14.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
@@ -87,29 +101,30 @@ fun EvidenceCard(
                         Icon(
                             imageVector = Icons.Default.Link,
                             contentDescription = "URL Risk",
-                            tint = if (isPhishing) StopRed else ActGreen,
+                            tint = if (isPhishing) StopCoral else ActLime,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
                             text = "URL CLASSIFIER INFERENCE",
-                            color = if (isPhishing) StopRed else ActGreen,
+                            color = if (isPhishing) StopCoral else ActLime,
                             fontSize = 11.sp,
+                            fontFamily = TechnicalMono,
                             fontWeight = FontWeight.Bold
                         )
                     }
                     Text(
                         text = "P(phish) = ${String.format("%.3f", score)}",
-                        color = if (isPhishing) StopRed else ActGreen,
-                        fontSize = 13.sp,
+                        color = if (isPhishing) StopCoral else ActLime,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace
+                        fontFamily = TechnicalMono
                     )
                 }
 
                 Text(
                     text = if (isPhishing) "XGBoost Model (PhiUSIIL trained) flagged anomalous entropy & deceptive token structure."
                     else "XGBoost Model verified domain reputation and structural lexical bounds.",
-                    color = TextSecondary,
+                    color = MutedText,
                     fontSize = 12.sp,
                     lineHeight = 16.sp
                 )
@@ -121,8 +136,8 @@ fun EvidenceCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(BackgroundDark, RoundedCornerShape(12.dp))
-                    .border(1.dp, SurfaceBorder, RoundedCornerShape(12.dp))
+                    .background(ElevatedSurface, RoundedCornerShape(12.dp))
+                    .border(1.dp, ContourBorder, RoundedCornerShape(12.dp))
                     .padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
@@ -132,15 +147,16 @@ fun EvidenceCard(
                 ) {
                     Text(
                         text = "SPATIAL PERCEPTION REGIONS",
-                        color = CyanAccent,
+                        color = IonCyan,
                         fontSize = 10.sp,
+                        fontFamily = TechnicalMono,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "${perceptionResult.piiFindings.size} PII | ${perceptionResult.faces.size} Faces",
-                        color = TextTertiary,
+                        color = MutedText,
                         fontSize = 10.sp,
-                        fontFamily = FontFamily.Monospace
+                        fontFamily = TechnicalMono
                     )
                 }
 
@@ -151,8 +167,8 @@ fun EvidenceCard(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "• ${pii.type.name}", color = TextPrimary, fontSize = 11.sp)
-                        Text(text = "$coordText (${(pii.confidence * 100).toInt()}%)", color = TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                        Text(text = "• ${pii.type.name}", color = SoftWhite, fontSize = 11.sp, fontFamily = TechnicalMono)
+                        Text(text = "$coordText (${(pii.confidence * 100).toInt()}%)", color = MutedText, fontSize = 11.sp, fontFamily = TechnicalMono)
                     }
                 }
             }
@@ -163,54 +179,88 @@ fun EvidenceCard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(BackgroundDark, RoundedCornerShape(12.dp))
-                    .border(1.dp, SurfaceBorder, RoundedCornerShape(12.dp))
+                    .background(ElevatedSurface, RoundedCornerShape(12.dp))
+                    .border(1.dp, ContourBorder, RoundedCornerShape(12.dp))
                     .padding(12.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = "EXTRACTED DOCUMENT OCR EXCERPT",
-                    color = TextTertiary,
+                    color = MutedText,
                     fontSize = 10.sp,
+                    fontFamily = TechnicalMono,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = perceptionResult.ocrText.lines().take(3).joinToString("\n"),
-                    color = TextSecondary,
+                    color = SoftWhite,
                     fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace,
+                    fontFamily = TechnicalMono,
                     lineHeight = 15.sp
                 )
             }
         }
 
-        // Categorized Evidence Items List
+        // Categorized Evidence Items List with Interactive Evidence Focus
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            evidenceItems.forEach { item ->
+            evidenceItems.forEachIndexed { index, item ->
                 val (icon, color) = resolveEvidenceIconAndColor(item)
-                Row(
+                val isSelected = effectiveSelectedIndex == index
+                val animatedBorderColor by animateColorAsState(
+                    targetValue = if (isSelected) IonCyan else ContourBorder,
+                    animationSpec = tween(MotionTokens.DurationStateStandard),
+                    label = "EvidenceBorderColor"
+                )
+
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(BackgroundDark, RoundedCornerShape(10.dp))
-                        .border(1.dp, SurfaceBorder, RoundedCornerShape(10.dp))
-                        .padding(10.dp),
-                    verticalAlignment = Alignment.Top,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        .background(if (isSelected) ElevatedSurface.copy(alpha = 0.95f) else ElevatedSurface, RoundedCornerShape(10.dp))
+                        .border(1.dp, animatedBorderColor, RoundedCornerShape(10.dp))
+                        .clickable {
+                            val newIndex = if (isSelected) null else index
+                            if (onEvidenceSelected != null) {
+                                onEvidenceSelected(newIndex)
+                            } else {
+                                internalSelectedIndex = newIndex
+                            }
+                        }
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = "Signal",
-                        tint = color,
-                        modifier = Modifier
-                            .padding(top = 2.dp)
-                            .size(16.dp)
-                    )
-                    Text(
-                        text = item,
-                        color = TextPrimary,
-                        fontSize = 13.sp,
-                        lineHeight = 18.sp
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.Top,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = "Signal",
+                            tint = if (isSelected) IonCyan else color,
+                            modifier = Modifier
+                                .padding(top = 2.dp)
+                                .size(16.dp)
+                        )
+                        Text(
+                            text = item,
+                            color = if (isSelected) SoftWhite else SoftWhite.copy(alpha = 0.9f),
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    if (isSelected) {
+                        Text(
+                            text = "⦿ Evidence Focus: Nearby Context Field contours orient gently toward this signal to explain the risk source.",
+                            color = IonCyan,
+                            fontSize = 11.sp,
+                            fontFamily = TechnicalMono,
+                            lineHeight = 15.sp,
+                            modifier = Modifier.padding(start = 26.dp, top = 2.dp)
+                        )
+                    }
                 }
             }
         }
@@ -221,18 +271,18 @@ private fun resolveEvidenceIconAndColor(evidence: String): Pair<ImageVector, Col
     val lower = evidence.lowercase()
     return when {
         lower.contains("financial") || lower.contains("balance") || lower.contains("transaction") || lower.contains("account") ->
-            Pair(Icons.Default.AccountBalance, CyanAccent)
+            Pair(Icons.Default.AccountBalance, IonCyan)
         lower.contains("credential") || lower.contains("password") || lower.contains("otp") || lower.contains("token") ->
-            Pair(Icons.Default.VpnKey, StopRed)
+            Pair(Icons.Default.VpnKey, StopCoral)
         lower.contains("url") || lower.contains("phish") || lower.contains("domain") ->
             Pair(Icons.Default.Language, WarnOrange)
         lower.contains("face") || lower.contains("biometric") || lower.contains("identity") ->
-            Pair(Icons.Default.Face, AskYellow)
+            Pair(Icons.Default.Face, AskAmber)
         lower.contains("policy") || lower.contains("formula") || lower.contains("rho") ->
-            Pair(Icons.Default.Functions, CyanAccent)
+            Pair(Icons.Default.Functions, IonCyan)
         lower.contains("recipient") || lower.contains("telegram") || lower.contains("channel") ->
-            Pair(Icons.Default.Send, VioletAccent)
+            Pair(Icons.Default.Send, ElectricViolet)
         else ->
-            Pair(Icons.Default.CheckCircle, ActGreen)
+            Pair(Icons.Default.CheckCircle, ActLime)
     }
 }

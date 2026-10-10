@@ -16,7 +16,7 @@ fun ContextGuardNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Welcome.route,
+        startDestination = Screen.Home.route,
         modifier = modifier
     ) {
         composable(Screen.Welcome.route) {

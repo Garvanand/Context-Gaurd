@@ -224,6 +224,97 @@ fun SettingsScreen(
             }
         }
 
+        // Supervisor Telemetry Synchronization Card
+        val relayStorage = remember { com.contextguard.app.core.relay.RelayStorage.getInstance(context) }
+        var isTelemetrySyncOn by remember { mutableStateOf(relayStorage.isTelemetrySyncEnabled) }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SurfaceDark, RoundedCornerShape(16.dp))
+                .border(1.dp, SurfaceBorder, RoundedCornerShape(16.dp))
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "SUPERVISOR TELEMETRY SYNC",
+                        color = CyanAccent,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = "Live Stream to Examiner Web Console",
+                        color = TextSecondary,
+                        fontSize = 11.sp
+                    )
+                }
+                Surface(
+                    color = if (isTelemetrySyncOn) ActGreen.copy(alpha = 0.15f) else WarnOrange.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(
+                        text = if (isTelemetrySyncOn) "SYNC ACTIVE" else "SYNC DISABLED",
+                        color = if (isTelemetrySyncOn) ActGreen else WarnOrange,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Text(
+                text = "Explicit opt-in setting: Synchronizes privacy-safe telemetry (intervention decisions, masked entity counts, risk scores, latency, and acknowledgements) with the supervisor dashboard over the authenticated relay.",
+                color = TextSecondary,
+                fontSize = 13.sp,
+                lineHeight = 18.sp
+            )
+
+            Surface(
+                color = BackgroundDark.copy(alpha = 0.6f),
+                shape = RoundedCornerShape(10.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceBorder)
+            ) {
+                Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("• Zero raw screenshots or unredacted files transmitted", color = TextPrimary, fontSize = 12.sp)
+                    Text("• Zero passwords, OTPs, or message contents transmitted", color = TextPrimary, fontSize = 12.sp)
+                    Text("• Offline mode completely disables all outbound relay communication", color = TextPrimary, fontSize = 12.sp)
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Enable Supervisor Telemetry Sync",
+                    color = TextPrimary,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Switch(
+                    checked = isTelemetrySyncOn,
+                    onCheckedChange = {
+                        isTelemetrySyncOn = it
+                        relayStorage.isTelemetrySyncEnabled = it
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = CyanAccent,
+                        checkedTrackColor = CyanAccent.copy(alpha = 0.4f),
+                        uncheckedThumbColor = TextSecondary,
+                        uncheckedTrackColor = SurfaceBorder
+                    )
+                )
+            }
+        }
+
         // Backend Endpoint Configuration Card
         Column(
             modifier = Modifier

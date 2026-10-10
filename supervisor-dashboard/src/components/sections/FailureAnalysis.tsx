@@ -55,37 +55,51 @@ export const FailureAnalysis: React.FC<FailureAnalysisProps> = ({ data, loading 
 
   return (
     <section id="section-failures" style={{ marginBottom: '32px' }}>
+      {/* Editorial Section Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '16px'
+        marginBottom: '20px',
+        borderBottom: '1px solid var(--contour-border)',
+        paddingBottom: '12px'
       }}>
         <div>
+          <div style={{
+            fontSize: '11px',
+            fontFamily: 'var(--font-mono)',
+            color: 'var(--stop)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: '4px'
+          }}>
+            Edge-Case Audit & False Intervention Diagnostics
+          </div>
           <h2 style={{
-            fontSize: '18px',
+            fontSize: '20px',
+            fontFamily: 'var(--font-display)',
             fontWeight: 700,
-            color: '#f8fafc',
+            color: 'var(--text-main)',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '10px',
             margin: 0
           }}>
-            <AlertTriangle size={18} color="#ef4444" />
-            9. Failure Analysis & Safety Boundary Audit
+            <AlertTriangle size={20} color="var(--stop)" />
+            Failure Analysis & Safety Boundary Audit
           </h2>
-          <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0' }}>
+          <p style={{ fontSize: '13px', color: 'var(--muted-text)', margin: '4px 0 0 0' }}>
             Auditing false interventions, edge-case hazards, OCR/VLM fallbacks, and tail latency outliers.
           </p>
         </div>
         <div style={{
           fontSize: '11px',
-          color: '#f87171',
-          fontFamily: 'monospace',
-          backgroundColor: '#0c121e',
-          padding: '4px 10px',
+          color: 'var(--stop)',
+          fontFamily: 'var(--font-mono)',
+          backgroundColor: 'rgba(255, 102, 125, 0.05)',
+          padding: '6px 12px',
           borderRadius: '4px',
-          border: '1px solid rgba(239, 68, 68, 0.3)'
+          border: '1px solid rgba(255, 102, 125, 0.25)'
         }}>
           STRICT CONSERVATIVE BOUNDARY
         </div>

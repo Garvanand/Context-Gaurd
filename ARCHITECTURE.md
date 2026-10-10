@@ -247,3 +247,58 @@ To showcase action-conditioning, ContextGuard utilizes a single synthetic bank s
 | **Action 3** | Post to Public Social Media Feed | $0.90$ | $1.00$ | $1.57$ | **STOP** (Red) |
 
 This visual demonstration validates the core thesis: **The artifact remains constant, but the intervention adapts dynamically to action and context.**
+
+---
+
+## 8. Real-Time Mobile ↔ Web Relay Architecture
+
+ContextGuard features a real-time, authenticated, bidirectional communication relay connecting the Android client and the Supervisor Web Dashboard through the FastAPI backend.
+
+```mermaid
+flowchart LR
+    subgraph AndroidClient ["Android Handset (com.contextguard.app)"]
+        Sensors[Accessibility & ML Kit] --> RelayMgr[RelayManager]
+        RelayMgr --> Outbox[Durable Outbox Queue]
+        RelayMgr --> WSClient[OkHttp WebSocket Client]
+        RelayStorage[(Private SharedPreferences)] --- RelayMgr
+    end
+
+    subgraph BackendRelay ["FastAPI Relay Service"]
+        RelayRouter["/api/v1/relay/* & /ws/*"]
+        ConnBroker[RelayConnectionManager Broker]
+        PrivacyEngine[Privacy Enforcement Engine]
+        SqliteLedger[(SQLite WAL Ledger: relay.db)]
+        
+        RelayRouter --> PrivacyEngine
+        PrivacyEngine --> SqliteLedger
+        RelayRouter --> ConnBroker
+    end
+
+    subgraph SupervisorWeb ["Supervisor Dashboard (React + Vite)"]
+        DashWS[Dashboard WebSocket Client]
+        LivePanel[Live Device Relay Panel]
+        CmdCenter[Interactive Command Center]
+        PairModal[Device Pairing Modal]
+        
+        DashWS --> LivePanel
+        CmdCenter --> DashWS
+    end
+
+    WSClient <-->|ws://.../ws/device?token=devtok| ConnBroker
+    Outbox -->|POST /api/v1/relay/events/ingest| RelayRouter
+    ConnBroker <-->|ws://.../ws/dashboard?token=dshtok| DashWS
+    RelayRouter -->|Presence & History| LivePanel
+```
+
+### Key Subsystems:
+1. **Secure Pairing Handshake:**
+   - 6-character uppercase shortcode generated on-device with 5-minute expiration.
+   - Supervisor claims the shortcode via dashboard.
+   - User grants approval on-device; backend issues scoped cryptographically hashed tokens (`devtok_*` and `dshtok_*`).
+2. **Real-Time Telemetry Stream & Durable Outbox:**
+   - Live events stream over WebSocket for sub-10ms delivery.
+   - If offline or disconnected, events are enqueued in SQLite WAL and durable Android memory, flushing upon reconnect.
+   - Zero raw persistence: Strict validation rejects unredacted credentials or image buffers.
+3. **Controlled Command Channel:**
+   - Supervisor queues commands (`RUN_SYNTHETIC_DEMO`, `TRIGGER_DIAGNOSTIC_TRACE`, `SYNC_ALLOWLIST`).
+   - Phone receives command via WebSocket or HTTP poll, executes on-device, and returns execution ACK (`QUEUED` $\to$ `DELIVERED` $\to$ `EXECUTING` $\to$ `SUCCEEDED` / `FAILED`).

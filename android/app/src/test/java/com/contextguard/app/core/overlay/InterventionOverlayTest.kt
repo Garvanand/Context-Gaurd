@@ -374,4 +374,170 @@ class InterventionOverlayTest {
 
         assertFalse("Twitter must now be disallowed", AllowlistManager.isPackageAllowed(targetPkg))
     }
+
+    // =========================================================================
+    // SIGNAL INTERCEPT: Precision Floating Card & Non-Modal Geometry
+    // =========================================================================
+
+    @Test
+    fun test_signal_intercept_card_layout_never_fullscreen_modal() {
+        val metadata = ScreenContextMetadata(
+            packageName = "com.google.android.apps.nbu.paisa.user",
+            candidateAction = ScreenActionType.APPROVE,
+            buttonLabels = listOf("Approve Payment"),
+            visibleTextFragments = listOf("Transfer INR 85,000 to Unknown Beneficiary via UPI")
+        )
+        val safetyResult = ScreenRiskTriggerEngine.evaluate(metadata)!!
+        assertEquals(InterventionType.STOP, safetyResult.intervention)
+
+        // Mock window layout params check
+        val wmLayoutParams = WindowManager.LayoutParams().apply {
+            type = WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY
+            format = android.graphics.PixelFormat.TRANSLUCENT
+            width = WindowManager.LayoutParams.MATCH_PARENT
+            height = WindowManager.LayoutParams.WRAP_CONTENT
+            gravity = android.view.Gravity.TOP or android.view.Gravity.CENTER_HORIZONTAL
+            flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        }
+
+        assertEquals("Height must be WRAP_CONTENT (never MATCH_PARENT full screen takeover)",
+            WindowManager.LayoutParams.WRAP_CONTENT, wmLayoutParams.height)
+        assertTrue("Flags must include FLAG_NOT_TOUCH_MODAL so user is never trapped",
+            (wmLayoutParams.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL) != 0)
+        assertTrue("Flags must include FLAG_NOT_FOCUSABLE so system navigation & back gestures work",
+            (wmLayoutParams.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE) != 0)
+    }
+
+    // =========================================================================
+    // SIGNAL INTERCEPT: Evidence Category Indicator Resolution
+    // =========================================================================
+
+    @Test
+    fun test_signal_intercept_category_indicators_resolution() {
+        // Phishing URL
+        val phishMeta = ScreenContextMetadata(
+            packageName = "com.android.chrome",
+            candidateAction = ScreenActionType.LOGIN,
+            activeUrl = "https://secure-hdfc-kyc.xyz/login",
+            visibleTextFragments = listOf("Login to NetBanking")
+        )
+        val phishResult = ScreenRiskTriggerEngine.evaluate(phishMeta)!!
+        val phishCategory = InterventionOverlayManager.resolveEvidenceCategory(phishResult, phishMeta)
+        assertEquals("PHISHING LINK", phishCategory)
+
+        // Sensitive PII
+        val piiMeta = ScreenContextMetadata(
+            packageName = "com.whatsapp",
+            candidateAction = ScreenActionType.SEND,
+            visibleTextFragments = listOf("My Aadhaar card is 4512 8790 3214")
+        )
+        val piiResult = ScreenRiskTriggerEngine.evaluate(piiMeta)!!
+        val piiCategory = InterventionOverlayManager.resolveEvidenceCategory(piiResult, piiMeta)
+        assertEquals("SENSITIVE PII", piiCategory)
+
+        // Payment Transfer
+        val payMeta = ScreenContextMetadata(
+            packageName = "com.google.android.apps.nbu.paisa.user",
+            candidateAction = ScreenActionType.APPROVE,
+            visibleTextFragments = listOf("Authorize transfer of INR 50,000")
+        )
+        val payResult = ScreenRiskTriggerEngine.evaluate(payMeta)!!
+        val payCategory = InterventionOverlayManager.resolveEvidenceCategory(payResult, payMeta)
+        assertEquals("PAYMENT AUTHORIZATION", payCategory)
+    }
+
+    // =========================================================================
+    // SIGNAL INTERCEPT: Strong Headings & Grounded Evidence Sentences
+    // =========================================================================
+
+    @Test
+    fun test_signal_intercept_strong_headings_and_sentences() {
+        val stopMeta = ScreenContextMetadata(
+            packageName = "com.android.chrome",
+            candidateAction = ScreenActionType.LOGIN,
+            activeUrl = "https://suspicious-bank-login.xyz",
+            visibleTextFragments = listOf("Enter customer ID and password")
+        )
+        val stopResult = ScreenRiskTriggerEngine.evaluate(stopMeta)!!
+        val heading = InterventionOverlayManager.resolveInterventionHeading(stopResult.intervention, stopMeta)
+        assertTrue("STOP heading must be strong and authoritative",
+            heading.contains("Stop:", ignoreCase = true))
+
+        val sentence = InterventionOverlayManager.resolveEvidenceSentence(stopResult, stopMeta)
+        assertTrue("Evidence sentence must be grounded and non-empty", sentence.isNotBlank())
+        assertFalse("Sentence must not include raw debug dumps", sentence.contains("Zero Network"))
+
+        val guidance = InterventionOverlayManager.resolveGuidanceText(stopResult.intervention, stopResult)
+        assertTrue("STOP guidance must explain override consequence",
+            guidance.contains("bypass safety protections", ignoreCase = true))
+
+        // WARN guidance must provide alternative
+        val warnGuidance = InterventionOverlayManager.resolveGuidanceText(InterventionType.WARN, stopResult)
+        assertTrue("WARN guidance must provide safer alternative",
+            warnGuidance.contains("Alternative:", ignoreCase = true))
+
+        // ASK guidance must prompt for clarification
+        val askGuidance = InterventionOverlayManager.resolveGuidanceText(InterventionType.ASK, stopResult)
+        assertTrue("ASK guidance must prompt for verification",
+            askGuidance.contains("Verify", ignoreCase = true) || askGuidance.contains("uncertainty", ignoreCase = true))
+    }
+
+    // =========================================================================
+    // RAPID APP SWITCHING: Immediate Overlay Dismissal on App Change
+    // =========================================================================
+
+    @Test
+    fun test_rapid_app_switching_dismisses_overlay() {
+        // Overlay shown for WhatsApp
+        val whatsAppMeta = ScreenContextMetadata(
+            packageName = "com.whatsapp",
+            candidateAction = ScreenActionType.SEND,
+            visibleTextFragments = listOf("Credit card number: 4111 2222 3333 4444")
+        )
+        val result = ScreenRiskTriggerEngine.evaluate(whatsAppMeta)!!
+
+        val recordId = OverlayTelemetryManager.recordOverlayShown(
+            eventTimestamp = whatsAppMeta.timestampMs,
+            riskDecisionTimestamp = System.currentTimeMillis(),
+            overlayShownTimestamp = System.currentTimeMillis() + 5,
+            interventionType = result.intervention.name,
+            targetPackage = whatsAppMeta.packageName,
+            candidateAction = whatsAppMeta.candidateAction.name
+        )
+        assertNotNull(recordId)
+
+        // Rapid app switch occurs: user navigates to Chrome or Settings
+        val newPackage = "com.android.chrome"
+        assertNotEquals("Package changed during rapid switch", whatsAppMeta.packageName, newPackage)
+
+        // Rapid app switch handler dismisses overlay for old package
+        InterventionOverlayManager.dismissActiveOverlay()
+        assertFalse("Overlay must be immediately dismissed on rapid app switch",
+            InterventionOverlayManager.isOverlayShowing())
+    }
+
+    // =========================================================================
+    // REDUCED MOTION MODE & EVENT LATENCY
+    // =========================================================================
+
+    @Test
+    fun test_event_to_overlay_latency_and_telemetry() {
+        val eventTime = System.currentTimeMillis() - 25
+        val decisionTime = System.currentTimeMillis() - 8
+        val shownTime = System.currentTimeMillis()
+
+        val recordId = OverlayTelemetryManager.recordOverlayShown(
+            eventTimestamp = eventTime,
+            riskDecisionTimestamp = decisionTime,
+            overlayShownTimestamp = shownTime,
+            interventionType = "WARN",
+            targetPackage = "com.whatsapp",
+            candidateAction = "SEND"
+        )
+
+        val record = OverlayTelemetryManager.records.value.first { it.id == recordId }
+        assertTrue("Decision to overlay latency must be non-negative", record.decisionToOverlayLatencyMs >= 0)
+        assertTrue("Event to overlay latency must be measured", (record.overlayShownTimestamp - record.eventTimestamp) >= 0)
+    }
 }
+

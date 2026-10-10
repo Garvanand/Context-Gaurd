@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" fill="none">
+  <!-- ContextGuard: The Aperture Signal (Monochrome Dark on Transparent) -->
+  <path
+    d="M 87.42 43.40
+       A 38 38 0 1 1 43.40 12.58
+       L 45.14 22.43
+       A 28 28 0 1 0 77.57 45.14
+       Z"
+    fill="#F4F6FF"
+  />
+
+  <path
+    d="M 64.78 67.62
+       A 23 23 0 1 1 57.87 28.39
+       L 55.13 35.90
+       A 15 15 0 1 0 59.64 61.49
+       Z"
+    fill="#F4F6FF"
+    fill-opacity="0.82"
+  />
+
+  <path
+    d="M 42.72 55.44
+       A 9 9 0 0 1 55.44 42.72
+       Z"
+    fill="#F4F6FF"
+  />
+
+  <circle cx="55.0" cy="55.0" r="2.8" fill="#F4F6FF" />
+</svg>

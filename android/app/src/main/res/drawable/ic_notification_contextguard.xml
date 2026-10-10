@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ContextGuard: Notification Icon (Monochrome Silhouette for Android Status Bar) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Wing Alpha: Outer Signal Contour -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 87.42,43.40 A 38,38 0 1,1 43.40,12.58 L 45.14,22.43 A 28,28 0 1,0 77.57,45.14 Z" />
+
+    <!-- Wing Beta: Inner Offset Signal Contour -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 64.78,67.62 A 23,23 0 1,1 57.87,28.39 L 55.13,35.90 A 15,15 0 1,0 59.64,61.49 Z" />
+
+    <!-- Central Aperture Focal Core -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 42.72,55.44 A 9,9 0 0,1 55.44,42.72 Z" />
+
+    <!-- Observer Anchor Point -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M 52.2,55 A 2.8,2.8 0 1,0 57.8,55 A 2.8,2.8 0 1,0 52.2,55 Z" />
+</vector>

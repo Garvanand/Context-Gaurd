@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, RefreshCw, Smartphone, Server, Lock } from 'lucide-react';
+import { RefreshCw, Smartphone, Server, Lock, Sun, Moon } from 'lucide-react';
+import { ApertureSignalLogo } from './ApertureSignalLogo';
 import type { SystemOverviewData } from '../types';
 
 interface NavbarProps {
@@ -10,162 +11,267 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ overview, loading, onRefresh }) => {
   const [timeStr, setTimeStr] = useState<string>('');
+  const [isLightMode, setIsLightMode] = useState<boolean>(() => {
+    return document.documentElement.getAttribute('data-theme') === 'light';
+  });
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      setTimeStr(now.toTimeString().split(' ')[0] + ' UTC' + (now.getTimezoneOffset() <= 0 ? '+' : '-') + Math.abs(Math.round(now.getTimezoneOffset() / 60)));
+      setTimeStr(
+        now.toTimeString().split(' ')[0] +
+          ' UTC' +
+          (now.getTimezoneOffset() <= 0 ? '+' : '-') +
+          Math.abs(Math.round(now.getTimezoneOffset() / 60))
+      );
     };
     updateTime();
     const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
   }, []);
 
+  const toggleTheme = () => {
+    const nextLight = !isLightMode;
+    setIsLightMode(nextLight);
+    if (nextLight) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  };
+
   return (
-    <header style={{
-      height: '64px',
-      backgroundColor: '#090d16',
-      borderBottom: '1px solid #1e293b',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '0 24px',
-      position: 'sticky',
-      top: 0,
-      zIndex: 50,
-      backdropFilter: 'blur(12px)',
-    }}>
-      {/* Brand & Title */}
+    <header
+      style={{
+        height: '68px',
+        backgroundColor: 'var(--midnight)',
+        borderBottom: '1px solid var(--contour-border)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 24px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      }}
+    >
+      {/* Brand & Signature Context Field Motif */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-        <div style={{
-          width: '38px',
-          height: '38px',
-          borderRadius: '8px',
-          backgroundColor: '#1e293b',
-          border: '1px solid #3b82f6',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 0 12px rgba(59, 130, 246, 0.35)',
-        }}>
-          <Shield size={22} color="#60a5fa" />
+        <div
+          style={{
+            width: '42px',
+            height: '42px',
+            borderRadius: '10px',
+            backgroundColor: 'var(--deep-surface)',
+            border: '1px solid var(--contour-border-active)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 0 16px rgba(139, 112, 255, 0.25)',
+          }}
+        >
+          <ApertureSignalLogo size={26} animated />
         </div>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '16px', fontWeight: 700, letterSpacing: '0.02em', color: '#ffffff' }}>
+            <span
+              style={{
+                fontSize: '17px',
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                color: 'var(--text-main)',
+              }}
+            >
               CONTEXTGUARD
             </span>
-            <span style={{
-              fontSize: '10px',
-              fontFamily: 'monospace',
-              padding: '2px 6px',
-              borderRadius: '4px',
-              backgroundColor: '#1e293b',
-              color: '#38bdf8',
-              border: '1px solid #0284c7',
-            }}>
-              SUPERVISOR v0.1.0
+            <span
+              style={{
+                fontSize: '10px',
+                fontFamily: "'JetBrains Mono', monospace",
+                padding: '2px 7px',
+                borderRadius: '5px',
+                backgroundColor: 'rgba(139, 112, 255, 0.15)',
+                color: 'var(--electric-violet)',
+                border: '1px solid var(--contour-border-active)',
+                fontWeight: 600,
+              }}
+            >
+              SPECTRAL SIGNAL
             </span>
           </div>
-          <div style={{ fontSize: '11px', color: '#64748b', letterSpacing: '0.04em' }}>
+          <div
+            style={{
+              fontSize: '11px',
+              fontFamily: "'Inter', sans-serif",
+              color: 'var(--muted-text)',
+              letterSpacing: '0.02em',
+            }}
+          >
             HIGH-ASSURANCE MULTIMODAL SAFETY CONTROL ROOM
           </div>
         </div>
       </div>
 
       {/* Telemetry Status Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         {/* Android Device Status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-          <Smartphone size={14} color="#10b981" />
-          <span style={{ color: '#94a3b8' }}>Android Client:</span>
-          <span style={{
-            color: '#34d399',
-            fontFamily: 'monospace',
-            fontWeight: 600,
+        <div
+          style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '5px'
-          }}>
-            <span style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              display: 'inline-block'
-            }} />
+            gap: '8px',
+            fontSize: '12px',
+            padding: '5px 10px',
+            backgroundColor: 'var(--deep-surface)',
+            borderRadius: '6px',
+            border: '1px solid var(--contour-border)',
+          }}
+        >
+          <Smartphone size={14} color="var(--act)" />
+          <span style={{ color: 'var(--muted-text)' }}>Android Sentinel:</span>
+          <span
+            style={{
+              color: 'var(--act)',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--act)',
+                display: 'inline-block',
+                boxShadow: '0 0 6px var(--act)',
+              }}
+            />
             {overview?.android_connection?.status || 'CONNECTED'}
           </span>
         </div>
 
         {/* Backend Status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-          <Server size={14} color="#38bdf8" />
-          <span style={{ color: '#94a3b8' }}>Backend:</span>
-          <span style={{
-            color: '#38bdf8',
-            fontFamily: 'monospace',
-            fontWeight: 600,
+        <div
+          style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '5px'
-          }}>
-            <span style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              backgroundColor: '#38bdf8',
-              display: 'inline-block'
-            }} />
+            gap: '8px',
+            fontSize: '12px',
+            padding: '5px 10px',
+            backgroundColor: 'var(--deep-surface)',
+            borderRadius: '6px',
+            border: '1px solid var(--contour-border)',
+          }}
+        >
+          <Server size={14} color="var(--ion-cyan)" />
+          <span style={{ color: 'var(--muted-text)' }}>Inference:</span>
+          <span
+            style={{
+              color: 'var(--ion-cyan)',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: 'var(--ion-cyan)',
+                display: 'inline-block',
+                boxShadow: '0 0 6px var(--ion-cyan)',
+              }}
+            />
             {overview?.backend?.status || 'HEALTHY'}
           </span>
         </div>
 
         {/* Zero Disk Invariant */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontSize: '11px',
-          padding: '4px 10px',
-          backgroundColor: '#0e1726',
-          border: '1px solid #1e3a5f',
-          borderRadius: '4px',
-          color: '#38bdf8',
-        }}>
-          <Lock size={12} color="#38bdf8" />
-          <span style={{ fontWeight: 500 }}>RAM-ONLY STORAGE</span>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            fontSize: '11px',
+            padding: '5px 10px',
+            backgroundColor: 'rgba(139, 112, 255, 0.12)',
+            border: '1px solid var(--contour-border-active)',
+            borderRadius: '6px',
+            color: 'var(--electric-violet)',
+            fontFamily: "'JetBrains Mono', monospace",
+            fontWeight: 600,
+          }}
+        >
+          <Lock size={12} color="var(--electric-violet)" />
+          <span>RAM-ONLY STORAGE</span>
         </div>
 
         {/* Live Clock */}
-        <div style={{
-          fontSize: '12px',
-          fontFamily: 'monospace',
-          color: '#cbd5e1',
-          padding: '4px 8px',
-          backgroundColor: '#0f172a',
-          borderRadius: '4px',
-          border: '1px solid #1e293b'
-        }}>
+        <div
+          style={{
+            fontSize: '11px',
+            fontFamily: "'JetBrains Mono', monospace",
+            color: 'var(--muted-text)',
+            padding: '5px 10px',
+            backgroundColor: 'var(--deep-surface)',
+            borderRadius: '6px',
+            border: '1px solid var(--contour-border)',
+          }}
+        >
           {timeStr}
         </div>
+
+        {/* Theme Toggle (Dark Cinematic <-> Cool Porcelain) */}
+        <button
+          onClick={toggleTheme}
+          style={{
+            padding: '7px 11px',
+            backgroundColor: 'var(--deep-surface)',
+            border: '1px solid var(--contour-border)',
+            borderRadius: '7px',
+            color: 'var(--text-main)',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
+          title={isLightMode ? 'Switch to Dark Cinematic' : 'Switch to Cool Porcelain'}
+        >
+          {isLightMode ? <Moon size={13} color="var(--electric-violet)" /> : <Sun size={13} color="var(--signal-lime)" />}
+          <span style={{ fontSize: '11px', fontWeight: 500 }}>
+            {isLightMode ? 'Dark' : 'Porcelain'}
+          </span>
+        </button>
 
         {/* Manual Refresh */}
         <button
           onClick={onRefresh}
           disabled={loading}
           style={{
-            padding: '6px 12px',
-            backgroundColor: '#1e293b',
-            border: '1px solid #334155',
-            borderRadius: '6px',
-            color: '#e2e8f0',
+            padding: '7px 14px',
+            backgroundColor: 'var(--electric-violet)',
+            border: 'none',
+            borderRadius: '7px',
+            color: '#FFFFFF',
             fontSize: '12px',
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
             cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1,
+            boxShadow: '0 2px 8px rgba(139, 112, 255, 0.35)',
+            fontWeight: 600,
             transition: 'all 0.15s ease',
           }}
           title="Refresh Telemetry"

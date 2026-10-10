@@ -88,6 +88,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
+    // Networking & WebSocket
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
     // Google ML Kit Vision
     implementation("com.google.mlkit:text-recognition:16.0.0")
     implementation("com.google.mlkit:face-detection:16.1.6")

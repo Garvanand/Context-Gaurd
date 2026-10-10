@@ -15,6 +15,7 @@ from backend.app.core.logging import logger
 from backend.app.api.v1.health import router as health_router
 from backend.app.api.v1.analyze import router as analyze_router
 from backend.app.api.v1.supervisor import router as supervisor_router
+from backend.app.api.v1.relay import router as relay_router
 
 
 @asynccontextmanager
@@ -66,15 +67,17 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-# Include routes at root level (/health, /analyze, /supervisor)
+# Include routes at root level (/health, /analyze, /supervisor, /relay)
 app.include_router(health_router, tags=["Health"])
 app.include_router(analyze_router, tags=["Analyze"])
 app.include_router(supervisor_router, tags=["Supervisor"])
+app.include_router(relay_router, tags=["Relay"])
 
-# Include routes under /api/v1 prefix (/api/v1/health, /api/v1/analyze, /api/v1/supervisor)
+# Include routes under /api/v1 prefix (/api/v1/health, /api/v1/analyze, /api/v1/supervisor, /api/v1/relay)
 app.include_router(health_router, prefix="/api/v1", tags=["Health v1"])
 app.include_router(analyze_router, prefix="/api/v1", tags=["Analyze v1"])
 app.include_router(supervisor_router, prefix="/api/v1", tags=["Supervisor v1"])
+app.include_router(relay_router, prefix="/api/v1", tags=["Relay v1"])
 
 
 @app.get("/", summary="Root Welcome")

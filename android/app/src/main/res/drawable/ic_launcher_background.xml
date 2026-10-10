@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ContextGuard: Adaptive Launcher Icon Background (108dp x 108dp) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Midnight Canvas Base -->
+    <path
+        android:fillColor="#080A12"
+        android:pathData="M 0,0 L 108,0 L 108,108 L 0,108 Z" />
+
+    <!-- Ambient Spectral Depth Ring (subtle concentric field) -->
+    <path
+        android:fillColor="#0E1222"
+        android:pathData="M 54,8 A 46,46 0 1,1 53.99,8 Z" />
+
+    <!-- Outer Structural Rim -->
+    <path
+        android:fillColor="#151B30"
+        android:pathData="M 54,16 A 38,38 0 1,1 53.99,16 Z" />
+
+    <!-- Inner Core Well -->
+    <path
+        android:fillColor="#0B0E19"
+        android:pathData="M 54,24 A 30,30 0 1,1 53.99,24 Z" />
+</vector>

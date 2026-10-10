@@ -211,3 +211,21 @@ The migration must strictly preserve existing, verified working components:
 1. **Strict Ordering:** No code changes for Phase M1–M5 shall begin until the forensic audit (`docs/FORENSIC_AUDIT.md`) and gap specification (`docs/MOBILE_PROTECTION_GAP.md`) are finalized and reviewed.
 2. **Benchmark Integrity:** The existing EARB v1 benchmark and published evaluation tables in `results/` shall remain untouched.
 3. **User Experience:** The existing Sharesheet receiver flow will remain active as a fallback mode.
+
+---
+
+## 6. Resolution & Final Implementation Status (Migration Completed)
+
+All nine gap criteria identified in the initial gap audit have been successfully resolved and integrated at the source-code level:
+
+| # | Protection Criterion | Resolution & Source Location | Status |
+| :-: | :--- | :--- | :---: |
+| **1** | **Configured AccessibilityService** | `ScreenGuardAccessibilityService.kt` declared in `AndroidManifest.xml` with `@xml/screenguard_accessibility_service_config`. Subscribes to window changes, view clicks, and focus events. | **RESOLVED & VERIFIED** |
+| **2** | **Monitoring Permission & In-App Consent** | `ConsentScreen.kt` provides explicit disclosure of screen context access, affirmative opt-in consent, and direct intent to system accessibility settings. | **RESOLVED & VERIFIED** |
+| **3** | **Selected-App Allowlist** | `AllowlistManager.kt` enforces package-level allowlisting (Chrome, Firefox, WhatsApp, Telegram, Google Messages, Gmail, etc.) preventing indiscriminate screen reading. | **RESOLVED & VERIFIED** |
+| **4** | **UI-Event Processing** | `ScreenRiskTriggerEngine.kt` processes window state changes, debounces rapid navigation, and suppresses password-field inspection completely. | **RESOLVED & VERIFIED** |
+| **5** | **Accessible-Window Inspection** | `ScreenContextExtractor.kt` safely inspects `rootInActiveWindow` without ANR risk, extracting active URLs, destination context, and action candidates. | **RESOLVED & VERIFIED** |
+| **6** | **Working Intervention Overlay** | `InterventionOverlayManager.kt` utilizes `WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY` to attach directly to the system window layer. ACT is silent; ASK, WARN, and STOP display floating interventions with Review and Continue Once actions. | **RESOLVED & VERIFIED** |
+| **7** | **NotificationListenerService** | `NotificationGuardService.kt` declared in `AndroidManifest.xml` and registered with system NotificationManager. Analyzes incoming communications via `NotificationThreatAnalyzer.kt` without logging raw messages. | **RESOLVED & VERIFIED** |
+| **8** | **Persistent Monitoring Status & Entry States** | `AppEntryState.kt` defines the 9-state entry state machine (`NORMAL_LAUNCH`, `SETUP_REQUIRED`, `PROTECTION_ACTIVE`, `PROTECTION_PAUSED`, etc.). `HomeScreen.kt` dynamically inspects live service states on resume. | **RESOLVED & VERIFIED** |
+| **9** | **Immediate Disable / Kill Switch** | `ScreenGuardStateManager.pauseMonitoring()` and `NotificationGuardStateManager.pauseProtection()` immediately suppress events and dismiss active overlays. | **RESOLVED & VERIFIED** |

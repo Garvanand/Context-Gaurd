@@ -284,3 +284,59 @@ export interface ModelHealthData {
   overall_status: string;
   components: Record<string, ComponentHealth>;
 }
+
+// =============================================================================
+// RELAY CONTRACTS
+// =============================================================================
+
+export interface RelayDevice {
+  device_id: string;
+  device_name: string;
+  model: string;
+  platform: string;
+  app_version: string;
+  status: 'ONLINE' | 'OFFLINE' | 'DEGRADED' | 'UNPAIRED';
+  last_heartbeat: string | null;
+  monitoring_active: boolean;
+  notification_active: boolean;
+  selected_apps_count: number;
+  local_model_healthy: boolean;
+  network_mode: string;
+  telemetry_enabled: boolean;
+  paired_at: string;
+}
+
+export interface RelayTelemetryEvent {
+  event_id: string;
+  device_id: string;
+  event_type: string;
+  timestamp: string;
+  source_app?: string | null;
+  risk_category: string;
+  intervention: 'ACT' | 'ASK' | 'WARN' | 'STOP';
+  risk_score: number;
+  severity: number;
+  reversibility: number;
+  confidence: number;
+  evidence_summary: string[];
+  model_version: string;
+  latency_ms: number;
+  redaction_count: number;
+  correlation_id?: string | null;
+  network_mode: string;
+}
+
+export interface RelayCommand {
+  command_id: string;
+  device_id: string;
+  command_type: 'REQUEST_STATUS' | 'REQUEST_DIAGNOSTICS' | 'RUN_SYNTHETIC_DEMO' | 'REQUEST_CONFIG_REFRESH';
+  issuer_session?: string;
+  payload?: Record<string, any>;
+  status: 'QUEUED' | 'DELIVERED' | 'ACKNOWLEDGED' | 'SUCCEEDED' | 'FAILED' | 'EXPIRED' | 'CANCELLED';
+  created_at: string;
+  expires_at?: string;
+  delivered_at?: string | null;
+  acknowledged_at?: string | null;
+  result?: Record<string, any>;
+  error_message?: string | null;
+}

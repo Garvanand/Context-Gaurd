@@ -53,7 +53,7 @@ fun DecisionTracePipeline(
             title = "1. Artifact",
             summary = "${result.artifactTitle} | Ingested via Volatile Memory",
             icon = Icons.Default.Description,
-            accentColor = CyanAccent,
+            accentColor = IonCyan,
             details = listOf(
                 "Artifact Name" to result.artifactTitle,
                 "SHA-256 Digest" to result.hashSha256.take(16) + "...",
@@ -65,7 +65,7 @@ fun DecisionTracePipeline(
             title = "2. Context",
             summary = "Target: ${result.destination} | Source App Analyzed",
             icon = Icons.Default.Share,
-            accentColor = IndigoAccent,
+            accentColor = ElectricViolet,
             details = listOf(
                 "Destination Channel" to result.destination,
                 "Recipient Verification" to if (result.destination.contains("Public", true) || result.destination.contains("Telegram", true)) "Unverified / External" else "Private / Enclosed",
@@ -77,7 +77,7 @@ fun DecisionTracePipeline(
             title = "3. Intent",
             summary = "Action: ${result.intendedAction}",
             icon = Icons.Default.TouchApp,
-            accentColor = VioletAccent,
+            accentColor = ElectricViolet,
             details = listOf(
                 "Selected Action" to result.intendedAction,
                 "Intent Source" to "Explicit User Action",
@@ -89,7 +89,7 @@ fun DecisionTracePipeline(
             title = "4. Evidence",
             summary = "${result.evidence.size} Grounded Perceptual & Lexical Items",
             icon = Icons.Default.Search,
-            accentColor = CyanAccent,
+            accentColor = IonCyan,
             details = result.evidence.mapIndexed { idx, ev -> "Evidence #${idx + 1}" to ev }
         ),
         PipelineStageNode(
@@ -109,7 +109,7 @@ fun DecisionTracePipeline(
             title = "6. Uncertainty",
             summary = "Epistemic Confidence (c) = ${(c * 100).toInt()}%",
             icon = Icons.Default.Psychology,
-            accentColor = AskYellow,
+            accentColor = AskAmber,
             details = listOf(
                 "Confidence Metric (c)" to "${String.format("%.2f", c)} (Scale: 0.0 - 1.0)",
                 "Epistemic Uncertainty" to if (c < 0.70f) "High Uncertainty (Triggers ASK Gating)" else "Calibrated Low Uncertainty",
@@ -121,7 +121,7 @@ fun DecisionTracePipeline(
             title = "7. Policy",
             summary = "Formula: rho = s * (1 + lambda * r) = ${String.format("%.3f", rho)}",
             icon = Icons.Default.Functions,
-            accentColor = CyanAccent,
+            accentColor = IonCyan,
             details = listOf(
                 "Composite Risk (rho)" to String.format("%.3f", rho),
                 "Lambda Weight" to "$lambda (Irreversibility penalty)",
@@ -140,10 +140,10 @@ fun DecisionTracePipeline(
                 com.contextguard.app.ui.viewmodel.InterventionType.STOP -> Icons.Default.Block
             },
             accentColor = when (result.intervention) {
-                com.contextguard.app.ui.viewmodel.InterventionType.ACT -> ActGreen
-                com.contextguard.app.ui.viewmodel.InterventionType.ASK -> AskYellow
+                com.contextguard.app.ui.viewmodel.InterventionType.ACT -> ActLime
+                com.contextguard.app.ui.viewmodel.InterventionType.ASK -> AskAmber
                 com.contextguard.app.ui.viewmodel.InterventionType.WARN -> WarnOrange
-                com.contextguard.app.ui.viewmodel.InterventionType.STOP -> StopRed
+                com.contextguard.app.ui.viewmodel.InterventionType.STOP -> StopCoral
             },
             details = listOf(
                 "Intervention Level" to result.intervention.name,
@@ -156,8 +156,8 @@ fun DecisionTracePipeline(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(SurfaceDark, RoundedCornerShape(16.dp))
-            .border(1.dp, SurfaceBorder, RoundedCornerShape(16.dp))
+            .background(DeepSurface, RoundedCornerShape(18.dp))
+            .border(1.dp, ContourBorder, RoundedCornerShape(18.dp))
             .padding(18.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
@@ -169,26 +169,28 @@ fun DecisionTracePipeline(
             Column {
                 Text(
                     text = "VISUAL DECISION TRACE",
-                    color = CyanAccent,
+                    color = IonCyan,
                     fontSize = 11.sp,
+                    fontFamily = TechnicalMono,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
+                    letterSpacing = 1.2.sp
                 )
                 Text(
                     text = "Eight-stage causal pipeline (Tap node to expand)",
-                    color = TextSecondary,
-                    fontSize = 12.sp
+                    color = MutedText,
+                    fontSize = 11.sp,
+                    fontFamily = TechnicalMono
                 )
             }
             Icon(
                 imageVector = Icons.Default.AccountTree,
                 contentDescription = "Pipeline",
-                tint = CyanAccent,
+                tint = IonCyan,
                 modifier = Modifier.size(20.dp)
             )
         }
 
-        HorizontalDivider(color = DividerColor)
+        HorizontalDivider(color = ContourBorder)
 
         stages.forEachIndexed { index, node ->
             PipelineNodeItem(
@@ -241,7 +243,7 @@ private fun PipelineNodeItem(
                         modifier = Modifier
                             .width(2.dp)
                             .height(if (expanded) 24.dp else 16.dp)
-                            .background(SurfaceBorder)
+                            .background(ContourBorder)
                     )
                 }
             }
@@ -259,21 +261,22 @@ private fun PipelineNodeItem(
                 ) {
                     Text(
                         text = node.title,
-                        color = TextPrimary,
+                        color = SoftWhite,
                         fontSize = 14.sp,
+                        fontFamily = TechnicalMono,
                         fontWeight = FontWeight.Bold
                     )
                     Icon(
                         imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                         contentDescription = if (expanded) "Collapse" else "Expand",
-                        tint = TextTertiary,
+                        tint = MutedText,
                         modifier = Modifier.size(18.dp)
                     )
                 }
 
                 Text(
                     text = node.summary,
-                    color = TextSecondary,
+                    color = MutedText,
                     fontSize = 12.sp,
                     lineHeight = 16.sp
                 )
@@ -288,8 +291,8 @@ private fun PipelineNodeItem(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp)
-                            .background(BackgroundDark, RoundedCornerShape(10.dp))
-                            .border(1.dp, SurfaceBorder, RoundedCornerShape(10.dp))
+                            .background(ElevatedSurface, RoundedCornerShape(10.dp))
+                            .border(1.dp, ContourBorder, RoundedCornerShape(10.dp))
                             .padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
@@ -299,13 +302,14 @@ private fun PipelineNodeItem(
                                     text = label,
                                     color = node.accentColor,
                                     fontSize = 10.sp,
+                                    fontFamily = TechnicalMono,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
                                     text = value,
-                                    color = TextPrimary,
+                                    color = SoftWhite,
                                     fontSize = 12.sp,
-                                    fontFamily = FontFamily.Monospace,
+                                    fontFamily = TechnicalMono,
                                     lineHeight = 15.sp
                                 )
                             }

@@ -86,26 +86,40 @@ export const ModelHealth: React.FC<ModelHealthProps> = ({ initialData }) => {
 
   return (
     <section id="section-health" style={{ marginBottom: '32px' }}>
+      {/* Editorial Section Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '16px'
+        marginBottom: '20px',
+        borderBottom: '1px solid var(--contour-border)',
+        paddingBottom: '12px'
       }}>
         <div>
+          <div style={{
+            fontSize: '11px',
+            fontFamily: 'var(--font-mono)',
+            color: 'var(--electric-violet)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: '4px'
+          }}>
+            Runtime Sentinel & Synthetic Health Probes
+          </div>
           <h2 style={{
-            fontSize: '18px',
+            fontSize: '20px',
+            fontFamily: 'var(--font-display)',
             fontWeight: 700,
-            color: '#f8fafc',
+            color: 'var(--text-main)',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '10px',
             margin: 0
           }}>
-            <HeartPulse size={18} color="#ec4899" />
-            11. Model Health Probes & Runtime Watchdog
+            <HeartPulse size={20} color="var(--electric-violet)" />
+            Model Health Probes & Runtime Watchdog
           </h2>
-          <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0' }}>
+          <p style={{ fontSize: '13px', color: 'var(--muted-text)', margin: '4px 0 0 0' }}>
             Active probes testing model endpoints, inference latency, checksum parsers, and RAM memory invariants.
           </p>
         </div>
@@ -113,8 +127,8 @@ export const ModelHealth: React.FC<ModelHealthProps> = ({ initialData }) => {
         <button
           onClick={handleRunProbes}
           disabled={probing}
-          className="btn btn-secondary"
-          style={{ fontSize: '12px', padding: '6px 14px' }}
+          className="btn btn-secondary precision-press"
+          style={{ fontSize: '12px', padding: '6px 14px', border: '1px solid var(--contour-border)' }}
         >
           <RefreshCw size={13} className={probing ? 'animate-spin' : ''} />
           {probing ? 'Running Probes...' : 'Ping Live Probes'}

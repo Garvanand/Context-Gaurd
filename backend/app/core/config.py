@@ -44,6 +44,12 @@ class Settings(BaseSettings):
     network_audit_enabled: bool = Field(True, description="Enables network telemetry audit logging")
     log_level: str = Field("INFO", description="Log level: DEBUG, INFO, WARNING, ERROR")
 
+    # Relay & Connectivity
+    relay_db_path: str = Field("data/relay.db", description="Path to SQLite persistence store for device relay")
+    relay_pairing_code_expiry_seconds: int = Field(300, description="Pairing code expiry time in seconds")
+    relay_device_offline_timeout_seconds: int = Field(30, description="Heartbeat timeout for marking device OFFLINE")
+    relay_max_message_size_bytes: int = Field(65536, description="Max allowed WebSocket message size in bytes")
+
     # CORS
     allowed_origins: List[str] = Field(default_factory=lambda: ["*"], description="Allowed CORS origins")
 

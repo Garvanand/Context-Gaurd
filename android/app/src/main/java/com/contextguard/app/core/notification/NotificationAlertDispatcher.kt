@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.contextguard.app.MainActivity
+import com.contextguard.app.R
 import com.contextguard.app.core.logging.AppLogger
 import com.contextguard.app.ui.viewmodel.InterventionType
 import com.contextguard.app.ui.viewmodel.SafetyResult
@@ -111,7 +112,7 @@ object NotificationAlertDispatcher {
 
             // Build NotificationCompat
             val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_dialog_alert)
+                .setSmallIcon(R.drawable.ic_notification_contextguard)
                 .setContentTitle(title)
                 .setContentText(evidenceSummary)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(

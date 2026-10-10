@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.contextguard.app.theme.*
+import com.contextguard.app.ui.components.ApertureSignalLogoReveal
 
 @Composable
 fun WelcomeScreen(
@@ -41,17 +41,12 @@ fun WelcomeScreen(
         ) {
             Box(
                 modifier = Modifier
-                    .size(68.dp)
-                    .background(SurfaceGlass, RoundedCornerShape(20.dp))
-                    .border(1.dp, CyanAccent, RoundedCornerShape(20.dp)),
+                    .size(92.dp)
+                    .background(DeepSurface, RoundedCornerShape(24.dp))
+                    .border(1.dp, ContourBorderActive, RoundedCornerShape(24.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.Security,
-                    contentDescription = "Shield Logo",
-                    tint = CyanAccent,
-                    modifier = Modifier.size(38.dp)
-                )
+                ApertureSignalLogoReveal(size = 72.dp)
             }
 
             Text(

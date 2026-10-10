@@ -52,9 +52,27 @@ class ScreenGuardAccessibilityService : AccessibilityService() {
             return
         }
 
-        // 2. Package filtering: Only allowlisted third-party packages are inspected
+        // 2. Package filtering & Rapid App Switching handling
         val packageName = event.packageName?.toString() ?: return
+
+        // Rapid App Switching: If overlay is currently displayed for a different package,
+        // dismiss active overlay immediately so it never lingers above a different app.
+        if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+            val activeOverlayPkg = InterventionOverlayManager.getActivePackage()
+            if (activeOverlayPkg != null && activeOverlayPkg != packageName) {
+                mainHandler.post {
+                    InterventionOverlayManager.dismissActiveOverlay()
+                }
+            }
+        }
+
         if (!AllowlistManager.isPackageAllowed(packageName)) {
+            // Also ensure no overlay lingers if switched to a non-allowlisted package
+            if (InterventionOverlayManager.getActivePackage() != null) {
+                mainHandler.post {
+                    InterventionOverlayManager.dismissActiveOverlay()
+                }
+            }
             return
         }
 

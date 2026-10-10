@@ -23,6 +23,7 @@ from backend.pipeline.pipeline import ContextGuardPipeline
 from backend.models.qwen_vision import QwenVisionReasoner
 from evaluation.dataset import BenchmarkDatasetLoader
 from evaluation.perception import PERCEPTION_REGISTRY
+from backend.app.api.v1.relay import relay_db
 
 router = APIRouter(prefix="/supervisor", tags=["Supervisor Control Room"])
 
@@ -55,6 +56,34 @@ async def get_system_overview() -> Dict[str, Any]:
 
     uptime_sec = round(time.time() - _START_TIME, 1)
 
+    primary_device = relay_db.get_primary_device()
+    if primary_device:
+        android_conn = {
+            "status": primary_device["status"],
+            "active_mode": primary_device.get("network_mode", "LOCAL_BACKEND"),
+            "device": f"{primary_device.get('device_name', 'Android Device')} ({primary_device.get('model', 'Unknown')})",
+            "last_handshake": primary_device.get("last_heartbeat") or primary_device.get("paired_at"),
+            "sharesheet_integration": "ACTIVE (image/*, text/plain, application/pdf)",
+            "device_id": primary_device.get("device_id"),
+            "monitoring_active": bool(primary_device.get("monitoring_active", 0)),
+            "notification_active": bool(primary_device.get("notification_active", 0)),
+            "selected_apps_count": primary_device.get("selected_apps_count", 0),
+            "telemetry_enabled": bool(primary_device.get("telemetry_enabled", 0)),
+        }
+    else:
+        android_conn = {
+            "status": "UNPAIRED",
+            "active_mode": "STANDBY",
+            "device": "No Paired Android Device",
+            "last_handshake": None,
+            "sharesheet_integration": "STANDBY (Requires Device Pairing)",
+            "device_id": None,
+            "monitoring_active": False,
+            "notification_active": False,
+            "selected_apps_count": 0,
+            "telemetry_enabled": False,
+        }
+
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "contextguard": {
@@ -64,13 +93,7 @@ async def get_system_overview() -> Dict[str, Any]:
             "environment": settings.environment,
             "security_invariant": "Zero unredacted raw disk persistence (Volatile RAM only)",
         },
-        "android_connection": {
-            "status": "CONNECTED",
-            "active_mode": "REDACTED_LOCAL_BACKEND",
-            "device": "Android Emulator (API 34)",
-            "last_handshake": datetime.now(timezone.utc).isoformat(),
-            "sharesheet_integration": "ACTIVE (image/*, text/plain, application/pdf)",
-        },
+        "android_connection": android_conn,
         "backend": {
             "status": "HEALTHY",
             "uptime_seconds": uptime_sec,

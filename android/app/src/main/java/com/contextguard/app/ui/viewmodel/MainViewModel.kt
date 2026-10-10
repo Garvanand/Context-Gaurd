@@ -16,6 +16,7 @@ import com.contextguard.app.core.privacy.PrivacyPipeline
 import com.contextguard.app.core.privacy.RedactionEngine
 import com.contextguard.app.core.privacy.RedactionResult
 import com.contextguard.app.core.privacy.RedactionStyle
+import com.contextguard.app.core.state.AppEntryState
 import com.contextguard.app.core.state.UiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,11 +72,12 @@ data class DemoAction(
 )
 
 data class AppState(
-    val currentArtifactTitle: String = "Bank_Statement_Oct2026.pdf",
-    val currentSourceApp: String = "HDFC Mobile Banking",
-    val currentRecipient: String = "Unverified Telegram Contact",
-    val selectedAction: String = "SAVE",
-    val selectedDestination: String = "Personal Encrypted Drive",
+    val currentArtifactTitle: String = "",
+    val currentSourceApp: String = "",
+    val currentRecipient: String = "",
+    val selectedAction: String = "",
+    val selectedDestination: String = "",
+    val hasActiveArtifact: Boolean = false,
     val isRedactionEnabled: Boolean = true,
     val redactionStyle: RedactionStyle = RedactionStyle.BLACKOUT,
     val maskedPiiCount: Int = 0,
@@ -96,6 +98,13 @@ class MainViewModel : ViewModel() {
     private val _appState = MutableStateFlow(AppState())
     val appState: StateFlow<AppState> = _appState.asStateFlow()
 
+    private val _entryState = MutableStateFlow<AppEntryState>(AppEntryState.NormalLaunch)
+    val entryState: StateFlow<AppEntryState> = _entryState.asStateFlow()
+
+    fun setEntryState(state: AppEntryState) {
+        _entryState.value = state
+    }
+
     private val _analysisState = MutableStateFlow<UiState<SafetyResult>>(UiState.Idle)
     val analysisState: StateFlow<UiState<SafetyResult>> = _analysisState.asStateFlow()
 
@@ -108,6 +117,36 @@ class MainViewModel : ViewModel() {
 
     fun consumeNavigation() {
         _pendingNavigation.value = null
+    }
+
+    fun cancelArtifactAnalysis() {
+        _appState.update {
+            it.copy(
+                currentArtifactTitle = "",
+                currentSourceApp = "",
+                currentRecipient = "",
+                selectedAction = "",
+                selectedDestination = "",
+                hasActiveArtifact = false,
+                rawBitmap = null,
+                lastPerceptionResult = null,
+                lastRedactionResult = null,
+                lastResult = null,
+                isOverrideEngaged = false,
+                maskedPiiCount = 0,
+                detectedFacesCount = 0,
+                currentUrlRiskScore = null
+            )
+        }
+        _analysisState.value = UiState.Idle
+        _entryState.value = AppEntryState.NormalLaunch
+        AppLogger.i("Artifact analysis cancelled by user; volatile state reset to NormalLaunch.")
+    }
+
+    fun refreshHealthState() {
+        _appState.update {
+            it.copy(healthState = com.contextguard.app.core.health.ModelHealthManager.getLiveHealthState())
+        }
     }
 
     private val perceptionEngine = MlKitPerceptionEngine()
@@ -260,6 +299,7 @@ class MainViewModel : ViewModel() {
                 it.copy(
                     currentArtifactTitle = title,
                     currentSourceApp = sourceApp,
+                    hasActiveArtifact = true,
                     rawBitmap = bitmap,
                     lastPerceptionResult = pipelineResult.perceptionResult,
                     lastRedactionResult = pipelineResult.redactionResult,
@@ -270,6 +310,14 @@ class MainViewModel : ViewModel() {
                     isOverrideEngaged = false
                 )
             }
+
+            _entryState.value = AppEntryState.ActionContextSelection(
+                artifactTitle = title,
+                candidateActions = listOf("SAVE", "SEND", "POST", "UPLOAD"),
+                preselectedAction = state.selectedAction.ifBlank { "SAVE" },
+                recipient = state.currentRecipient,
+                destination = state.selectedDestination
+            )
 
             _analysisState.value = UiState.Success(pipelineResult.safetyResult)
             onComplete(pipelineResult.perceptionResult)
@@ -299,6 +347,7 @@ class MainViewModel : ViewModel() {
                 it.copy(
                     currentArtifactTitle = title,
                     currentSourceApp = sourceApp,
+                    hasActiveArtifact = true,
                     rawBitmap = null,
                     lastPerceptionResult = pipelineResult.perceptionResult,
                     lastRedactionResult = pipelineResult.redactionResult,
@@ -309,6 +358,14 @@ class MainViewModel : ViewModel() {
                     isOverrideEngaged = false
                 )
             }
+
+            _entryState.value = AppEntryState.ActionContextSelection(
+                artifactTitle = title,
+                candidateActions = listOf("SEND", "OPEN", "POST", "SAVE"),
+                preselectedAction = state.selectedAction.ifBlank { "SEND" },
+                recipient = state.currentRecipient,
+                destination = state.selectedDestination
+            )
 
             _analysisState.value = UiState.Success(pipelineResult.safetyResult)
             onComplete(pipelineResult.perceptionResult)
@@ -338,6 +395,7 @@ class MainViewModel : ViewModel() {
                 it.copy(
                     currentArtifactTitle = title,
                     currentSourceApp = sourceApp,
+                    hasActiveArtifact = true,
                     rawBitmap = null,
                     lastPerceptionResult = pipelineResult.perceptionResult,
                     lastRedactionResult = pipelineResult.redactionResult,
@@ -348,6 +406,14 @@ class MainViewModel : ViewModel() {
                     isOverrideEngaged = false
                 )
             }
+
+            _entryState.value = AppEntryState.ActionContextSelection(
+                artifactTitle = title,
+                candidateActions = listOf("SAVE", "SIGN", "SEND", "APPROVE"),
+                preselectedAction = state.selectedAction.ifBlank { "SAVE" },
+                recipient = state.currentRecipient,
+                destination = state.selectedDestination
+            )
 
             _analysisState.value = UiState.Success(pipelineResult.safetyResult)
             onComplete(pipelineResult.perceptionResult)
@@ -377,13 +443,22 @@ class MainViewModel : ViewModel() {
         when (payload) {
             is com.contextguard.app.core.sharesheet.SharePayload.ImagePayload -> {
                 triggerNavigation("analyze")
+                _entryState.value = AppEntryState.SharedArtifactIngestion(
+                    title = payload.title,
+                    mimeType = payload.mimeType,
+                    sourceApp = payload.sourceApp
+                )
                 _appState.update {
                     it.copy(
                         currentArtifactTitle = payload.title,
                         currentSourceApp = payload.sourceApp,
                         selectedAction = "SAVE",
                         selectedDestination = "Personal Encrypted Drive",
-                        currentRecipient = "Self / Personal Vault"
+                        currentRecipient = "Self / Personal Vault",
+                        hasActiveArtifact = true,
+                        lastResult = null,
+                        lastPerceptionResult = null,
+                        lastRedactionResult = null
                     )
                 }
                 if (payload.bitmap != null) {
@@ -408,6 +483,12 @@ class MainViewModel : ViewModel() {
                     com.contextguard.app.core.engine.UrlTreeInferenceEngine.getInstanceOrNull()?.predictUrl(rawUrl)?.probability
                 } else null
 
+                _entryState.value = AppEntryState.SharedArtifactIngestion(
+                    title = payload.title,
+                    mimeType = "text/plain",
+                    sourceApp = payload.sourceApp
+                )
+
                 _appState.update {
                     it.copy(
                         currentArtifactTitle = payload.title,
@@ -415,7 +496,11 @@ class MainViewModel : ViewModel() {
                         selectedAction = initialAction,
                         selectedDestination = initialDest,
                         currentRecipient = initialDest,
-                        currentUrlRiskScore = urlScore
+                        currentUrlRiskScore = urlScore,
+                        hasActiveArtifact = true,
+                        lastResult = null,
+                        lastPerceptionResult = null,
+                        lastRedactionResult = null
                     )
                 }
                 processTextArtifact(
@@ -428,12 +513,21 @@ class MainViewModel : ViewModel() {
             }
             is com.contextguard.app.core.sharesheet.SharePayload.PdfPayload -> {
                 triggerNavigation("analyze")
+                _entryState.value = AppEntryState.SharedArtifactIngestion(
+                    title = payload.title,
+                    mimeType = "application/pdf",
+                    sourceApp = payload.sourceApp
+                )
                 _appState.update {
                     it.copy(
                         currentArtifactTitle = payload.title,
                         currentSourceApp = payload.sourceApp,
                         selectedAction = "SAVE",
-                        selectedDestination = "Personal Encrypted Drive"
+                        selectedDestination = "Personal Encrypted Drive",
+                        hasActiveArtifact = true,
+                        lastResult = null,
+                        lastPerceptionResult = null,
+                        lastRedactionResult = null
                     )
                 }
                 processPdfPagesArtifact(
@@ -450,6 +544,7 @@ class MainViewModel : ViewModel() {
             }
             is com.contextguard.app.core.sharesheet.SharePayload.ErrorPayload -> {
                 AppLogger.e("Sharesheet resolution error: ${payload.reason}")
+                _entryState.value = AppEntryState.RecoverableError(payload.reason, payload.recoverable)
                 _analysisState.value = UiState.Error(payload.reason)
             }
             is com.contextguard.app.core.sharesheet.SharePayload.EmptyOrCancelled -> {
@@ -470,18 +565,24 @@ class MainViewModel : ViewModel() {
     ) {
         viewModelScope.launch {
             val analysisStartTime = System.currentTimeMillis()
+            _entryState.value = AppEntryState.AnalysisInProgress(1, "Ingesting artifact and channel metadata")
             _analysisState.value = UiState.Loading("1/6 Context: Ingesting artifact and channel metadata...")
-            delay(150)
+            delay(120)
+            _entryState.value = AppEntryState.AnalysisInProgress(2, "Evaluating action chip taxonomy")
             _analysisState.value = UiState.Loading("2/6 Intent: Evaluating action chip taxonomy...")
-            delay(150)
+            delay(120)
+            _entryState.value = AppEntryState.AnalysisInProgress(3, "Extracting on-device OCR & ML Kit perception")
             _analysisState.value = UiState.Loading("3/6 Evidence: Extracting on-device OCR & ML Kit perception...")
-            delay(150)
+            delay(120)
+            _entryState.value = AppEntryState.AnalysisInProgress(4, "Projecting severity and irreversibility bounds")
             _analysisState.value = UiState.Loading("4/6 Consequence: Projecting severity and irreversibility bounds...")
-            delay(150)
+            delay(120)
+            _entryState.value = AppEntryState.AnalysisInProgress(5, "Calibrating epistemic confidence")
             _analysisState.value = UiState.Loading("5/6 Uncertainty: Calibrating epistemic confidence...")
-            delay(150)
+            delay(120)
+            _entryState.value = AppEntryState.AnalysisInProgress(6, "Applying deterministic policy gating")
             _analysisState.value = UiState.Loading("6/6 Intervention: Applying deterministic policy gating...")
-            delay(150)
+            delay(120)
 
             val state = _appState.value
             val s = customSeverity ?: when (state.selectedAction.uppercase()) {
@@ -493,7 +594,8 @@ class MainViewModel : ViewModel() {
                 "POST" -> if (state.maskedPiiCount > 0 || state.currentArtifactTitle.contains("Statement", true)) 0.90f else 0.15f
                 "UPLOAD" -> if (state.selectedDestination.contains("Public", true)) 0.85f else 0.30f
                 "SEND" -> if (state.selectedDestination.contains("Unverified", true) || state.selectedDestination.contains("Telegram", true)) 0.38f else 0.20f
-                else -> if (state.selectedDestination.contains("Public", true)) 0.85f else 0.10f
+                "" -> 0.45f
+                else -> if (state.selectedDestination.contains("Public", true)) 0.85f else 0.25f
             }
 
             val r = customIrreversibility ?: when (state.selectedAction.uppercase()) {
@@ -505,19 +607,23 @@ class MainViewModel : ViewModel() {
                 "POST" -> 1.00f
                 "UPLOAD" -> if (state.selectedDestination.contains("Public", true)) 0.95f else 0.40f
                 "SEND" -> if (state.selectedDestination.contains("Unverified", true)) 0.50f else 0.25f
-                else -> if (state.selectedDestination.contains("Public", true)) 1.00f else 0.00f
+                "" -> 0.50f
+                else -> if (state.selectedDestination.contains("Public", true)) 1.00f else 0.20f
             }
 
-            val c = customConfidence ?: 0.90f
+            val c = customConfidence ?: if (state.selectedAction.isBlank()) 0.40f else 0.90f
 
             // rho = s * (1 + lambda * r)
             val lambdaVal = 0.75f
             val rho = s * (1.0f + lambdaVal * r)
 
+            // Policy invariant: Fail-safe gating. Never silently ACT when action intent is undefined.
             val intervention = when {
+                state.selectedAction.isBlank() -> InterventionType.ASK
                 rho >= 0.65f -> InterventionType.STOP
                 rho >= 0.35f && c < 0.70f -> InterventionType.ASK
                 rho >= 0.35f -> InterventionType.WARN
+                c < 0.50f -> InterventionType.ASK
                 else -> InterventionType.ACT
             }
 
@@ -545,7 +651,7 @@ class MainViewModel : ViewModel() {
                 rationale = customRationale ?: when (intervention) {
                     InterventionType.STOP -> "Irreversible disclosure hazard detected on public channel. Action blocked to prevent financial compromise."
                     InterventionType.WARN -> "Elevated exposure hazard with target channel. Proceed only after explicit confirmation."
-                    InterventionType.ASK -> "High uncertainty in recipient identity. User verification required before proceeding."
+                    InterventionType.ASK -> "High uncertainty in recipient identity or missing action context. Verification required."
                     InterventionType.ACT -> "Negligible risk bounded in encrypted perimeter. Safe to proceed."
                 },
                 artifactTitle = state.currentArtifactTitle,
@@ -568,6 +674,7 @@ class MainViewModel : ViewModel() {
             )
 
             _appState.update { it.copy(lastResult = result, lastAuditEntry = audit, isOverrideEngaged = false) }
+            _entryState.value = AppEntryState.InterventionResult(result.intervention.name, result.riskScore)
             _analysisState.value = UiState.Success(result)
             AppLogger.audit(
                 event = "Pre-Action Decision: ${result.intervention}",

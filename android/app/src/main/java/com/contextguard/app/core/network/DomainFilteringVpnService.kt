@@ -14,6 +14,7 @@ import android.net.VpnService
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import com.contextguard.app.R
 
 /**
  * Opt-In Android VpnService Extension for Domain-Level Protection.
@@ -227,7 +228,7 @@ class DomainFilteringVpnService : VpnService() {
         return builder
             .setContentTitle("ContextGuard Network Protection")
             .setContentText(statusText)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_notification_contextguard)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Stop Protection", stopPendingIntent)
             .setOngoing(true)
             .build()

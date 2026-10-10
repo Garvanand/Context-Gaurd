@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ContextGuard: Horizontal Brand VectorDrawable (200dp x 40dp) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="40dp"
+    android:viewportWidth="200"
+    android:viewportHeight="40">
+
+    <!-- Aperture Signal Symbol (Left, 32x32 footprint) -->
+    <group
+        android:translateX="4"
+        android:translateY="4"
+        android:scaleX="0.32"
+        android:scaleY="0.32">
+
+        <!-- Wing Alpha -->
+        <path
+            android:fillColor="#8B70FF"
+            android:pathData="M 87.42,43.40 A 38,38 0 1,1 43.40,12.58 L 45.14,22.43 A 28,28 0 1,0 77.57,45.14 Z" />
+
+        <!-- Wing Beta -->
+        <path
+            android:fillColor="#45E4FF"
+            android:pathData="M 64.78,67.62 A 23,23 0 1,1 57.87,28.39 L 55.13,35.90 A 15,15 0 1,0 59.64,61.49 Z" />
+
+        <!-- Central Focal Core -->
+        <path
+            android:fillColor="#D8FF63"
+            android:pathData="M 42.72,55.44 A 9,9 0 0,1 55.44,42.72 Z" />
+
+        <!-- Observer Anchor Point -->
+        <path
+            android:fillColor="#F4F6FF"
+            android:pathData="M 52.2,55 A 2.8,2.8 0 1,0 57.8,55 A 2.8,2.8 0 1,0 52.2,55 Z" />
+    </group>
+
+    <!-- Stylized Geometric Wordmark: "C O N T E X T G U A R D" -->
+    <!-- C -->
+    <path
+        android:fillColor="#F4F6FF"
+        android:pathData="M 48,15 L 44,15 A 6,6 0 0,0 44,25 L 48,25 L 48,23 L 44,23 A 4,4 0 0,1 44,17 L 48,17 Z" />
+    <!-- O -->
+    <path
+        android:fillColor="#F4F6FF"
+        android:pathData="M 54,15 A 5,5 0 0,0 49,20 A 5,5 0 0,0 54,25 A 5,5 0 0,0 59,20 A 5,5 0 0,0 54,15 Z M 54,17 A 3,3 0 0,1 57,20 A 3,3 0 0,1 54,23 A 3,3 0 0,1 51,20 A 3,3 0 0,1 54,17 Z" />
+    <!-- N -->
+    <path
+        android:fillColor="#F4F6FF"
+        android:pathData="M 61,15 L 63,15 L 67,23 L 67,15 L 69,15 L 69,25 L 67,25 L 63,17 L 63,25 L 61,25 Z" />
+    <!-- T -->
+    <path
+        android:fillColor="#F4F6FF"
+        android:pathData="M 71,15 L 79,15 L 79,17 L 76,17 L 76,25 L 74,25 L 74,17 L 71,17 Z" />
+    <!-- E -->
+    <path
+        android:fillColor="#F4F6FF"
+        android:pathData="M 81,15 L 87,15 L 87,17 L 83,17 L 83,19 L 86,19 L 86,21 L 83,21 L 83,23 L 87,23 L 87,25 L 81,25 Z" />
+    <!-- X -->
+    <path
+        android:fillColor="#F4F6FF"
+        android:pathData="M 89,15 L 91,15 L 93.5,19.5 L 96,15 L 98,15 L 94.5,20 L 98,25 L 96,25 L 93.5,20.5 L 91,25 L 89,25 L 92.5,20 Z" />
+    <!-- T -->
+    <path
+        android:fillColor="#F4F6FF"
+        android:pathData="M 100,15 L 108,15 L 108,17 L 105,17 L 105,25 L 103,25 L 103,17 L 100,17 Z" />
+
+    <!-- GUARD (Electric Violet / Cyan Accent) -->
+    <!-- G -->
+    <path
+        android:fillColor="#8B70FF"
+        android:pathData="M 118,15 L 114,15 A 6,6 0 0,0 114,25 L 118,25 L 118,19 L 116,19 L 116,23 L 114,23 A 4,4 0 0,1 114,17 L 118,17 Z" />
+    <!-- U -->
+    <path
+        android:fillColor="#8B70FF"
+        android:pathData="M 120,15 L 122,15 L 122,22 A 3,3 0 0,0 125,25 A 3,3 0 0,0 128,22 L 128,15 L 130,15 L 130,22 A 5,5 0 0,1 125,27 A 5,5 0 0,1 120,22 Z" />
+    <!-- A -->
+    <path
+        android:fillColor="#8B70FF"
+        android:pathData="M 134,15 L 138,15 L 141,25 L 139,25 L 138.2,22 L 133.8,22 L 133,25 L 131,25 Z M 134.4,20 L 137.6,20 L 136,17 Z" />
+    <!-- R -->
+    <path
+        android:fillColor="#8B70FF"
+        android:pathData="M 143,15 L 148,15 A 3,3 0 0,1 148,21 L 146,21 L 149,25 L 146.5,25 L 143.8,21 L 143,21 L 143,25 L 141,25 L 141,15 Z M 143,17 L 143,19 L 146,19 A 1,1 0 0,0 146,17 Z" />
+    <!-- D -->
+    <path
+        android:fillColor="#8B70FF"
+        android:pathData="M 151,15 L 155,15 A 5,5 0 0,1 155,25 L 151,25 Z M 153,17 L 153,23 L 155,23 A 3,3 0 0,0 155,17 Z" />
+
+    <!-- Action Policy Indicator Dot -->
+    <path
+        android:fillColor="#D8FF63"
+        android:pathData="M 166,19 A 2.5,2.5 0 1,1 165.99,19 Z" />
+</vector>

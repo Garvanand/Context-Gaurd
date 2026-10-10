@@ -85,6 +85,18 @@ ml/data/raw/*.csv
 ml/datasets/*.zip
 ml/datasets/sms_phishing/ncsu_phishing_raw.csv
 
+# SQLite Runtime Databases & WAL Ledgers
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+data/*.db
+backend/data/*.db
+
+# Scratch and Temporary Storage
+scratch/
+.tempmediaStorage/
+
 # Node.js & Web builds
 node_modules/
 */node_modules/

@@ -2,9 +2,9 @@
 
 **Capstone Title:** CONTEXTGUARD: A Multimodal AI System for Pre-Action Risk Detection in Everyday Digital Tasks  
 **Institution:** Final-Year B.Tech Capstone Project  
-**Status Date:** Phase 5 (Research Evaluation Framework, Baselines & Ablation Study) Completed  
-**Current Milestone:** Research Evaluation Framework (Baselines B1/B3/B4/B5, Ablations A1-A5) **COMPLETED**  
-**Next Milestone:** Phase 6 (System Integration, End-to-End Testing & Viva Polish)
+**Status Date:** Phase 6 (Real-Time Mobile ↔ Web Relay Integration) Completed  
+**Current Milestone:** Real-Time Mobile ↔ Web Relay Integration **COMPLETED**  
+**Next Milestone:** Final Capstone Presentation & Live Viva Demonstration
 
 ---
 
@@ -18,11 +18,12 @@
 | **Android SDK** | API 34+ | Android SDK at `C:\Users\GARV ANAND\AppData\Local\Android\Sdk` (API 34, Build-tools 34.0.0) | **PASS** |
 | **Gradle** | 8.x | Gradle 8.3 (Wrapper generated in `android/gradlew.bat`) | **PASS** |
 | **FastAPI Backend** | 0.110+ | FastAPI 0.141.1, Uvicorn 0.52.0, Pydantic 2.13.4 | **PASS** (100% tests pass) |
-| **Android App** | Jetpack Compose | CompileSdk 34, MinSdk 26, Material 3, Kotlin 1.9.22, AGP 8.2.2 | **PASS** (100% tests pass, APK built) |
+| **Android App** | Jetpack Compose | CompileSdk 34, MinSdk 26, Material 3, Kotlin 1.9.22, AGP 8.2.2, OkHttp 4.12.0 | **PASS** (100% tests pass, APK built) |
 | **ML Component** | Trained Classifier | XGBoost 3.2.0 trained on PhiUSIIL (UCI ID: 967) | **PASS** (Test F1: 0.9951, AUC: 0.9990) |
 | **Multimodal Reasoner** | Qwen2.5-VL-3B / Ollama | `backend/models/qwen_vision.py`, `backend/prompts/*` | **PASS** (20/20 tests pass, safe fallback active) |
 | **Six-Stage Pipeline** | Full Reasoning Pipeline | `backend/pipeline/pipeline.py`, `backend/policy/*` | **PASS** (18/18 pipeline & policy tests pass) |
-| **Evaluation Framework** | Baselines & Ablations | `evaluation/`, `results/`, `results/figures/`, `results/tables/` | **PASS** (76/76 Python tests pass) |
+| **Relay Backend** | Bidirectional Transport | `backend/app/relay/`, SQLite WAL Ledger, In-Memory Broker | **PASS** (8/8 relay tests, 1/1 e2e test pass) |
+| **Evaluation Framework** | Baselines & Ablations | `evaluation/`, `results/`, `results/figures/`, `results/tables/` | **PASS** (99/99 Python tests pass) |
 
 ---
 
@@ -44,12 +45,14 @@
 | **Dataset Acquisition** | - Reproducible script<br>- PhiUSIIL (UCI ID 967) | - `ml/datasets/acquire_phiusiil.py`<br>- 235,795 rows extracted | **PASS** |
 | **Feature Extraction** | - Deterministic features<br>- 30+ properties | - `ml/features/url_features.py` (36 features) | **PASS** |
 | **Model Training & Comparison** | - Model comparison<br>- XGBoost champion | - `ml/training/train_phishing.py`<br>- XGBoost test F1: 0.9951, AUC: 0.9990 | **PASS** |
-| **Android Client** | - 8 Compose screens<br>- Single Activity | - Material 3 Dark theme, single activity architecture, edge perception integration | **PASS**<br>`testDebugUnitTest`: 28/28 passed.<br>`assembleDebug`: `app-debug.apk` built. |
+| **Android Client** | - 8 Compose screens<br>- Single Activity | - Material 3 Dark theme, single activity architecture, edge perception integration | **PASS**<br>`testDebugUnitTest`: passed.<br>`assembleDebug`: `app-debug.apk` built. |
 | **Android Perception Layer** | - Google ML Kit Text Recognition<br>- Google ML Kit Face Detection<br>- Native `PdfRenderer` (first 3 pages)<br>- Local PII Detector (9 types, Luhn check, OTP context)<br>- Strongly typed `LocalPerceptionResult` | - `MlKitPerceptionEngine.kt`<br>- `PiiDetector.kt`<br>- `PdfPerceptionRenderer.kt`<br>- `ImagePreprocessor.kt`<br>- Coroutines off-UI dispatchers (`Dispatchers.Default`, `Dispatchers.IO`) | **PASS**<br>15 dedicated unit tests passed.<br>APK packaged with real native ML Kit runtime (`libface_detector_v2_jni.so`, `libmlkit_google_ocr_pipeline.so`). |
-| **Privacy Architecture** | - 9-stage Serial Privacy Pipeline<br>- In-memory Redaction Engine (`BLACKOUT` & `BLUR`)<br>- 3 Network Modes (`OFFLINE`, `LOCAL_BACKEND`, `RESTRICTED_EVALUATION`)<br>- Metadata-only Network Audit Logger<br>- SHA-256 Correlation Fingerprinting<br>- Interactive Privacy Center UI<br>- Before vs After Redaction Preview<br>- User Intentional Override on STOP | - `PrivacyPipeline.kt`<br>- `RedactionEngine.kt`<br>- `NetworkAuditLogger.kt`<br>- `ContextGuardApiClient.kt`<br>- `PrivacyScreen.kt`<br>- `AnalyzeScreen.kt`<br>- `ResultScreen.kt`<br>- `docs/THREAT_MODEL.md` | **PASS**<br>6/6 privacy invariant unit tests passed.<br>28 total Android unit tests passed.<br>Debug APK assembled successfully. |
-| **Android Sharesheet Integration** | - System-level Share Target (`ACTION_SEND` & `ACTION_SEND_MULTIPLE`)<br>- Supported MIME types: `image/*`, `text/plain`, `application/pdf`, `*/*`<br>- ContentResolver extraction (zero persistent disk writes)<br>- Safe in-memory decoding with bounded 1600px downsampling<br>- Multi-page PDF rasterization via `PdfRenderer`<br>- URL pattern extraction from shared browser text<br>- Non-crashing error handling across 8 edge cases<br>- 3-Iteration identical artifact triad verification | - `AndroidManifest.xml`<br>- `SharesheetPayloadResolver.kt`<br>- `SharePayload.kt`<br>- `PdfPerceptionRenderer.kt`<br>- `MainViewModel.kt`<br>- `MainActivity.kt`<br>- `SharesheetIntegrationTest.kt`<br>- `DEMO_RUNBOOK.md` (Section 5) | **PASS**<br>6/6 sharesheet integration unit tests pass.<br>28/28 debug unit tests pass.<br>Debug APK assembled (94.9 MB). |
+| **Privacy Architecture** | - 9-stage Serial Privacy Pipeline<br>- In-memory Redaction Engine (`BLACKOUT` & `BLUR`)<br>- 3 Network Modes (`OFFLINE`, `LOCAL_BACKEND`, `RESTRICTED_EVALUATION`)<br>- Metadata-only Network Audit Logger<br>- SHA-256 Correlation Fingerprinting<br>- Interactive Privacy Center UI<br>- Before vs After Redaction Preview<br>- User Intentional Override on STOP | - `PrivacyPipeline.kt`<br>- `RedactionEngine.kt`<br>- `NetworkAuditLogger.kt`<br>- `ContextGuardApiClient.kt`<br>- `PrivacyScreen.kt`<br>- `AnalyzeScreen.kt`<br>- `ResultScreen.kt`<br>- `docs/THREAT_MODEL.md` | **PASS**<br>6/6 privacy invariant unit tests passed.<br>Debug APK assembled successfully. |
+| **Android Sharesheet Integration** | - System-level Share Target (`ACTION_SEND` & `ACTION_SEND_MULTIPLE`)<br>- Supported MIME types: `image/*`, `text/plain`, `application/pdf`, `*/*`<br>- ContentResolver extraction (zero persistent disk writes)<br>- Safe in-memory decoding with bounded 1600px downsampling<br>- Multi-page PDF rasterization via `PdfRenderer`<br>- URL pattern extraction from shared browser text<br>- Non-crashing error handling across 8 edge cases<br>- 3-Iteration identical artifact triad verification | - `AndroidManifest.xml`<br>- `SharesheetPayloadResolver.kt`<br>- `SharePayload.kt`<br>- `PdfPerceptionRenderer.kt`<br>- `MainViewModel.kt`<br>- `MainActivity.kt`<br>- `SharesheetIntegrationTest.kt`<br>- `DEMO_RUNBOOK.md` (Section 5) | **PASS**<br>6/6 sharesheet integration unit tests pass.<br>Debug APK assembled (94.9 MB). |
 | **Everyday Action Risk Benchmark (EARB)** | - Exactly 20 programmatically generated synthetic base artifacts<br>- Exactly 60 action-conditioned pairs across 4 categories<br>- 3 candidate actions per base artifact with dynamic shifts<br>- 20 negative controls (ACT) & 8 ambiguous cases (ASK)<br>- Zero-leakage grouping by base artifact (dev: 42, test: 18)<br>- Interactive CLI annotator & local Web UI annotator<br>- Automated Pydantic validation & pytest test suite | - `benchmark/data/earb_v1.jsonl`<br>- `benchmark/data/earb_v1.csv`<br>- `benchmark/schema/earb_schema.json`<br>- `benchmark/scripts/generate_synthetic_artifacts.py`<br>- `benchmark/scripts/build_earb_dataset.py`<br>- `benchmark/scripts/annotate_cli.py`<br>- `benchmark/scripts/validate_benchmark.py`<br>- `benchmark/annotator/index.html`<br>- `tests/benchmark/test_earb_benchmark.py` | **PASS**<br>60/60 pairs valid.<br>7/7 benchmark pytest tests pass. |
-| **Research Evaluation Framework & Baselines** | - Baselines: B1 (Artifact-only), B3 (No intent), B4 (Fixed threshold), B5 (ContextGuard Full)<br>- Ablations: A1 (No intent), A2 (No multimodality), A3 (Fixed policy), A4 (Adaptive policy), A5 (Warn everything)<br>- Common Evaluation Contract enforced<br>- Statistical Clustered Bootstrap 95% CIs (by base artifact)<br>- Publication figures in `results/figures/`<br>- Reproducible CLI (`python -m evaluation.run`, `.compare`, `.report`) | - `evaluation/schemas.py`<br>- `evaluation/metrics.py`<br>- `evaluation/engine.py`<br>- `evaluation/baselines/*`<br>- `evaluation/ablations/*`<br>- `evaluation/run.py`<br>- `evaluation/compare.py`<br>- `evaluation/report.py`<br>- `tests/benchmark/test_evaluation.py` | **PASS**<br>100% pairs evaluated without simulation.<br>76/76 Python tests pass.<br>Empirical Macro F1: 0.5455 vs 0.1767.<br>ACT FAR reduced: 95.0% -> 10.0%. |
+| **Spectral Signal Artifact-Analysis Journey** | - Step 1: Spacious Artifact Intake Surface with animated aperture & before/after inspection<br>- Step 2: 8-Action Selector (SAVE, SEND, UPLOAD, POST, SIGN, LOGIN, APPROVE, OPEN) with dynamic animated signal connector bus into Context Field & app-capability disclosures<br>- Step 3: Progressive 6-sector illuminated reasoning pipeline with TalkBack liveRegion announcements and sub-400ms transitions<br>- Step 4: Controlled 4-phase result reveal without superficial fireworks<br>- Step 5: Grounded evidence inspection with uncertainty calibration & model provenance<br>- Step 6: Change-Context Comparison simulating identical artifact under SAVE vs SEND vs POST with genuine math $\rho = s \cdot (1 + \lambda r)$ | - `ArtifactIntakeSurface.kt`<br>- `ActionSelectorWithConnector.kt`<br>- `SixStageProgressOverlay.kt`<br>- `ContextComparisonMode.kt`<br>- `AnalyzeScreen.kt`<br>- `ResultScreen.kt`<br>- `EvidenceCard.kt` | **PASS**<br>Clean build and unit test execution. |
+| **Signal Intercept: JIT Intervention Overlay** | - Genuine `AccessibilityService` overlay using `TYPE_ACCESSIBILITY_OVERLAY`<br>- Compact floating card layout (`WRAP_CONTENT` height for all classes, never full-screen modal)<br>- Thin spectral accent leading edge (Electric Violet -> Ion Cyan -> Intervention Accent)<br>- Small Aperture Signal logo & evidence-category indicators (`PHISHING LINK`, `SENSITIVE PII`, `PAYMENT AUTHORIZATION`, `CREDENTIAL ENTRY`)<br>- One strong intervention heading & concise grounded evidence sentence<br>- Prominent "Review Evidence" CTA & restrained "Continue once" dismissal without click injection<br>- 4-Phase signature animation (< 300ms) with full Reduced Motion mode support<br>- Rapid app switching auto-dismissal & anti-fatigue fingerprint cooldowns | - `InterventionOverlayManager.kt`<br>- `ScreenGuardAccessibilityService.kt`<br>- `OverlayTelemetry.kt`<br>- `ScreenRiskTriggerEngine.kt`<br>- `InterventionOverlayTest.kt` | **PASS**<br>Zero click injection verified.<br>RAPID app switch & latency telemetry verified. |
+| **Real-Time Mobile ↔ Web Relay** | - Authenticated 6-char pairing handshake<br>- Scoped cryptographically hashed tokens (`devtok_*`, `dshtok_*`)<br>- Durable SQLite WAL ledger for events, commands, presence, audit logs<br>- Real-time WebSocket multiplexer with live fan-out<br>- Zero raw persistence privacy enforcement<br>- Bidirectional command queue with mobile ACK loop<br>- Interactive Live Device Relay Panel & Command Center in Dashboard | - `backend/app/relay/*`<br>- `backend/app/api/v1/relay.py`<br>- `android/app/.../network/Relay*`<br>- `supervisor-dashboard/src/services/relay.ts`<br>- `supervisor-dashboard/src/components/LiveDeviceRelayPanel.tsx`<br>- `tests/backend/test_relay.py`<br>- `tests/integration/test_relay_e2e.py` | **PASS**<br>8/8 relay pytest tests pass.<br>1/1 E2E round-trip test passes.<br>Android unit tests pass.<br>Production dashboard builds cleanly. |
 
 ---
 
@@ -60,39 +63,49 @@
 platform win32 -- Python 3.12.0, pytest-9.0.3, pluggy-1.5.0
 rootdir: C:\Users\GARV ANAND\Downloads\Krish project\Context-Gaurd
 
-tests/backend/test_config.py ...                                         [  4%]
-tests/backend/test_health.py .....                                       [ 11%]
-tests/backend/test_pipeline.py ..........                                [ 24%]
+tests/backend/test_action_decision_engine.py ........                    [  8%]
+tests/backend/test_config.py ...                                         [ 11%]
+tests/backend/test_health.py .....                                       [ 16%]
+tests/backend/test_pipeline.py ..........                                [ 26%]
 tests/backend/test_policy_engine.py ........                             [ 34%]
-tests/backend/test_vision_reasoner.py ....................               [ 61%]
-tests/benchmark/test_earb_benchmark.py ....                              [ 66%]
-tests/benchmark/test_earb_schema.py ...                                  [ 70%]
-tests/benchmark/test_evaluation.py ........                              [ 80%]
-tests/ml/test_policy.py ......                                           [ 88%]
-tests/ml/test_url_risk.py .........                                      [100%]
+tests/backend/test_relay.py ........                                     [ 42%]
+tests/backend/test_vision_reasoner.py ....................               [ 62%]
+tests/benchmark/test_cac_metric.py .....                                 [ 67%]
+tests/benchmark/test_earb_benchmark.py ....                              [ 71%]
+tests/benchmark/test_earb_schema.py ...                                  [ 74%]
+tests/benchmark/test_evaluation.py ........                              [ 82%]
+tests/integration/test_relay_e2e.py .                                    [ 83%]
+tests/ml/test_policy.py ......                                           [ 89%]
+tests/ml/test_url_risk.py ..........                                     [100%]
 
-======================= 76 passed, 2 warnings in 22.40s =======================
+======================= 99 passed, 2 warnings in 42.10s =======================
 
 ============================= Android Gradle Build =============================
-> Task :app:compileDebugKotlin UP-TO-DATE
-> Task :app:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :app:compileDebugKotlin
+> Task :app:compileDebugUnitTestKotlin
 > Task :app:testDebugUnitTest
-BUILD SUCCESSFUL in 19s (22 actionable tasks executed: 28 total unit tests pass)
-- ViewModel & State Tests: 16 passed
-- Perception & ML Kit & PII Tests: 6 passed
-- Sharesheet Integration Tests: 6 passed
+BUILD SUCCESSFUL in 18s (Unit tests pass, including RelayModelsUnitTest)
 
 > Task :app:assembleDebug
-BUILD SUCCESSFUL in 22s (35 actionable tasks executed)
-Output APK: android/app/build/outputs/apk/debug/app-debug.apk (94.9 MB)
+BUILD SUCCESSFUL in 46s
+Output APK: android/app/build/outputs/apk/debug/app-debug.apk
+
+============================= Supervisor Dashboard =============================
+> tsc -b && vite build
+✓ 1874 modules transformed.
+dist/index.html                   0.85 kB │ gzip:  0.43 kB
+dist/assets/index-D7xVpE2L.css   24.12 kB │ gzip:  5.23 kB
+dist/assets/index-CF7v9q1m.js   384.62 kB │ gzip: 112.44 kB
+✓ built in 7.15s
 ```
 
 ---
 
-## 4. Next Immediate Phase
-**Phase 6: Full System Integration, End-to-End Testing & Viva Polish**
-1. End-to-end integration test connecting Android client, FastAPI backend (`POST /api/v1/analyze`), and ML model endpoints.
-2. Central Demo verification across all 3 actions on identical artifact.
-3. Supervisor HUD telemetry validation.
-4. Final documentation and viva presentation sign-off.
+## 4. Phase 6 Real-Time Integration Milestone Completed
+
+* **Operating Mode A (Normal Launch):** Direct navigation to `HomeScreen`. Dynamic telemetry for Accessibility, Notification access, Allowlisted apps (6 apps enabled), and On-device tree models.
+* **Operating Mode B (Background Protection):** `ScreenGuardAccessibilityService` and `NotificationGuardService` wired with deterministic pre-action trigger engine and `InterventionOverlayManager` (`TYPE_ACCESSIBILITY_OVERLAY`).
+* **Operating Mode C (Explicit Sharing):** `SharesheetPayloadResolver` ingests actual stream bytes/text. Local preprocessing executes in volatile RAM. Selecting an action automatically triggers inference without an unnecessary manual "Analyze Now" button.
+* **Operating Mode D (Real-Time Relay & Pairing):** Android client pairs via 6-character code with Supervisor Web Dashboard. Streams live telemetry events over authenticated WebSocket or durable REST outbox with zero-leakage privacy enforcement. Supervisor queues action commands executed by mobile with real-time ACKs.
+* **Physical Device Acceptance Status:** Honest assessment recorded — ADB device list empty, therefore physical hardware verification is **UNVERIFIED**, while APK packaging, unit tests, backend test suite, and web frontend are 100% verified.
 

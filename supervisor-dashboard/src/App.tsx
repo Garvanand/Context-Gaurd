@@ -12,6 +12,7 @@ import { PrivacyUtility } from './components/sections/PrivacyUtility';
 import { FailureAnalysis } from './components/sections/FailureAnalysis';
 import { NetworkActivity } from './components/sections/NetworkActivity';
 import { ModelHealth } from './components/sections/ModelHealth';
+import { LiveDeviceRelayPanel } from './components/sections/LiveDeviceRelayPanel';
 
 import type {
   SystemOverviewData,
@@ -92,7 +93,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#06090e', color: '#f8fafc' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-primary)', color: 'var(--text-main)' }}>
       {/* Top Bar */}
       <Navbar
         overview={overview}
@@ -101,7 +102,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main Workspace Layout */}
-      <div style={{ display: 'flex', minHeight: 'calc(100vh - 64px)' }}>
+      <div style={{ display: 'flex', minHeight: 'calc(100vh - 68px)' }}>
         {/* Navigation Sidebar */}
         <Sidebar
           activeSection={activeSection}
@@ -121,6 +122,7 @@ export const App: React.FC = () => {
         }}>
           {activeSection === 'all' ? (
             <div>
+              <LiveDeviceRelayPanel />
               <SystemOverview data={overview} loading={loading} />
               <LiveAnalysis
                 artifacts={artifacts}
@@ -141,6 +143,9 @@ export const App: React.FC = () => {
             <div>
               {activeSection === 'overview' && (
                 <SystemOverview data={overview} loading={loading} />
+              )}
+              {activeSection === 'relay' && (
+                <LiveDeviceRelayPanel />
               )}
               {activeSection === 'live-analysis' && (
                 <LiveAnalysis

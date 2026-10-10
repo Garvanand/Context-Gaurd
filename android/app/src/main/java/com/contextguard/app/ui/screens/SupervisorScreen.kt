@@ -21,6 +21,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import com.contextguard.app.core.relay.RelayManager
+import com.contextguard.app.core.relay.RelayStorage
+import com.contextguard.app.core.relay.RelaySocketState
 import com.contextguard.app.theme.*
 import com.contextguard.app.ui.components.InterventionBadge
 import com.contextguard.app.ui.viewmodel.MainViewModel
@@ -33,6 +37,15 @@ fun SupervisorScreen(
     val state by viewModel.appState.collectAsState()
     val result = state.lastResult
     val scrollState = rememberScrollState()
+
+    val context = LocalContext.current
+    val relayManager = remember { RelayManager.getInstance(context) }
+    val relayStorage = remember { RelayStorage.getInstance(context) }
+    val isPaired by relayManager.isPaired.collectAsState()
+    val pairingSession by relayManager.currentPairingSession.collectAsState()
+    val pendingClaim by relayManager.pendingClaim.collectAsState()
+    val socketState by relayManager.socketState.collectAsState()
+    var telemetrySyncEnabled by remember { mutableStateOf(relayStorage.isTelemetrySyncEnabled) }
 
     // Real-time telemetry values
     val latencyVal = "${result?.latencyMs ?: 142} ms"
@@ -75,6 +88,179 @@ fun SupervisorScreen(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold
                 )
+            }
+        }
+
+        // ==========================================
+        // SUPERVISOR WEB RELAY & PAIRING
+        // ==========================================
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(SurfaceDark, RoundedCornerShape(16.dp))
+                .border(1.dp, if (isPaired) ActGreen.copy(alpha = 0.5f) else SurfaceBorder, RoundedCornerShape(16.dp))
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "SUPERVISOR WEB RELAY",
+                        color = CyanAccent,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = if (isPaired) "Device Paired & Synchronized" else "Pair with Examiner Web Dashboard",
+                        color = TextSecondary,
+                        fontSize = 12.sp
+                    )
+                }
+                Surface(
+                    color = if (isPaired) ActGreen.copy(alpha = 0.15f) else TextSecondary.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(6.dp)
+                ) {
+                    Text(
+                        text = if (isPaired) "CONNECTED [${socketState.name}]" else "UNPAIRED",
+                        color = if (isPaired) ActGreen else TextSecondary,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            if (!isPaired) {
+                val currentSession = pairingSession
+                if (currentSession == null) {
+                    Text(
+                        text = "Connect this mobile device to the ContextGuard Supervisor Web Dashboard over the authenticated relay.",
+                        color = TextSecondary,
+                        fontSize = 13.sp,
+                        lineHeight = 18.sp
+                    )
+                    Button(
+                        onClick = {
+                            relayManager.startPairing(state.backendConfig.baseUrl) { /* started */ }
+                        },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = CyanAccent),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.QrCode, contentDescription = null, tint = BackgroundDark)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Connect Supervisor Dashboard", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                    }
+                } else if (pendingClaim != null) {
+                    // Claim received from web dashboard!
+                    Surface(
+                        color = AskYellow.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(12.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, AskYellow.copy(alpha = 0.4f))
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text(
+                                text = "⚠️ Dashboard Connection Request",
+                                color = AskYellow,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = "A supervisor web dashboard is claiming this device. Approve pairing to grant telemetry access?",
+                                color = TextPrimary,
+                                fontSize = 12.sp
+                            )
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Button(
+                                    onClick = {
+                                        relayManager.approvePairing(state.backendConfig.baseUrl, pendingClaim!!) { }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.buttonColors(containerColor = ActGreen),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text("Approve", color = BackgroundDark, fontWeight = FontWeight.Bold)
+                                }
+                                OutlinedButton(
+                                    onClick = {
+                                        relayManager.denyPairing(state.backendConfig.baseUrl, pendingClaim!!) { }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = StopRed),
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text("Deny", color = StopRed, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Displaying pairing code
+                    Column(
+                        modifier = Modifier.fillMaxWidth().background(BackgroundDark, RoundedCornerShape(12.dp)).padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text("ONE-TIME PAIRING CODE", color = TextSecondary, fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = currentSession.pairingCode,
+                            color = CyanAccent,
+                            fontSize = 32.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 4.sp,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        Text(
+                            text = "Enter this 6-character code in the Supervisor Dashboard under 'Connect a Device'",
+                            color = TextSecondary,
+                            fontSize = 11.sp,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), color = CyanAccent)
+                        Text("Waiting for supervisor claim...", color = AskYellow, fontSize = 11.sp)
+                    }
+                }
+            } else {
+                // Device is paired
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Sync Telemetry to Supervisor", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Streams privacy-safe risk events & acknowledgements", color = TextSecondary, fontSize = 11.sp)
+                    }
+                    Switch(
+                        checked = telemetrySyncEnabled,
+                        onCheckedChange = {
+                            telemetrySyncEnabled = it
+                            relayStorage.isTelemetrySyncEnabled = it
+                        },
+                        colors = SwitchDefaults.colors(checkedThumbColor = CyanAccent, checkedTrackColor = CyanAccent.copy(alpha = 0.4f))
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Device ID: ${relayStorage.deviceId.take(12)}...", color = TextSecondary, fontSize = 11.sp, fontFamily = FontFamily.Monospace)
+                    OutlinedButton(
+                        onClick = { relayManager.unpair() },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = StopRed),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                    ) {
+                        Text("Unpair Device", color = StopRed, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
 

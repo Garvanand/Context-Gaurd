@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 68" width="340" height="68" fill="none">
+  <!-- ContextGuard: The Aperture Signal Horizontal Logo (Spectral Signal Identity) -->
+  <defs>
+    <linearGradient id="h_wing_alpha" x1="12" y1="12" x2="88" y2="88" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#A28DFF" />
+      <stop offset="60%" stop-color="#8B70FF" />
+      <stop offset="100%" stop-color="#6E4FFF" />
+    </linearGradient>
+    <linearGradient id="h_wing_beta" x1="30" y1="30" x2="70" y2="70" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5BF0FF" />
+      <stop offset="100%" stop-color="#2FD5F6" />
+    </linearGradient>
+    <linearGradient id="h_guard_grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8B70FF" />
+      <stop offset="100%" stop-color="#5BF0FF" />
+    </linearGradient>
+  </defs>
+
+  <!-- Left: Aperture Signal Symbol (48x48 footprint centered at y=10) -->
+  <g transform="translate(10, 10) scale(0.48)">
+    <!-- Wing Alpha: Outer Signal Contour -->
+    <path
+      d="M 87.42 43.40
+         A 38 38 0 1 1 43.40 12.58
+         L 45.14 22.43
+         A 28 28 0 1 0 77.57 45.14
+         Z"
+      fill="url(#h_wing_alpha)"
+    />
+
+    <!-- Wing Beta: Inner Offset Signal Contour -->
+    <path
+      d="M 64.78 67.62
+         A 23 23 0 1 1 57.87 28.39
+         L 55.13 35.90
+         A 15 15 0 1 0 59.64 61.49
+         Z"
+      fill="url(#h_wing_beta)"
+    />
+
+    <!-- Central Aperture Focal Core -->
+    <path
+      d="M 42.72 55.44
+         A 9 9 0 0 1 55.44 42.72
+         Z"
+      fill="#D8FF63"
+    />
+
+    <!-- Observer Anchor -->
+    <circle cx="55.0" cy="55.0" r="2.8" fill="#F4F6FF" />
+  </g>
+
+  <!-- Right: Wordmark & Architecture Descriptor -->
+  <g transform="translate(70, 0)">
+    <!-- Primary Wordmark -->
+    <text
+      x="0"
+      y="35"
+      font-family="system-ui, -apple-system, 'Space Grotesk', 'Inter', 'Segoe UI', sans-serif"
+      font-size="22"
+      font-weight="700"
+      letter-spacing="1.5"
+      fill="#F4F6FF"
+    >
+      CONTEXT<tspan fill="url(#h_guard_grad)">GUARD</tspan>
+    </text>
+
+    <!-- Subtitle / Architecture Descriptor -->
+    <text
+      x="1"
+      y="50"
+      font-family="system-ui, -apple-system, 'JetBrains Mono', 'Roboto Mono', monospace"
+      font-size="8.5"
+      font-weight="600"
+      letter-spacing="2.8"
+      fill="#8B95B5"
+    >
+      PRE-ACTION SAFETY RETICLE
+    </text>
+
+    <!-- Signal Status Micro-Pill -->
+    <rect x="200" y="22" width="58" height="15" rx="4" fill="rgba(139, 112, 255, 0.15)" stroke="#8B70FF" stroke-width="0.75" />
+    <text
+      x="229"
+      y="32.5"
+      font-family="system-ui, -apple-system, 'JetBrains Mono', monospace"
+      font-size="7.5"
+      font-weight="700"
+      letter-spacing="1"
+      fill="#D8FF63"
+      text-anchor="middle"
+    >
+      ACTIVE
+    </text>
+  </g>
+</svg>

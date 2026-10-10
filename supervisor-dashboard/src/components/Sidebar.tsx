@@ -12,10 +12,12 @@ import {
   Wifi,
   HeartPulse,
   Layers,
+  Smartphone,
 } from 'lucide-react';
 
 export type SectionId =
   | 'overview'
+  | 'relay'
   | 'live-analysis'
   | 'pipeline'
   | 'earb'
@@ -36,6 +38,7 @@ interface SidebarProps {
 
 export const SECTIONS: { id: SectionId; label: string; icon: React.FC<any>; badge?: string }[] = [
   { id: 'overview', label: '1. System Overview', icon: Activity },
+  { id: 'relay', label: 'Live Mobile Relay', icon: Smartphone, badge: 'REALTIME' },
   { id: 'live-analysis', label: '2. Live Analysis', icon: Zap, badge: 'EXEC' },
   { id: 'pipeline', label: '3. Pipeline Trace', icon: GitCommit, badge: '6-STAGE' },
   { id: 'earb', label: '4. EARB Benchmark', icon: Database, badge: '60 PAIRS' },
@@ -54,50 +57,60 @@ export const Sidebar: React.FC<SidebarProps> = ({
   failureCount,
 }) => {
   return (
-    <aside style={{
-      width: '260px',
-      backgroundColor: '#070a12',
-      borderRight: '1px solid #1e293b',
-      height: 'calc(100vh - 64px)',
-      position: 'sticky',
-      top: '64px',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      padding: '16px 10px',
-      overflowY: 'auto',
-    }}>
+    <aside
+      style={{
+        width: '260px',
+        backgroundColor: 'var(--ink)',
+        borderRight: '1px solid var(--contour-border)',
+        height: 'calc(100vh - 68px)',
+        position: 'sticky',
+        top: '68px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '16px 12px',
+        overflowY: 'auto',
+      }}
+    >
       <div>
-        <div style={{
-          padding: '0 10px 12px 10px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: '1px solid #141d2e',
-          marginBottom: '10px'
-        }}>
-          <span style={{
-            fontSize: '11px',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            color: '#64748b'
-          }}>
-            CONSOLE PANELS
+        <div
+          style={{
+            padding: '0 8px 12px 8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: '1px solid var(--contour-border)',
+            marginBottom: '10px',
+          }}
+        >
+          <span
+            style={{
+              fontSize: '11px',
+              fontFamily: "'JetBrains Mono', monospace",
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: 'var(--muted-text)',
+            }}
+          >
+            PANELS
           </span>
           <button
             onClick={() => onSelectSection('all')}
             style={{
               fontSize: '11px',
-              padding: '2px 8px',
-              borderRadius: '4px',
-              backgroundColor: activeSection === 'all' ? '#2563eb' : '#172033',
-              color: activeSection === 'all' ? '#ffffff' : '#94a3b8',
-              border: '1px solid ' + (activeSection === 'all' ? '#3b82f6' : '#1e293b'),
+              fontFamily: "'Inter', sans-serif",
+              padding: '3px 9px',
+              borderRadius: '6px',
+              backgroundColor: activeSection === 'all' ? 'var(--electric-violet)' : 'var(--deep-surface)',
+              color: activeSection === 'all' ? '#FFFFFF' : 'var(--muted-text)',
+              border: '1px solid ' + (activeSection === 'all' ? 'var(--electric-violet)' : 'var(--contour-border)'),
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '4px'
+              gap: '5px',
+              fontWeight: 500,
+              transition: 'all 0.15s ease',
             }}
           >
             <Layers size={11} />
@@ -105,7 +118,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
           {SECTIONS.map((sec) => {
             const Icon = sec.icon;
             const isActive = activeSection === sec.id;
@@ -119,56 +132,62 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   padding: '9px 12px',
-                  borderRadius: '6px',
-                  backgroundColor: isActive ? '#131e36' : 'transparent',
-                  color: isActive ? '#60a5fa' : '#cbd5e1',
-                  border: '1px solid ' + (isActive ? '#2563eb' : 'transparent'),
+                  borderRadius: '8px',
+                  backgroundColor: isActive ? 'rgba(139, 112, 255, 0.14)' : 'transparent',
+                  color: isActive ? 'var(--text-main)' : 'var(--muted-text)',
+                  border: '1px solid ' + (isActive ? 'var(--contour-border-active)' : 'transparent'),
                   cursor: 'pointer',
                   textAlign: 'left',
                   fontSize: '12px',
+                  fontFamily: "'Inter', sans-serif",
                   fontWeight: isActive ? 600 : 500,
                   transition: 'all 0.15s ease',
                 }}
                 onMouseEnter={(e) => {
                   if (!isActive) {
-                    e.currentTarget.style.backgroundColor = '#0d1424';
-                    e.currentTarget.style.color = '#f1f5f9';
+                    e.currentTarget.style.backgroundColor = 'var(--elevated-surface)';
+                    e.currentTarget.style.color = 'var(--text-main)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!isActive) {
                     e.currentTarget.style.backgroundColor = 'transparent';
-                    e.currentTarget.style.color = '#cbd5e1';
+                    e.currentTarget.style.color = 'var(--muted-text)';
                   }
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Icon size={16} color={isActive ? '#38bdf8' : '#64748b'} />
+                  <Icon size={16} color={isActive ? 'var(--electric-violet)' : 'var(--muted-text)'} />
                   <span>{sec.label}</span>
                 </div>
                 {sec.badge && (
-                  <span style={{
-                    fontSize: '9px',
-                    fontFamily: 'monospace',
-                    padding: '2px 5px',
-                    borderRadius: '3px',
-                    backgroundColor: isActive ? 'rgba(56, 189, 248, 0.2)' : '#162032',
-                    color: isActive ? '#38bdf8' : '#94a3b8',
-                    border: '1px solid ' + (isActive ? 'rgba(56, 189, 248, 0.4)' : '#1e293b'),
-                  }}>
+                  <span
+                    style={{
+                      fontSize: '9px',
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontWeight: 600,
+                      padding: '2px 6px',
+                      borderRadius: '4px',
+                      backgroundColor: isActive ? 'rgba(69, 228, 255, 0.2)' : 'var(--deep-surface)',
+                      color: isActive ? 'var(--ion-cyan)' : 'var(--muted-text)',
+                      border: '1px solid ' + (isActive ? 'rgba(69, 228, 255, 0.4)' : 'var(--contour-border)'),
+                    }}
+                  >
                     {sec.badge}
                   </span>
                 )}
                 {sec.id === 'failures' && failureCount > 0 && !sec.badge && (
-                  <span style={{
-                    fontSize: '10px',
-                    fontWeight: 700,
-                    padding: '1px 6px',
-                    borderRadius: '10px',
-                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
-                    color: '#f87171',
-                    border: '1px solid rgba(239, 68, 68, 0.4)'
-                  }}>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      padding: '1px 6px',
+                      borderRadius: '10px',
+                      backgroundColor: 'rgba(255, 102, 125, 0.2)',
+                      color: 'var(--stop)',
+                      border: '1px solid rgba(255, 102, 125, 0.4)',
+                    }}
+                  >
                     {failureCount}
                   </span>
                 )}
@@ -179,18 +198,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Footer System Specs */}
-      <div style={{
-        padding: '12px',
-        backgroundColor: '#0c121e',
-        borderRadius: '6px',
-        border: '1px solid #1a253a',
-        fontSize: '11px',
-      }}>
-        <div style={{ color: '#64748b', marginBottom: '4px', fontWeight: 600 }}>SAFETY BOUNDARY</div>
-        <div style={{ color: '#38bdf8', fontFamily: 'monospace', fontSize: '10px' }}>
-          • Pre-action Interception<br/>
-          • Reversibility Penalty λ=0.75<br/>
-          • Stop Thresh: 0.65 | Ask: 0.35
+      <div
+        style={{
+          padding: '12px',
+          backgroundColor: 'var(--deep-surface)',
+          borderRadius: '8px',
+          border: '1px solid var(--contour-border)',
+          fontSize: '11px',
+        }}
+      >
+        <div
+          style={{
+            color: 'var(--muted-text)',
+            marginBottom: '4px',
+            fontWeight: 700,
+            fontSize: '10px',
+            fontFamily: "'JetBrains Mono', monospace",
+            letterSpacing: '0.06em',
+          }}
+        >
+          SPECTRAL SIGNAL BOUNDS
+        </div>
+        <div style={{ color: 'var(--ion-cyan)', fontFamily: "'JetBrains Mono', monospace", fontSize: '10px', lineHeight: '16px' }}>
+          • Pre-action Interception<br />
+          • Reversibility Penalty λ=0.75<br />
+          • Stop: ≥0.65 | Ask: c&lt;0.70 &amp; ρ≥0.35
         </div>
       </div>
     </aside>

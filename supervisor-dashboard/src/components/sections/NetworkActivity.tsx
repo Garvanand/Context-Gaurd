@@ -10,37 +10,51 @@ interface NetworkActivityProps {
 export const NetworkActivity: React.FC<NetworkActivityProps> = ({ entries }) => {
   return (
     <section id="section-network" style={{ marginBottom: '32px' }}>
+      {/* Editorial Section Header */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: '16px'
+        marginBottom: '20px',
+        borderBottom: '1px solid var(--contour-border)',
+        paddingBottom: '12px'
       }}>
         <div>
+          <div style={{
+            fontSize: '11px',
+            fontFamily: 'var(--font-mono)',
+            color: 'var(--ion-cyan)',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            marginBottom: '4px'
+          }}>
+            Zero-Leakage Cryptographic Wire Ledger
+          </div>
           <h2 style={{
-            fontSize: '18px',
+            fontSize: '20px',
+            fontFamily: 'var(--font-display)',
             fontWeight: 700,
-            color: '#f8fafc',
+            color: 'var(--text-main)',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '10px',
             margin: 0
           }}>
-            <Wifi size={18} color="#06b6d4" />
-            10. Network Activity & Privacy Audit Ledger
+            <Wifi size={20} color="var(--ion-cyan)" />
+            Network Activity & Wire Ledger
           </h2>
-          <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0' }}>
+          <p style={{ fontSize: '13px', color: 'var(--muted-text)', margin: '4px 0 0 0' }}>
             Cryptographically audited wire payloads, SHA-256 fingerprints, and client-side redaction verification.
           </p>
         </div>
         <div style={{
           fontSize: '11px',
-          color: '#22d3ee',
-          fontFamily: 'monospace',
-          backgroundColor: '#0c121e',
-          padding: '4px 10px',
+          color: 'var(--ion-cyan)',
+          fontFamily: 'var(--font-mono)',
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          padding: '6px 12px',
           borderRadius: '4px',
-          border: '1px solid #14283d'
+          border: '1px solid var(--contour-border)'
         }}>
           AUDIT LOG ACTIVE // SHA-256 VERIFIED
         </div>

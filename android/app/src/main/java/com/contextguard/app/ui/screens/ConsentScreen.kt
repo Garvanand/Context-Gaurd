@@ -2,6 +2,9 @@ package com.contextguard.app.ui.screens
 
 import android.content.Intent
 import android.provider.Settings
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,7 +20,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -83,11 +89,34 @@ fun ConsentScreen(
             }
         }
 
-        // PERSISTENT LIVE MONITORING STATUS CARD
+        // PERSISTENT LIVE MONITORING STATUS CARD (Signature Animation 7: Success Settle)
+        val reducedMotion = isReducedMotion()
+        val isSettled = isConnected && !isPaused
+        val settledScale by animateFloatAsState(
+            targetValue = if (isSettled) 1f else 0.98f,
+            animationSpec = if (reducedMotion) tween(0) else MotionTokens.harmonicSettle(),
+            label = "SuccessSettleScale"
+        )
+        val settledBorderColor by animateColorAsState(
+            targetValue = if (isSettled) ActLime.copy(alpha = 0.65f) else SurfaceBorder,
+            animationSpec = if (reducedMotion) tween(0) else MotionTokens.harmonicSettle(),
+            label = "SuccessSettleBorder"
+        )
+
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(1.dp, if (isConnected && !isPaused) ActGreen.copy(alpha = 0.5f) else SurfaceBorder, RoundedCornerShape(16.dp)),
+                .scale(settledScale)
+                .border(1.dp, settledBorderColor, RoundedCornerShape(16.dp))
+                .semantics {
+                    contentDescription = if (isSettled) {
+                        "Protection active. Real-time pre-action monitoring settled and operational."
+                    } else if (isConnected && isPaused) {
+                        "Protection paused. Kill-switch engaged."
+                    } else {
+                        "Service not bound. Setup required."
+                    }
+                },
             colors = CardDefaults.cardColors(containerColor = SurfaceDark),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -219,7 +248,7 @@ fun ConsentScreen(
         )
 
         ConsentPointItem(
-            icon = Icons.Default.Security,
+            icon = Icons.Default.CenterFocusStrong,
             title = "3. Why is this necessary?",
             description = "Attackers exploit the moment of action. Real-time pre-action inspection detects phishing links, credential harvesting, and inadvertent PII disclosures before the user commits."
         )

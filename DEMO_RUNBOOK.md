@@ -247,3 +247,102 @@ adb shell am start -a android.intent.action.SEND \
 ```
 Result: ContextGuard launches gracefully, catches the empty stream, informs the user, and remains stable.
 
+---
+
+## 6. End-to-End Mobile Product Modes (Post-Recovery Demonstration)
+
+### Mode A: Normal Application Launch
+1. Tap the ContextGuard app icon from the Android system launcher.
+2. The application opens directly to the **Real Protection Home** (`HomeScreen`).
+3. Notice:
+   - **Protection Status:** Clearly displays "Protection active", "Protection paused", or "Setup required".
+   - **Satellite Capabilities:** Screen Guard (window tree access), Notification Guard (listener access), On-Device Tree Inference (120 XGBoost trees loaded in RAM).
+   - **Monitored Applications:** Displays count of enabled packages (e.g., "6 enabled: Google Chrome, Firefox, WhatsApp, Telegram, Google Messages, Gmail").
+   - **Network Privacy Mode:** Clearly shows "Offline Local (Zero egress)" or "Backend: host:port".
+   - **Missing Permissions:** Clearly displayed; tapping "Configure protection" opens `ConsentScreen` to guide the user directly to system settings.
+   - Returning from Android Settings dynamically updates permission states via the lifecycle resume observer.
+
+### Mode B: Event-Driven Background Protection
+1. Grant Accessibility and Notification listener permissions.
+2. Select target applications to protect in Settings or Consent Screen.
+3. Switch to third-party app (e.g., Chrome or WhatsApp).
+4. When a suspicious link or credential form is interacted with, `ScreenGuardAccessibilityService` intercepts the window context.
+5. In-memory `UrlTreeInferenceEngine` or `ScamMessageClassifier` evaluates risk in < 0.5ms.
+6. If risk is elevated (WARN/STOP/ASK):
+   - A floating, compact JIT intervention card appears directly over the third-party application via `TYPE_ACCESSIBILITY_OVERLAY`.
+   - ACT is silent.
+   - Tapping "Review" launches ContextGuard `ResultScreen` displaying grounded evidence.
+   - Tapping "Continue once" dismisses the overlay cleanly without clicking through or submitting the underlying app.
+   - Immediate pause/kill-switch in ContextGuard immediately removes the overlay and suspends monitoring.
+
+### Mode C: Explicit Artifact Sharing
+1. Share an image, document, URL, or text snippet from any Android application using the system Sharesheet into ContextGuard.
+2. ContextGuard resolves the actual content via `SharesheetPayloadResolver` (not just filename).
+3. The actual content is opened and local preprocessing begins immediately in volatile RAM.
+4. Preview and extracted evidence appear on `AnalyzeScreen`.
+5. Prompts the user: "What are you about to do with this?" with tailored action chips (e.g., `SAVE`, `SEND`, `POST`, `SIGN`).
+6. **Automatic Analysis:** Tapping an action chip immediately triggers risk analysis without requiring an additional "Analyze Now" button click.
+7. Result renders automatically upon inference completion in `ResultScreen`.
+8. User can tap "Cancel" at any time to abort and return cleanly to Home.
+
+---
+
+## 7. Real-Time Mobile ↔ Web Relay & Supervisor Command Center Demonstration
+
+This walkthrough demonstrates the real-time bidirectional bridge connecting the Android handset to the Supervisor Web Dashboard.
+
+### Step 1: Start Services & Open Interfaces
+1. **Launch FastAPI Relay Backend:**
+   ```powershell
+   python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
+   ```
+2. **Launch Supervisor Web Dashboard:**
+   ```powershell
+   cd supervisor-dashboard
+   npm run dev
+   ```
+   Open `http://localhost:5173` in your browser.
+3. **Launch Android App:**
+   Open ContextGuard on an Android emulator or device with backend profile configured (`LOCAL_LAN_DEMO` or `10.0.2.2:8000`).
+
+---
+
+### Step 2: Live Device Pairing Handshake
+1. **On Android:**
+   - Navigate to the **Supervisor** screen.
+   - Locate the **"SUPERVISOR WEB RELAY & PAIRING"** card.
+   - Tap **"Generate Pairing Code"**.
+   - A 6-character code appears (e.g. `ABC123`) with a 5-minute countdown.
+2. **On Supervisor Web Dashboard:**
+   - Click **"Live Mobile Relay"** in the sidebar navigation.
+   - If unpaired, click **"Pair Mobile Device"**.
+   - Enter the 6-character code into the modal input and click **"Claim Code"**.
+3. **Approve on Device:**
+   - The Android handset immediately displays: *"Supervisor Workstation requested connection"*.
+   - Tap **"Approve Connection"**.
+   - Scoped cryptographic tokens (`devtok_*` and `dshtok_*`) are issued and securely stored.
+   - Both phone and web dashboard instantly transition to **CONNECTED** with live heartbeat telemetry.
+
+---
+
+### Step 3: Zero-Refresh Real-Time Event Streaming
+1. Ensure **"Enable Telemetry Sync"** toggle is enabled on the Android Supervisor screen.
+2. Trigger an analysis on Android (e.g., share an image or run an in-app scenario).
+3. **Observe Web Dashboard:**
+   - Without refreshing the browser, the **"Real-Time Telemetry Feed"** automatically animates a new incoming event card within ~10ms via WebSocket fan-out.
+   - The badge highlights the intervention (`STOP`, `WARN`, `ASK`, `ACT`).
+   - Click **"Inspect Event"** to view grounded evidence, correlation ID, and privacy verification (zero raw screenshots stored).
+
+---
+
+### Step 4: Bidirectional Command Center Dispatch
+1. In the Web Dashboard's **"Command Center"**:
+   - Locate the **"Run Synthetic Demo"** action card.
+   - Select the target scenario (e.g., `synthetic_bank_statement_v1`).
+   - Click **"Dispatch Command"**.
+2. **Observe Execution:**
+   - Command state transitions: `QUEUED` $\to$ `DELIVERED` $\to$ `EXECUTING`.
+   - The Android client executes the scenario on-device in the background.
+   - Mobile sends an execution ACK back to the relay.
+   - Dashboard command card dynamically updates to `SUCCEEDED` with the executed intervention (`STOP`) and risk score.
+

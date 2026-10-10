@@ -3,60 +3,129 @@ package com.contextguard.app.theme
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-// Primary Dark Theme Palette (Graphite & Glass Surfaces)
-val BackgroundDark = Color(0xFF090D14)
-val BackgroundObsidian = Color(0xFF06090E)
-val SurfaceDark = Color(0xFF111722)
-val SurfaceCard = Color(0xFF161E2E)
-val SurfaceGlass = Color(0xCC1A2336)
-val SurfaceGlassHigh = Color(0xE6202B42)
-val SurfaceBorder = Color(0xFF26334A)
-val SurfaceBorderSubtle = Color(0x2638BDF8)
+// ============================================================================
+// CREATIVE DIRECTION: SPECTRAL SIGNAL
+// Primary Palette Tokens
+// ============================================================================
+val Ink = Color(0xFF080A12)              // Deepest backdrop
+val Midnight = Color(0xFF0D1120)         // Cinematic container background
+val DeepSurface = Color(0xFF13192B)      // Sub-layer surface
+val ElevatedSurface = Color(0xFF1A2238)  // Primary elevated card
+val GlassSurface = Color(0xCC1A2238)     // 80% opacity glass panel
+val GlassSurfaceSubtle = Color(0x8013192B)// 50% opacity subtle layer
 
-// Brand & Accent Colors
-val CyanAccent = Color(0xFF00E5FF)
-val CyanAccentGlow = Color(0xFF38BDF8)
-val CyanAccentMuted = Color(0xFF00838F)
-val IndigoAccent = Color(0xFF6366F1)
-val VioletAccent = Color(0xFF8B5CF6)
+// Brand Identifiers
+val ElectricViolet = Color(0xFF8B70FF)   // Primary brand identity (Signal core)
+val ElectricVioletGlow = Color(0x408B70FF)
+val ElectricVioletMuted = Color(0xFF5B45C6)
+val ElectricVioletSubtle = Color(0x1F8B70FF)
 
-// Safety Intervention Colors & Backgrounds
-val ActGreen = Color(0xFF00E676)
-val ActGreenDark = Color(0xFF1B5E20)
-val ActGreenContainer = Color(0x1F00E676)
-val ActGreenText = Color(0xFF69F0AE)
+val IonCyan = Color(0xFF45E4FF)          // Detection, perception & evidence
+val IonCyanGlow = Color(0x4045E4FF)
+val IonCyanMuted = Color(0xFF1FA8C7)
+val IonCyanSubtle = Color(0x1A45E4FF)
 
-val AskYellow = Color(0xFFFFD600)
-val AskYellowDark = Color(0xFFF57F17)
-val AskYellowContainer = Color(0x1FFFD600)
-val AskYellowText = Color(0xFFFFEA00)
+val SignalLime = Color(0xFFD8FF63)       // Success, resolution & verified states
+val SignalLimeGlow = Color(0x40D8FF63)
+val SignalLimeSubtle = Color(0x22D8FF63)
 
-val WarnOrange = Color(0xFFFF9100)
-val WarnOrangeDark = Color(0xFFE65100)
-val WarnOrangeContainer = Color(0x1FFF9100)
-val WarnOrangeText = Color(0xFFFFB74D)
+val SoftWhite = Color(0xFFF4F6FF)        // High-legibility editorial white
+val MutedText = Color(0xFF9CA8C2)        // Secondary technical labels
+val SubtleText = Color(0xFF5D6B88)       // Tertiary captions & timestamps
+val ContourBorder = Color(0xFF232D48)    // Fine geometry contour lines
+val ContourBorderActive = Color(0x668B70FF)// Active state contour highlight
 
-val StopRed = Color(0xFFFF1744)
-val StopRedDark = Color(0xFFB71C1C)
-val StopRedContainer = Color(0x28FF1744)
-val StopRedText = Color(0xFFFF5252)
+// ============================================================================
+// Intervention Color Palette (Semantic, Distinct Roles)
+// ============================================================================
+val ActLime = Color(0xFFC9F77A)          // ACT: Calm harmonic resolution
+val ActLimeDark = Color(0xFF1E3812)
+val ActLimeContainer = Color(0x24C9F77A)
+val ActLimeText = Color(0xFFD8FF63)
 
-// Typography & State
-val TextPrimary = Color(0xFFF8FAFC)
-val TextSecondary = Color(0xFF94A3B8)
-val TextTertiary = Color(0xFF64748B)
+val AskAmber = Color(0xFFFFD166)         // ASK: Unresolved ambiguity / gap
+val AskAmberDark = Color(0xFF3D2E0B)
+val AskAmberContainer = Color(0x24FFD166)
+val AskAmberText = Color(0xFFFFE082)
 
-val DividerColor = Color(0xFF1E293B)
+val WarnOrange = Color(0xFFFFAA65)       // WARN: Focused evidence alert
+val WarnOrangeDark = Color(0xFF3D200E)
+val WarnOrangeContainer = Color(0x24FFAA65)
+val WarnOrangeText = Color(0xFFFFCC99)
 
-// Gradients
+val StopCoral = Color(0xFFFF667D)        // STOP: Contracted protective barrier
+val StopCoralDark = Color(0xFF3D0F18)
+val StopCoralContainer = Color(0x28FF667D)
+val StopCoralText = Color(0xFFFF94A4)
+
+// ============================================================================
+// Secondary Light Theme Tokens (Porcelain & Subtle Violet)
+// ============================================================================
+val PorcelainBg = Color(0xFFF5F7FC)
+val PorcelainElevated = Color(0xFFFFFFFF)
+val PorcelainSurface = Color(0xFFEAE8FB)
+val PorcelainBorder = Color(0xFFD6D3F3)
+val PorcelainTextPrimary = Color(0xFF080A12)
+val PorcelainTextSecondary = Color(0xFF5E6A85)
+
+// ============================================================================
+// Compatibility Aliases (Seamless integration with existing screens)
+// ============================================================================
+val BackgroundDark = Ink
+val BackgroundObsidian = Midnight
+val SurfaceDark = DeepSurface
+val SurfaceCard = ElevatedSurface
+val SurfaceGlassHigh = ElevatedSurface
+val SurfaceBorder = ContourBorder
+val SurfaceBorderSubtle = ContourBorderActive
+
+val CyanAccent = IonCyan
+val CyanAccentGlow = IonCyanGlow
+val CyanAccentMuted = IonCyanMuted
+val IndigoAccent = ElectricViolet
+val VioletAccent = ElectricViolet
+
+val ActGreen = ActLime
+val ActGreenDark = ActLimeDark
+val ActGreenContainer = ActLimeContainer
+val ActGreenText = ActLimeText
+
+val AskYellow = AskAmber
+val AskYellowDark = AskAmberDark
+val AskYellowContainer = AskAmberContainer
+val AskYellowText = AskAmberText
+
+val SurfaceGlass = ElevatedSurface
+
+val StopRed = StopCoral
+val StopRedDark = StopCoralDark
+val StopRedContainer = StopCoralContainer
+val StopRedText = StopCoralText
+
+val TextPrimary = SoftWhite
+val TextSecondary = MutedText
+val TextTertiary = SubtleText
+val DividerColor = ContourBorder
+
+// ============================================================================
+// Spectral Signal Dynamic Gradients
+// ============================================================================
 val HeroGradient = Brush.verticalGradient(
-    colors = listOf(Color(0xFF0F172A), Color(0xFF090D14))
+    colors = listOf(Midnight, Ink)
 )
 
 val CardGlowGradient = Brush.horizontalGradient(
-    colors = listOf(Color(0x1A00E5FF), Color(0x086366F1))
+    colors = listOf(Color(0x1A8B70FF), Color(0x1045E4FF))
 )
 
 val AccentGradient = Brush.horizontalGradient(
-    colors = listOf(CyanAccent, IndigoAccent)
+    colors = listOf(ElectricViolet, IonCyan)
+)
+
+val SignalApertureGradient = Brush.radialGradient(
+    colors = listOf(Color(0x338B70FF), Color(0x000D1120))
+)
+
+val SafeFieldGradient = Brush.horizontalGradient(
+    colors = listOf(SignalLime, IonCyan)
 )
